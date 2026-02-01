@@ -1,0 +1,36 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-format
+        name: Ruff formatter
+        entry: "uv run ruff format"
+        language: system
+        types: [python]
+        files: ^(bot|config|db|localization|services)/|^main\.py$
+
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: Ruff linter
+        entry: "uv run ruff check"
+        language: system
+        types: [python]
+        files: ^(bot|config|db|localization|services)/|^main\.py$
+
+  - repo: local
+    hooks:
+      - id: isort
+        name: Isort
+        entry: "uv run isort"
+        language: system
+        types: [python]
+        files: ^(bot|config|db|localization|services)/|^main\.py$
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: "uv run mypy"
+        language: system
+        types: [python]
+        files: ^(bot|config|db|localization|services)/|^main\.py$

@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - name: Run database migrations
+        run: |
+          mkdir -p data
+          uv run alembic upgrade head
+
+      - name: Run ruff linter
+        run: |
+          uv run ruff check bot/ config/ db/ localization/ services/ main.py
+
+      - name: Run ruff formatter
+        run: |
+          uv run ruff format --check bot/ config/ db/ localization/ services/ main.py
+
+      - name: Run isort
+        run: |
+          uv run isort bot/ config/ db/ localization/ services/ main.py --check
+
+      - name: Run mypy
+        run: |
+          uv run mypy bot/ config/ db/ localization/ services/ main.py

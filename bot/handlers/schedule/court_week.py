@@ -1,0 +1,105 @@
+import logging
+from datetime import date, datetime, timedelta
+from typing import Any
+
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import ContextTypes
+
+from bot.deps import get_deps
+from config.settings import now_kiev
+from localization import get_messages
+
+logger = logging.getLogger(__name__)
+
+
+async def _handle_court_schedule_for_week(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, court_id: str, start_of_week: datetime
+) -> None:
+    if not update.callback_query:
+        return
+
+    msgs = get_messages()
+    deps = get_deps(context)
+
+    try:
+        court = deps.court_repo.get(court_id)
+        court_name = court.name if court else 'Неизвестный корт'
+
+        all_slots = []
+        for i in range(7):
+            day = start_of_week + timedelta(days=i)
+            day_slots = deps.schedule_service.get_all_time_slots_for_date(day)
+            court_day_slots = [s for s in day_slots if str(s.court_id) == court_id]
+            all_slots.extend(court_day_slots)
+
+        week_end = start_of_week + timedelta(days=6)
+
+        location = None
+        if court and court.location_id:
+            location = deps.location_repo.get(court.location_id)
+
+        text = msgs.schedule_weekly_court(
+            court_name=court_name,
+            start=start_of_week.strftime('%d.%m'),
+            end=week_end.strftime('%d.%m.%Y'),
+            location_name=location.name if location else None,
+            maps_link=location.google_maps_link if location else None,
+        )
+
+        now = now_kiev()
+        slots_by_day: dict[date, list[Any]] = {}
+        for i in range(7):
+            day = start_of_week + timedelta(days=i)
+            slots_by_day[day.date()] = []
+
+        for slot in all_slots:
+            if slot.start_time < now:
+                continue
+            slot_date = slot.start_time.date()
+            if slot_date in slots_by_day:
+                slots_by_day[slot_date].append(slot)
+
+        day_names = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+        for i in range(7):
+            day = start_of_week + timedelta(days=i)
+            day_date = day.date()
+            day_slots = slots_by_day.get(day_date, [])
+
+            day_name = day_names[day.weekday()]
+
+            if not day_slots:
+                text += msgs.schedule_weekly_day_row(
+                    day_name=day_name,
+                    date=day.strftime('%d.%m'),
+                    available=0,
+                    total=0,
+                    trainer_count=0,
+                )
+            else:
+                available_count = sum(1 for s in day_slots if s.is_available)
+                total_count = len(day_slots)
+
+                trainer_count = 0
+                for slot in day_slots:
+                    if not slot.is_available and slot.booking_id:
+                        booking = deps.booking_repo.get(slot.booking_id)
+                        if booking and booking.trainer_id:
+                            trainer_count += 1
+
+                text += msgs.schedule_weekly_day_row(
+                    day_name=day_name,
+                    date=day.strftime('%d.%m'),
+                    available=available_count,
+                    total=total_count,
+                    trainer_count=trainer_count,
+                )
+
+        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        await update.callback_query.edit_message_text(
+            text, reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True
+        )
+    except Exception:
+        logger.exception('Failed to generate court weekly schedule')
+        await update.callback_query.edit_message_text(msgs.schedule_weekly_error)

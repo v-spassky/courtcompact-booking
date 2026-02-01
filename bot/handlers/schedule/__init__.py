@@ -1,0 +1,12 @@
+from bot.handlers.schedule.by_date import _handle_schedule_for_date as _handle_schedule_for_date
+from bot.handlers.schedule.by_date_courts import (
+    _handle_schedule_for_date_show_courts as _handle_schedule_for_date_show_courts,
+)
+from bot.handlers.schedule.court_day import _handle_court_schedule_for_day as _handle_court_schedule_for_day
+from bot.handlers.schedule.court_week import _handle_court_schedule_for_week as _handle_court_schedule_for_week
+from bot.handlers.schedule.trainer_menu import _handle_trainer_schedule_menu as _handle_trainer_schedule_menu
+from bot.handlers.schedule.trainer_view import _handle_view_trainer_schedule as _handle_view_trainer_schedule
+from bot.handlers.schedule.weekly import _handle_schedule_weekly as _handle_schedule_weekly
+from bot.handlers.schedule.weekly_courts import (
+    _handle_schedule_weekly_show_courts as _handle_schedule_weekly_show_courts,
+)

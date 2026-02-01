@@ -1,0 +1,44 @@
+import logging
+
+from bot.deps import Deps
+from bot.setup import setup_application
+from config.settings import settings
+from db.models import make_session_factory
+from db.repositories import BookingRepository, CourtRepository, LocationRepository, StudentRepository, TrainerRepository
+from services.booking import BookingService
+from services.registration import RegistrationService
+from services.schedule import ScheduleService
+
+logger = logging.getLogger(__name__)
+
+
+def build_deps() -> Deps:
+    factory = make_session_factory(settings.db_url)
+    location_repo = LocationRepository(factory)
+    court_repo = CourtRepository(factory)
+    trainer_repo = TrainerRepository(factory)
+    student_repo = StudentRepository(factory)
+    booking_repo = BookingRepository(factory)
+    return Deps(
+        settings=settings,
+        booking_service=BookingService(court_repo, student_repo, trainer_repo, booking_repo),
+        schedule_service=ScheduleService(court_repo, booking_repo, student_repo, trainer_repo),
+        registration_service=RegistrationService(student_repo, trainer_repo),
+        location_repo=location_repo,
+        court_repo=court_repo,
+        trainer_repo=trainer_repo,
+        student_repo=student_repo,
+        booking_repo=booking_repo,
+    )
+
+
+def main() -> None:
+    logging.basicConfig(level=settings.log_level)
+    deps = build_deps()
+    application = setup_application(deps)
+    logger.info('Starting Tennis Booking Bot...')
+    application.run_polling()
+
+
+if __name__ == '__main__':
+    main()

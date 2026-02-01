@@ -1,0 +1,10 @@
+from db.models import Base as Base
+from db.models import Booking as Booking
+from db.models import BookingStatus as BookingStatus
+from db.models import Court as Court
+from db.models import Location as Location
+from db.models import Student as Student
+from db.models import TimeSlot as TimeSlot
+from db.models import Trainer as Trainer
+from db.models import UserRole as UserRole
+from db.models import make_session_factory as make_session_factory

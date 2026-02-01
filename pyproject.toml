@@ -1,0 +1,41 @@
+[project]
+name = "courtcompact_booking"
+version = "0.1.0"
+requires-python = ">=3.13"
+
+dependencies = [
+    "alembic>=1.16",
+    "pydantic-settings>=2.0",
+    "python-dateutil>=2.9.0",
+    "python-telegram-bot>=21.0",
+    "pydantic>=2.0",
+    "sqlalchemy>=2.0",
+]
+
+[dependency-groups]
+dev = [
+    "isort>=6.0.1",
+    "mypy>=1.16.0",
+    "pre-commit>=4.2.0",
+    "ruff>=0.11.12",
+    "types-python-dateutil>=2.9.0",
+]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+explicit_package_bases = true
+
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.isort]
+py_version = 313
+multi_line_output = 3
+line_length = 120
+include_trailing_comma = true
+use_parentheses = true
