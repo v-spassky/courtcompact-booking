@@ -22,7 +22,7 @@ jobs:
 
       - name: Run database migrations
         run: |
-          mkdir -p data
+          mkdir -p .data
           uv run alembic upgrade head
 
       - name: Run ruff linter
