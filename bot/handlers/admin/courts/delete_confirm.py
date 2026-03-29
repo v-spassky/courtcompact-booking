@@ -23,7 +23,7 @@ async def _handle_admin_delete_court_confirm(update: Update, context: ContextTyp
 
     court_id_short = data.replace('admin_delete_court_', '')
 
-    courts = deps.court_repo.get_active()
+    courts = deps.court_repo.get_all()
     court = None
     for c in courts:
         if str(c.id).startswith(court_id_short):

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, create_engine
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 
@@ -11,12 +11,6 @@ class BookingStatus(str, Enum):
     CONFIRMED = 'confirmed'
     CANCELLED = 'cancelled'
     COMPLETED = 'completed'
-
-
-class UserRole(str, Enum):
-    STUDENT = 'student'
-    TRAINER = 'trainer'
-    ADMIN = 'admin'
 
 
 class Base(DeclarativeBase):
@@ -28,8 +22,7 @@ class Location(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     name: Mapped[str] = mapped_column(String(255))
-    google_maps_link: Mapped[str | None] = mapped_column(Text)
-    is_active: Mapped[bool] = mapped_column(Boolean)
+    maps_link: Mapped[str | None] = mapped_column(Text)
 
 
 class Court(Base):
@@ -39,7 +32,6 @@ class Court(Base):
     name: Mapped[str] = mapped_column(String(255))
     description: Mapped[str | None] = mapped_column(Text)
     location_id: Mapped[str | None] = mapped_column(String(36), ForeignKey('locations.id'))
-    is_active: Mapped[bool] = mapped_column(Boolean)
 
 
 class Trainer(Base):

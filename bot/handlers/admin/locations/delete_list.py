@@ -23,7 +23,7 @@ async def _handle_admin_delete_location_list(update: Update, context: ContextTyp
         return
 
     _clear_admin_state(context)
-    locations = deps.location_repo.get_active()
+    locations = deps.location_repo.get_all()
 
     if not locations:
         keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_locations')]]

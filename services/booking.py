@@ -42,8 +42,8 @@ class BookingService:
 
         # Validate court exists
         court = self.courts.get(court_id)
-        if not court or not court.is_active:
-            logger.warning(f'Court {court_id} not found or inactive')
+        if not court:
+            logger.warning(f'Court {court_id} not found')
             return None
 
         # Validate trainer if provided

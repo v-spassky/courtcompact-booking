@@ -27,7 +27,7 @@ async def _handle_booking_date_selection(update: Update, context: ContextTypes.D
 
         selected_date = datetime(year, month, day)
 
-        courts = deps.court_repo.get_active()
+        courts = deps.court_repo.get_all()
         court_id: str | None = None
         for court in courts:
             if str(court.id).startswith(court_id_short):

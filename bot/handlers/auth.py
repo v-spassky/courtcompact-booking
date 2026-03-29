@@ -233,6 +233,25 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, edi
 
 
 async def handle_unknown_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    from bot.handlers.admin.courts.description_input import _handle_admin_court_description_input
+    from bot.handlers.admin.courts.edit_description_input import _handle_admin_edit_court_description_input
+    from bot.handlers.admin.courts.edit_name_input import _handle_admin_edit_court_name_input
+    from bot.handlers.admin.courts.name_input import _handle_admin_court_name_input
+    from bot.handlers.admin.locations.edit_maps_link_input import _handle_admin_edit_location_maps_link_input
+    from bot.handlers.admin.locations.edit_name_input import _handle_admin_edit_location_name_input
+    from bot.handlers.admin.locations.maps_link_input import _handle_admin_location_maps_link_input
+    from bot.handlers.admin.locations.name_input import _handle_admin_location_name_input
+    from bot.handlers.admin.students.edit_name_input import _handle_admin_edit_student_name_input
+    from bot.handlers.admin.students.edit_phone_input import _handle_admin_edit_student_phone_input
+    from bot.handlers.admin.students.name_input import _handle_admin_student_name_input
+    from bot.handlers.admin.students.phone_input import _handle_admin_student_phone_input
+    from bot.handlers.admin.trainers.description_input import _handle_admin_trainer_description_input
+    from bot.handlers.admin.trainers.edit_description_input import _handle_admin_edit_trainer_description_input
+    from bot.handlers.admin.trainers.edit_name_input import _handle_admin_edit_trainer_name_input
+    from bot.handlers.admin.trainers.edit_telegram_id_input import _handle_admin_edit_trainer_id_input
+    from bot.handlers.admin.trainers.name_input import _handle_admin_trainer_name_input
+    from bot.handlers.admin.trainers.telegram_id_input import _handle_admin_trainer_id_input
+
     if not update.message or not update.effective_user:
         return
 
@@ -244,61 +263,59 @@ async def handle_unknown_message(update: Update, context: ContextTypes.DEFAULT_T
     admin_state = context.user_data.get('admin_state')
 
     if admin_state and _is_admin(user_id):
-        from bot.handlers.admin import courts, locations, students, trainers
-
         if admin_state == 'awaiting_location_name':
-            await locations._handle_admin_location_name_input(update, context, message_text)
+            await _handle_admin_location_name_input(update, context, message_text)
             return
         elif admin_state == 'awaiting_location_maps_link':
-            await locations._handle_admin_location_maps_link_input(update, context, message_text)
+            await _handle_admin_location_maps_link_input(update, context, message_text)
             return
         elif admin_state == 'awaiting_edit_location_name':
-            await locations._handle_admin_edit_location_name_input(update, context, message_text)
+            await _handle_admin_edit_location_name_input(update, context, message_text)
             return
         elif admin_state == 'awaiting_edit_location_maps_link':
-            await locations._handle_admin_edit_location_maps_link_input(update, context, message_text)
+            await _handle_admin_edit_location_maps_link_input(update, context, message_text)
             return
         elif admin_state == 'awaiting_court_name':
-            await courts._handle_admin_court_name_input(update, context, message_text)
+            await _handle_admin_court_name_input(update, context, message_text)
             return
         elif admin_state == 'awaiting_court_description':
-            await courts._handle_admin_court_description_input(update, context, message_text)
+            await _handle_admin_court_description_input(update, context, message_text)
             return
         elif admin_state == 'awaiting_edit_court_name':
-            await courts._handle_admin_edit_court_name_input(update, context, message_text)
+            await _handle_admin_edit_court_name_input(update, context, message_text)
             return
         elif admin_state == 'awaiting_edit_court_description':
-            await courts._handle_admin_edit_court_description_input(update, context, message_text)
+            await _handle_admin_edit_court_description_input(update, context, message_text)
             return
         elif admin_state == 'awaiting_trainer_name':
-            await trainers._handle_admin_trainer_name_input(update, context, message_text)
+            await _handle_admin_trainer_name_input(update, context, message_text)
             return
         elif admin_state == 'awaiting_trainer_telegram_id':
-            await trainers._handle_admin_trainer_id_input(update, context, message_text)
+            await _handle_admin_trainer_id_input(update, context, message_text)
             return
         elif admin_state == 'awaiting_trainer_description':
-            await trainers._handle_admin_trainer_description_input(update, context, message_text)
+            await _handle_admin_trainer_description_input(update, context, message_text)
             return
         elif admin_state == 'awaiting_edit_trainer_name':
-            await trainers._handle_admin_edit_trainer_name_input(update, context, message_text)
+            await _handle_admin_edit_trainer_name_input(update, context, message_text)
             return
         elif admin_state == 'awaiting_edit_trainer_telegram_id':
-            await trainers._handle_admin_edit_trainer_id_input(update, context, message_text)
+            await _handle_admin_edit_trainer_id_input(update, context, message_text)
             return
         elif admin_state == 'awaiting_edit_trainer_description':
-            await trainers._handle_admin_edit_trainer_description_input(update, context, message_text)
+            await _handle_admin_edit_trainer_description_input(update, context, message_text)
             return
         elif admin_state == 'awaiting_student_name':
-            await students._handle_admin_student_name_input(update, context, message_text)
+            await _handle_admin_student_name_input(update, context, message_text)
             return
         elif admin_state == 'awaiting_student_phone':
-            await students._handle_admin_student_phone_input(update, context, message_text)
+            await _handle_admin_student_phone_input(update, context, message_text)
             return
         elif admin_state == 'awaiting_edit_student_name':
-            await students._handle_admin_edit_student_name_input(update, context, message_text)
+            await _handle_admin_edit_student_name_input(update, context, message_text)
             return
         elif admin_state == 'awaiting_edit_student_phone':
-            await students._handle_admin_edit_student_phone_input(update, context, message_text)
+            await _handle_admin_edit_student_phone_input(update, context, message_text)
             return
 
     keyboard = [[InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')]]

@@ -1,4 +1,4 @@
-from localization.base import Messages as Messages
+from localization.base import Messages
 from localization.ru import RussianMessages
 
 _messages: Messages = RussianMessages()

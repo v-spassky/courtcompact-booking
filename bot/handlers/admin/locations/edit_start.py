@@ -24,7 +24,7 @@ async def _handle_admin_edit_location_start(update: Update, context: ContextType
 
     location_id_short = data.replace('admin_edit_location_', '')
 
-    locations = deps.location_repo.get_active()
+    locations = deps.location_repo.get_all()
     location = None
     for loc in locations:
         if str(loc.id).startswith(location_id_short):
@@ -42,7 +42,7 @@ async def _handle_admin_edit_location_start(update: Update, context: ContextType
     context.user_data['admin_location_id'] = str(location.id)
     context.user_data['admin_state'] = 'awaiting_edit_location_name'
 
-    text = msgs.admin_location_edit_step1(name=location.name, maps_link=location.google_maps_link)
+    text = msgs.admin_location_edit_step1(name=location.name, maps_link=location.maps_link)
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_locations')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

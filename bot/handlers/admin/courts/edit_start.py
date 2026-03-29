@@ -24,7 +24,7 @@ async def _handle_admin_edit_court_start(update: Update, context: ContextTypes.D
 
     court_id_short = data.replace('admin_edit_court_', '')
 
-    courts = deps.court_repo.get_active()
+    courts = deps.court_repo.get_all()
     court = None
     for c in courts:
         if str(c.id).startswith(court_id_short):

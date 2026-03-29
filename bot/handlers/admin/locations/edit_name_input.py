@@ -39,7 +39,7 @@ async def _handle_admin_edit_location_name_input(update: Update, context: Contex
     context.user_data['admin_state'] = 'awaiting_edit_location_maps_link'
 
     new_name = context.user_data['admin_location_name']
-    text = msgs.admin_location_edit_step2(new_name=new_name, maps_link=location.google_maps_link)
+    text = msgs.admin_location_edit_step2(new_name=new_name, maps_link=location.maps_link)
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_locations')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

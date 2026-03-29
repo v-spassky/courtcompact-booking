@@ -24,7 +24,7 @@ async def _handle_booking_calendar_navigation(update: Update, context: ContextTy
         year = int(parts[4])
         month = int(parts[5])
 
-        courts = deps.court_repo.get_active()
+        courts = deps.court_repo.get_all()
         court_id: str | None = None
         for court in courts:
             if str(court.id).startswith(court_id_short):

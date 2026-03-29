@@ -25,7 +25,7 @@ async def _handle_schedule_weekly_show_courts(
             location = deps.location_repo.get(location_id)
             courts = deps.location_repo.get_courts(location_id)
         else:
-            courts = deps.court_repo.get_active()
+            courts = deps.court_repo.get_all()
 
         week_end = start_of_week + timedelta(days=6)
 
@@ -43,7 +43,7 @@ async def _handle_schedule_weekly_show_courts(
             start=start_of_week.strftime('%d.%m'),
             end=week_end.strftime('%d.%m.%Y'),
             location_name=location.name if location else None,
-            maps_link=location.google_maps_link if location else None,
+            maps_link=location.maps_link if location else None,
         )
 
         keyboard = []

@@ -23,7 +23,7 @@ async def _handle_admin_delete_location_execute(update: Update, context: Context
 
     location_id_short = data.replace('admin_confirm_delete_location_', '')
 
-    locations = deps.location_repo.get_active()
+    locations = deps.location_repo.get_all()
     location = None
     for loc in locations:
         if str(loc.id).startswith(location_id_short):

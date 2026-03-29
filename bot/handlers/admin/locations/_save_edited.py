@@ -33,7 +33,7 @@ async def _save_edited_location(update: Update, context: ContextTypes.DEFAULT_TY
 
     try:
         location.name = new_name
-        location.google_maps_link = new_maps_link
+        location.maps_link = new_maps_link
 
         deps.location_repo.save(location)
         if update.effective_user:

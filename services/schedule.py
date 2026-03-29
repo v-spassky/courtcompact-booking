@@ -73,7 +73,7 @@ class ScheduleService:
         return time_slots
 
     def get_all_time_slots_for_date(self, date: datetime) -> list[TimeSlot]:
-        courts = self.courts.get_active()
+        courts = self.courts.get_all()
         all_slots = []
 
         for court in courts:

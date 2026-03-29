@@ -24,7 +24,7 @@ async def _handle_admin_create_court_select_location(update: Update, context: Co
 
     _clear_admin_state(context)
 
-    locations = deps.location_repo.get_active()
+    locations = deps.location_repo.get_all()
 
     if not locations:
         text = msgs.admin_court_no_locations
@@ -42,7 +42,7 @@ async def _handle_admin_create_court_select_location(update: Update, context: Co
     for location in locations:
         location_id_short = str(location.id)[:8]
         button_text = f'📍 {location.name}'
-        if location.google_maps_link:
+        if location.maps_link:
             button_text += ' 🗺️'
         keyboard.append([InlineKeyboardButton(button_text, callback_data=f'admin_court_location_{location_id_short}')])
 

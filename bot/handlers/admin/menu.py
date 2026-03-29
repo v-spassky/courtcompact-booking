@@ -4,7 +4,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 from bot.deps import get_deps
-from bot.handlers.admin._utils import _clear_admin_state as _clear_admin_state
+from bot.handlers.admin._utils import _clear_admin_state
 from bot.handlers.auth import _is_admin, _log_user_action
 from localization import get_messages
 
@@ -50,7 +50,7 @@ async def _handle_admin_courts_menu(update: Update, context: ContextTypes.DEFAUL
 
     _clear_admin_state(context)
 
-    courts = deps.court_repo.get_active()
+    courts = deps.court_repo.get_all()
     text = msgs.admin_courts_menu(count=len(courts))
 
     keyboard = [
@@ -104,7 +104,7 @@ async def _handle_admin_locations_menu(update: Update, context: ContextTypes.DEF
 
     _clear_admin_state(context)
 
-    locations = deps.location_repo.get_active()
+    locations = deps.location_repo.get_all()
     text = msgs.admin_locations_menu(count=len(locations))
 
     keyboard = [

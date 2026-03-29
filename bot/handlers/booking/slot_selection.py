@@ -36,7 +36,7 @@ async def _handle_booking_slot_selection(
         start_time = datetime(year, month, day, hour, minute, 0)
         end_time = start_time + timedelta(minutes=30)
 
-        courts = deps.court_repo.get_active()
+        courts = deps.court_repo.get_all()
         court_id = None
         for court in courts:
             if str(court.id).startswith(court_id_short):

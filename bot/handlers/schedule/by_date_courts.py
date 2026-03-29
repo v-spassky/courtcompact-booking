@@ -25,7 +25,7 @@ async def _handle_schedule_for_date_show_courts(
             location = deps.location_repo.get(location_id)
             courts = deps.location_repo.get_courts(location_id)
         else:
-            courts = deps.court_repo.get_active()
+            courts = deps.court_repo.get_all()
 
         if not courts:
             text = msgs.schedule_no_courts(location_name=location.name if location else None)
@@ -44,7 +44,7 @@ async def _handle_schedule_for_date_show_courts(
         text = msgs.schedule_select_court(
             date=date.strftime('%d.%m.%Y'),
             location_name=location.name if location else None,
-            maps_link=location.google_maps_link if location else None,
+            maps_link=location.maps_link if location else None,
         )
 
         keyboard = []

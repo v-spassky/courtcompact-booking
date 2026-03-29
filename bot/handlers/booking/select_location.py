@@ -17,7 +17,7 @@ async def _handle_book_court_select_location(update: Update, context: ContextTyp
     msgs = get_messages()
     deps = get_deps(context)
 
-    locations = deps.location_repo.get_active()
+    locations = deps.location_repo.get_all()
 
     if not locations:
         await _handle_book_court(update, context, None)
@@ -26,8 +26,8 @@ async def _handle_book_court_select_location(update: Update, context: ContextTyp
     text = msgs.book_select_location
 
     for location in locations:
-        if location.google_maps_link:
-            text += f'📍 <a href="{location.google_maps_link}">{location.name}</a>\n\n'
+        if location.maps_link:
+            text += f'📍 <a href="{location.maps_link}">{location.name}</a>\n\n'
         else:
             text += f'📍 {location.name}\n\n'
 

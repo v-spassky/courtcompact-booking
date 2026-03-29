@@ -33,7 +33,6 @@ async def _handle_admin_court_description_input(
             name=court_name,
             description=court_description,
             location_id=location_id,
-            is_active=True,
         )
         deps.court_repo.save(court)
 

@@ -35,22 +35,14 @@ class LocationRepository:
         with self._session() as session:
             return list(session.execute(select(Location)).scalars().all())
 
-    def get_active(self) -> list[Location]:
-        with self._session() as session:
-            return list(session.execute(select(Location).where(Location.is_active.is_(True))).scalars().all())
-
     def delete(self, location_id: str) -> bool:
         with self._session() as session:
             row = session.get(Location, location_id)
             if row:
-                row.is_active = False
+                session.delete(row)
                 return True
             return False
 
     def get_courts(self, location_id: str) -> list[Court]:
         with self._session() as session:
-            return list(
-                session.execute(select(Court).where(Court.location_id == location_id, Court.is_active.is_(True)))
-                .scalars()
-                .all()
-            )
+            return list(session.execute(select(Court).where(Court.location_id == location_id)).scalars().all())

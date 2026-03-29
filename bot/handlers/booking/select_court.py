@@ -22,7 +22,7 @@ async def _handle_book_court(update: Update, context: ContextTypes.DEFAULT_TYPE,
     if data and data.startswith('book_location_'):
         location_id_short = data.replace('book_location_', '')
 
-        locations = deps.location_repo.get_active()
+        locations = deps.location_repo.get_all()
         for loc in locations:
             if str(loc.id).startswith(location_id_short):
                 location = loc
@@ -31,7 +31,7 @@ async def _handle_book_court(update: Update, context: ContextTypes.DEFAULT_TYPE,
         if location:
             courts = deps.location_repo.get_courts(location.id)
     else:
-        courts = deps.court_repo.get_active()
+        courts = deps.court_repo.get_all()
 
     if not courts:
         text = msgs.book_no_courts(location_name=location.name if location else None)
@@ -45,7 +45,7 @@ async def _handle_book_court(update: Update, context: ContextTypes.DEFAULT_TYPE,
 
     text = msgs.book_select_court(
         location_name=location.name if location else None,
-        maps_link=location.google_maps_link if location else None,
+        maps_link=location.maps_link if location else None,
     )
 
     keyboard = []

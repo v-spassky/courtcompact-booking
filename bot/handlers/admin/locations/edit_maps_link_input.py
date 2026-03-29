@@ -28,7 +28,7 @@ async def _handle_admin_edit_location_maps_link_input(
     if link_text.strip() == '--':
         context.user_data['admin_location_maps_link'] = None
     elif link_text.strip() == '-':
-        context.user_data['admin_location_maps_link'] = location.google_maps_link
+        context.user_data['admin_location_maps_link'] = location.maps_link
     else:
         context.user_data['admin_location_maps_link'] = link_text.strip()
 

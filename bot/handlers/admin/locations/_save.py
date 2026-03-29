@@ -19,7 +19,7 @@ async def _save_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     msgs = get_messages()
     deps = get_deps(context)
     location_name = context.user_data.get('admin_location_name', 'Unknown')
-    google_maps_link = context.user_data.get('admin_location_maps_link')
+    maps_link = context.user_data.get('admin_location_maps_link')
 
     _clear_admin_state(context)
 
@@ -27,8 +27,7 @@ async def _save_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         location = Location(
             id=str(uuid4()),
             name=location_name,
-            google_maps_link=google_maps_link,
-            is_active=True,
+            maps_link=maps_link,
         )
         deps.location_repo.save(location)
 
@@ -36,8 +35,8 @@ async def _save_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             _log_user_action(update.effective_user, f'created location: {location_name}')
 
         text = msgs.admin_location_created(name=location_name)
-        if google_maps_link:
-            text += f'\n🗺️ <a href="{google_maps_link}">Google Maps</a>'
+        if maps_link:
+            text += f'\n🗺️ <a href="{maps_link}">Google Maps</a>'
 
         keyboard = [
             [InlineKeyboardButton(msgs.btn_create_another, callback_data='admin_create_location')],

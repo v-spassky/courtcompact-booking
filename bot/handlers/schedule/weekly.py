@@ -20,7 +20,7 @@ async def _handle_schedule_weekly(update: Update, context: ContextTypes.DEFAULT_
     deps = get_deps(context)
 
     try:
-        locations = deps.location_repo.get_active()
+        locations = deps.location_repo.get_all()
 
         today = now_kiev()
         start_date = today
@@ -36,8 +36,8 @@ async def _handle_schedule_weekly(update: Update, context: ContextTypes.DEFAULT_
         )
 
         for location in locations:
-            if location.google_maps_link:
-                text += f'📍 <a href="{location.google_maps_link}">{location.name}</a>\n\n'
+            if location.maps_link:
+                text += f'📍 <a href="{location.maps_link}">{location.name}</a>\n\n'
             else:
                 text += f'📍 {location.name}\n\n'
 

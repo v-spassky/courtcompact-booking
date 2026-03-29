@@ -4,7 +4,11 @@ from typing import cast
 from telegram.ext import ContextTypes
 
 from config.settings import Settings
-from db.repositories import BookingRepository, CourtRepository, LocationRepository, StudentRepository, TrainerRepository
+from db.repositories.booking import BookingRepository
+from db.repositories.court import CourtRepository
+from db.repositories.location import LocationRepository
+from db.repositories.student import StudentRepository
+from db.repositories.trainer import TrainerRepository
 from services.booking import BookingService
 from services.registration import RegistrationService
 from services.schedule import ScheduleService

@@ -35,10 +35,6 @@ class CourtRepository:
         with self._session() as session:
             return list(session.execute(select(Court)).scalars().all())
 
-    def get_active(self) -> list[Court]:
-        with self._session() as session:
-            return list(session.execute(select(Court).where(Court.is_active.is_(True))).scalars().all())
-
     def delete(self, court_id: str) -> bool:
         with self._session() as session:
             row = session.get(Court, court_id)

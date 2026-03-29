@@ -21,7 +21,7 @@ async def _handle_trainer_selection_for_booking(
     court_id_short = parts[3]
 
     try:
-        courts = deps.court_repo.get_active()
+        courts = deps.court_repo.get_all()
         court_id: str | None = None
         for court in courts:
             if str(court.id).startswith(court_id_short):

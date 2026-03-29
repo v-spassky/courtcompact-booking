@@ -23,7 +23,7 @@ async def _handle_admin_edit_court_list(update: Update, context: ContextTypes.DE
         return
 
     _clear_admin_state(context)
-    courts = deps.court_repo.get_active()
+    courts = deps.court_repo.get_all()
 
     if not courts:
         keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')]]

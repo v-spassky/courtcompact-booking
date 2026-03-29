@@ -19,7 +19,7 @@ async def _handle_schedule_for_date(update: Update, context: ContextTypes.DEFAUL
     deps = get_deps(context)
 
     try:
-        locations = deps.location_repo.get_active()
+        locations = deps.location_repo.get_all()
 
         if not locations:
             await _handle_schedule_for_date_show_courts(update, context, date, None)
@@ -28,8 +28,8 @@ async def _handle_schedule_for_date(update: Update, context: ContextTypes.DEFAUL
         text = msgs.schedule_select_location(date=date.strftime('%d.%m.%Y'))
 
         for location in locations:
-            if location.google_maps_link:
-                text += f'📍 <a href="{location.google_maps_link}">{location.name}</a>\n\n'
+            if location.maps_link:
+                text += f'📍 <a href="{location.maps_link}">{location.name}</a>\n\n'
             else:
                 text += f'📍 {location.name}\n\n'
 

@@ -43,7 +43,7 @@ async def _handle_court_schedule_for_week(
             start=start_of_week.strftime('%d.%m'),
             end=week_end.strftime('%d.%m.%Y'),
             location_name=location.name if location else None,
-            maps_link=location.google_maps_link if location else None,
+            maps_link=location.maps_link if location else None,
         )
 
         now = now_kiev()
