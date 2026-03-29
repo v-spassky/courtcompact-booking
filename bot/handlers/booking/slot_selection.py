@@ -19,8 +19,6 @@ async def _handle_booking_slot_selection(
 
     msgs = get_messages()
     deps = get_deps(context)
-    query = update.callback_query
-
     try:
         parts = data.split('_')
         court_id_short = parts[2]
@@ -75,9 +73,10 @@ async def _handle_booking_slot_selection(
             booked_court = deps.court_repo.get(booking.court_id)
             court_name = booked_court.name if booked_court else msgs.unknown_court
 
-            if query.from_user:
+            if update.callback_query.from_user:
                 _log_user_action(
-                    query.from_user, f'created booking: {court_name} on {booking.start_time.strftime("%d.%m.%Y %H:%M")}'
+                    update.callback_query.from_user,
+                    f'created booking: {court_name} on {booking.start_time.strftime("%d.%m.%Y %H:%M")}',
                 )
 
             booked_trainer = None
@@ -97,11 +96,15 @@ async def _handle_booking_slot_selection(
 
             keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await query.edit_message_text(text, reply_markup=reply_markup)
+            await update.callback_query.edit_message_text(text, reply_markup=reply_markup)
 
             if booked_trainer and not is_trainer_booking and booked_trainer.telegram_user_id != user_id:
                 try:
-                    student_name = query.from_user.full_name if query.from_user else msgs.fallback_student_name
+                    student_name = (
+                        update.callback_query.from_user.full_name
+                        if update.callback_query.from_user
+                        else msgs.fallback_student_name
+                    )
                     notify_text = msgs.booking_new_notification(
                         student_name=student_name,
                         court_name=court_name,
@@ -118,9 +121,9 @@ async def _handle_booking_slot_selection(
         else:
             keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await query.edit_message_text(msgs.booking_slot_unavailable, reply_markup=reply_markup)
+            await update.callback_query.edit_message_text(msgs.booking_slot_unavailable, reply_markup=reply_markup)
     except Exception:
         logger.exception('Failed to create booking')
         keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.edit_message_text(msgs.booking_generic_error, reply_markup=reply_markup)
+        await update.callback_query.edit_message_text(msgs.booking_generic_error, reply_markup=reply_markup)
