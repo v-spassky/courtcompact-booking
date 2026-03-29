@@ -4,7 +4,6 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot.handlers.base import Handler
 from config.settings import now_kiev
-from db.models import BookingStatus
 from localization import get_messages
 
 logger = logging.getLogger(__name__)
@@ -21,9 +20,7 @@ class CancelBookingMenu(Handler):
         user_id = self._update.effective_user.id
 
         bookings = self._deps.schedule_service.get_user_bookings(user_id)
-        future_bookings = [
-            b for b in bookings if b.start_time > now_kiev() and b.status != BookingStatus.CANCELLED.value
-        ]
+        future_bookings = [b for b in bookings if b.start_time > now_kiev()]
 
         if not future_bookings:
             keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]

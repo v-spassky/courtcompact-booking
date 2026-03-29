@@ -27,7 +27,6 @@ class BookingRepository:
     def save(self, booking: Booking) -> None:
         if not booking.created_at:
             booking.created_at = datetime.utcnow()
-        booking.updated_at = datetime.utcnow()
         with self._session() as session:
             session.merge(booking)
 

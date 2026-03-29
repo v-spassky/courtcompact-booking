@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: e494e03bb8fd
+Revision ID: 86694fe0dfef
 Revises: 
-Create Date: 2026-03-29 12:25:18.668806
+Create Date: 2026-03-29 18:34:46.123254
 
 """
 from __future__ import annotations
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 from alembic import op
 
 
-revision: str = 'e494e03bb8fd'
+revision: str = '86694fe0dfef'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -56,10 +56,7 @@ def upgrade() -> None:
     sa.Column('trainer_id', sa.String(length=36), nullable=True),
     sa.Column('start_time', sa.DateTime(), nullable=False),
     sa.Column('end_time', sa.DateTime(), nullable=False),
-    sa.Column('status', sa.String(length=20), nullable=False),
-    sa.Column('notes', sa.Text(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['court_id'], ['courts.id'], ),
     sa.ForeignKeyConstraint(['student_id'], ['students.id'], ),
     sa.ForeignKeyConstraint(['trainer_id'], ['trainers.id'], ),

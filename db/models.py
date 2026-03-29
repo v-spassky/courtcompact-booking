@@ -1,16 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
-
-
-class BookingStatus(str, Enum):
-    PENDING = 'pending'
-    CONFIRMED = 'confirmed'
-    CANCELLED = 'cancelled'
-    COMPLETED = 'completed'
 
 
 class Base(DeclarativeBase):
@@ -61,10 +53,7 @@ class Booking(Base):
     trainer_id: Mapped[str | None] = mapped_column(String(36), ForeignKey('trainers.id'))
     start_time: Mapped[datetime] = mapped_column(DateTime)
     end_time: Mapped[datetime] = mapped_column(DateTime)
-    status: Mapped[str] = mapped_column(String(20))
-    notes: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime)
-    updated_at: Mapped[datetime] = mapped_column(DateTime)
 
 
 @dataclass

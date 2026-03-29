@@ -2,7 +2,7 @@ import logging
 from datetime import datetime, timedelta
 
 from config.settings import now_kiev
-from db.models import Booking, BookingStatus, TimeSlot
+from db.models import Booking, TimeSlot
 from db.repositories.booking import BookingRepository
 from db.repositories.court import CourtRepository
 from db.repositories.student import StudentRepository
@@ -36,9 +36,7 @@ class ScheduleService:
         end_of_day = start_of_day + timedelta(days=1)
 
         all_bookings = self.bookings.get_in_range(start_of_day, end_of_day)
-        court_bookings = [
-            b for b in all_bookings if b.court_id == court_id and b.status != BookingStatus.CANCELLED.value
-        ]
+        court_bookings = [b for b in all_bookings if b.court_id == court_id]
 
         time_slots = []
         current_time = start_of_day.replace(hour=start_hour)

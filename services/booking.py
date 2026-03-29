@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from uuid import uuid4
 
-from db.models import Booking, BookingStatus
+from db.models import Booking
 from db.repositories.booking import BookingRepository
 from db.repositories.court import CourtRepository
 from db.repositories.student import StudentRepository
@@ -31,7 +31,6 @@ class BookingService:
         end_time: datetime,
         student_id: str | None = None,
         trainer_id: str | None = None,
-        notes: str | None = None,
     ) -> Booking | None:
         # Validate student exists if provided
         if student_id:
@@ -66,10 +65,7 @@ class BookingService:
             trainer_id=trainer_id,
             start_time=start_time,
             end_time=end_time,
-            notes=notes,
-            status=BookingStatus.CONFIRMED.value,
             created_at=None,
-            updated_at=None,
         )
 
         try:
@@ -116,7 +112,7 @@ class BookingService:
 
     def _is_time_slot_available(self, court_id: str, start_time: datetime, end_time: datetime) -> bool:
         bookings = self.bookings.get_in_range(start_time, end_time)
-        court_bookings = [b for b in bookings if b.court_id == court_id and b.status != BookingStatus.CANCELLED.value]
+        court_bookings = [b for b in bookings if b.court_id == court_id]
 
         for booking in court_bookings:
             if start_time < booking.end_time and end_time > booking.start_time:
