@@ -1,4 +1,5 @@
 import logging
+from uuid import UUID
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -34,7 +35,7 @@ class AdminCourtNameInput(TextInputHandler):
         location_id = self._context.user_data.get('admin_court_location_id')
         location_name = msgs.not_specified
         if location_id:
-            location = self._deps.location_repo.get(location_id)
+            location = self._deps.location_repo.get(UUID(location_id))
             if location:
                 location_name = location.name
 

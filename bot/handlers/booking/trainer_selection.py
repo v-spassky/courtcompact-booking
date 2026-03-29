@@ -1,4 +1,5 @@
 import logging
+from uuid import UUID
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
@@ -31,7 +32,7 @@ class TrainerSelectionForBooking(Handler):
         court_id_short = parts[3]
 
         courts = self._deps.court_repo.get_all()
-        court_id: str | None = None
+        court_id: UUID | None = None
         for court in courts:
             if str(court.id).startswith(court_id_short):
                 court_id = court.id

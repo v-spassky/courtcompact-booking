@@ -1,4 +1,5 @@
 import logging
+from uuid import UUID
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -25,7 +26,7 @@ class AdminEditStudentPhoneInput(TextInputHandler):
             _clear_admin_state(self._context)
             return
 
-        student = self._deps.student_repo.get(student_id)
+        student = self._deps.student_repo.get(UUID(student_id))
         if not student:
             _clear_admin_state(self._context)
             keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]]

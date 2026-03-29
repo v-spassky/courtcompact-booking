@@ -1,5 +1,5 @@
 import logging
-from uuid import uuid4
+from uuid import UUID
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -21,14 +21,14 @@ class AdminCourtDescriptionInput(TextInputHandler):
         assert self._context.user_data is not None
         msgs = get_messages()
         court_name = self._context.user_data.get('admin_court_name', 'Unknown')
-        location_id = self._context.user_data.get('admin_court_location_id')
+        location_id_str = self._context.user_data.get('admin_court_location_id')
+        location_id = UUID(location_id_str) if location_id_str else None
 
         _clear_admin_state(self._context)
 
         court_description = None if self._text.strip() == '-' else self._text.strip()
 
         court = Court(
-            id=str(uuid4()),
             name=court_name,
             description=court_description,
             location_id=location_id,

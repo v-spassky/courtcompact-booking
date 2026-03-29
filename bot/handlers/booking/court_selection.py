@@ -1,4 +1,5 @@
 import logging
+from uuid import UUID
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
@@ -26,7 +27,7 @@ class CourtSelectionForBooking(Handler):
     async def _process(self) -> None:
         assert self._update.callback_query is not None
         msgs = get_messages()
-        court_id = self._callback_data.split('_')[2]
+        court_id = UUID(self._callback_data.split('_')[2])
 
         court = self._deps.court_repo.get(court_id)
         court_name = court.name if court else msgs.unknown_court

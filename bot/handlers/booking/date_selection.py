@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from uuid import UUID
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
@@ -33,7 +34,7 @@ class BookingDateSelection(Handler):
         selected_date = datetime(year, month, day)
 
         courts = self._deps.court_repo.get_all()
-        court_id: str | None = None
+        court_id: UUID | None = None
         for court in courts:
             if str(court.id).startswith(court_id_short):
                 court_id = court.id
@@ -53,7 +54,7 @@ class BookingDateSelection(Handler):
         court_name = court_obj.name if court_obj else msgs.unknown_court
 
         time_slots = self._deps.schedule_service.get_all_time_slots_for_date(selected_date)
-        court_slots = [slot for slot in time_slots if str(slot.court_id) == str(court_id)]
+        court_slots = [slot for slot in time_slots if slot.court_id == court_id]
 
         trainer_busy_times = set()
         if trainer_id:
@@ -61,7 +62,7 @@ class BookingDateSelection(Handler):
             for other_slot in all_slots:
                 if not other_slot.is_available and other_slot.booking_id:
                     booking = self._deps.booking_repo.get(other_slot.booking_id)
-                    if booking and str(booking.trainer_id) == str(trainer_id):
+                    if booking and booking.trainer_id == trainer_id:
                         trainer_busy_times.add((booking.start_time, booking.end_time))
 
         if not court_slots:

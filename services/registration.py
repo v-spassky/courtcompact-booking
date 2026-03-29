@@ -1,5 +1,4 @@
 import logging
-from uuid import uuid4
 
 from db.models import Student, Trainer
 from db.repositories.student import StudentRepository
@@ -20,7 +19,6 @@ class RegistrationService:
             return existing
 
         student = Student(
-            id=str(uuid4()),
             telegram_user_id=telegram_user_id,
             name=name,
             phone=phone,
@@ -35,7 +33,6 @@ class RegistrationService:
             return existing
 
         trainer = Trainer(
-            id=str(uuid4()),
             telegram_user_id=telegram_user_id,
             name=name,
             description=description,

@@ -1,5 +1,4 @@
 import logging
-from uuid import uuid4
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -50,7 +49,6 @@ class AdminStudentPhoneInput(TextInputHandler):
         _clear_admin_state(self._context)
 
         student = Student(
-            id=str(uuid4()),
             name=student_name,
             phone=self._text,
             telegram_user_id=None,

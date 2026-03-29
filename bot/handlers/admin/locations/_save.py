@@ -1,5 +1,4 @@
 import logging
-from uuid import uuid4
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
@@ -25,7 +24,6 @@ async def _save_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
     try:
         location = Location(
-            id=str(uuid4()),
             name=location_name,
             maps_link=maps_link,
         )

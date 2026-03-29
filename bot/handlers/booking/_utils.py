@@ -2,6 +2,7 @@ import calendar as cal
 import logging
 from datetime import date as DateType
 from datetime import datetime
+from uuid import UUID
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -12,12 +13,12 @@ from localization import get_messages
 logger = logging.getLogger(__name__)
 
 
-def _check_date_availability(date: DateType, court_id: str, trainer_id: str | None, deps: Deps) -> bool:
+def _check_date_availability(date: DateType, court_id: UUID, trainer_id: UUID | None, deps: Deps) -> bool:
     try:
         date_datetime = datetime.combine(date, datetime.min.time())
         time_slots = deps.schedule_service.get_all_time_slots_for_date(date_datetime)
 
-        court_slots = [slot for slot in time_slots if str(slot.court_id) == str(court_id)]
+        court_slots = [slot for slot in time_slots if slot.court_id == court_id]
 
         if not trainer_id:
             return any(slot.is_available for slot in court_slots)
@@ -33,7 +34,7 @@ def _check_date_availability(date: DateType, court_id: str, trainer_id: str | No
             for other_slot in all_day_slots:
                 if not other_slot.is_available and other_slot.booking_id:
                     booking = deps.booking_repo.get(other_slot.booking_id)
-                    if booking and str(booking.trainer_id) == str(trainer_id):
+                    if booking and booking.trainer_id == trainer_id:
                         if slot.start_time < booking.end_time and slot.end_time > booking.start_time:
                             trainer_busy = True
                             break
@@ -47,7 +48,7 @@ def _check_date_availability(date: DateType, court_id: str, trainer_id: str | No
 
 
 def _create_booking_calendar(
-    year: int, month: int, court_id: str, trainer_id: str | None, deps: Deps
+    year: int, month: int, court_id: UUID, trainer_id: UUID | None, deps: Deps
 ) -> InlineKeyboardMarkup:
     msgs = get_messages()
     keyboard = []

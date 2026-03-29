@@ -1,4 +1,5 @@
 import logging
+from uuid import UUID
 
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -30,7 +31,7 @@ class BookingCalendarNavigation(Handler):
         month = int(parts[5])
 
         courts = self._deps.court_repo.get_all()
-        court_id: str | None = None
+        court_id: UUID | None = None
         for court in courts:
             if str(court.id).startswith(court_id_short):
                 court_id = court.id
@@ -46,10 +47,13 @@ class BookingCalendarNavigation(Handler):
                     trainer_name = trainer.name
                     break
 
-        court_obj = self._deps.court_repo.get(court_id) if court_id else None
+        if not court_id:
+            raise ValueError(f'Court not found for ID starting with {court_id_short}')
+
+        court_obj = self._deps.court_repo.get(court_id)
         court_name = court_obj.name if court_obj else msgs.unknown_court
 
-        calendar_markup = _create_booking_calendar(year, month, court_id or '', trainer_id, self._deps)
+        calendar_markup = _create_booking_calendar(year, month, court_id, trainer_id, self._deps)
 
         text = msgs.booking_select_date(court_name=court_name, trainer_name=trainer_name)
 

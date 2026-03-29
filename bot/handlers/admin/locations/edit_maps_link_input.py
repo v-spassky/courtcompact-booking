@@ -1,4 +1,5 @@
 import logging
+from uuid import UUID
 
 from bot.handlers.admin._utils import _clear_admin_state
 from bot.handlers.admin.locations._save_edited import _save_edited_location
@@ -18,7 +19,7 @@ class AdminEditLocationMapsLinkInput(TextInputHandler):
             _clear_admin_state(self._context)
             return
 
-        location = self._deps.location_repo.get(location_id)
+        location = self._deps.location_repo.get(UUID(location_id))
         if not location:
             _clear_admin_state(self._context)
             return

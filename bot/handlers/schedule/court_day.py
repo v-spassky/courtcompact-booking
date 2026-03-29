@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from uuid import UUID
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class CourtScheduleForDay(Handler):
     def __init__(
-        self, update: Update, context: ContextTypes.DEFAULT_TYPE, deps: Deps, court_id: str, date: datetime
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE, deps: Deps, court_id: UUID, date: datetime
     ) -> None:
         super().__init__(update, context, deps)
         self._court_id = court_id
@@ -34,7 +35,7 @@ class CourtScheduleForDay(Handler):
         court_slots = [
             slot
             for slot in time_slots
-            if str(slot.court_id) == self._court_id and slot.start_time.date() == self._date.date()
+            if slot.court_id == self._court_id and slot.start_time.date() == self._date.date()
         ]
 
         location = court.location if court else None

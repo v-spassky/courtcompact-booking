@@ -1,4 +1,5 @@
 import logging
+from uuid import UUID
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -22,7 +23,7 @@ class AdminEditCourtNameInput(TextInputHandler):
             _clear_admin_state(self._context)
             return
 
-        court = self._deps.court_repo.get(court_id)
+        court = self._deps.court_repo.get(UUID(court_id))
         if not court:
             _clear_admin_state(self._context)
             return

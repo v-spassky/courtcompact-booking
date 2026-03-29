@@ -1,6 +1,7 @@
 import logging
 from datetime import date, datetime, timedelta
 from typing import Any
+from uuid import UUID
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class CourtScheduleForWeek(Handler):
     def __init__(
-        self, update: Update, context: ContextTypes.DEFAULT_TYPE, deps: Deps, court_id: str, start_of_week: datetime
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE, deps: Deps, court_id: UUID, start_of_week: datetime
     ) -> None:
         super().__init__(update, context, deps)
         self._court_id = court_id
@@ -35,7 +36,7 @@ class CourtScheduleForWeek(Handler):
         for i in range(7):
             day = self._start_of_week + timedelta(days=i)
             day_slots = self._deps.schedule_service.get_all_time_slots_for_date(day)
-            court_day_slots = [s for s in day_slots if str(s.court_id) == self._court_id]
+            court_day_slots = [s for s in day_slots if s.court_id == self._court_id]
             all_slots.extend(court_day_slots)
 
         week_end = self._start_of_week + timedelta(days=6)

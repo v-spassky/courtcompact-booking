@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from uuid import UUID
 
 from config.settings import now_kiev
 from db.models import Booking
@@ -16,9 +17,9 @@ logger = logging.getLogger(__name__)
 class TimeSlot:
     start_time: datetime
     end_time: datetime
-    court_id: str
+    court_id: UUID
     is_available: bool
-    booking_id: str | None
+    booking_id: UUID | None
 
 
 class ScheduleService:
@@ -36,7 +37,7 @@ class ScheduleService:
 
     def get_available_time_slots(
         self,
-        court_id: str,
+        court_id: UUID,
         date: datetime,
         duration_minutes: int = 30,
         start_hour: int = 6,
@@ -92,7 +93,7 @@ class ScheduleService:
 
     def get_user_bookings(self, telegram_user_id: int) -> list[Booking]:
         bookings = []
-        seen_ids: set[str] = set()
+        seen_ids: set[UUID] = set()
 
         student = self.students.get_by_telegram_id(telegram_user_id)
         if student:

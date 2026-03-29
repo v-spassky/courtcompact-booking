@@ -1,5 +1,6 @@
 from collections.abc import Generator
 from contextlib import contextmanager
+from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload, sessionmaker
@@ -27,7 +28,7 @@ class LocationRepository:
         with self._session() as session:
             session.merge(location)
 
-    def get(self, location_id: str) -> Location | None:
+    def get(self, location_id: UUID) -> Location | None:
         with self._session() as session:
             return session.get(Location, location_id)
 
@@ -35,7 +36,7 @@ class LocationRepository:
         with self._session() as session:
             return list(session.execute(select(Location)).scalars().all())
 
-    def delete(self, location_id: str) -> bool:
+    def delete(self, location_id: UUID) -> bool:
         with self._session() as session:
             row = session.get(Location, location_id)
             if row:
@@ -43,7 +44,7 @@ class LocationRepository:
                 return True
             return False
 
-    def get_courts(self, location_id: str) -> list[Court]:
+    def get_courts(self, location_id: UUID) -> list[Court]:
         with self._session() as session:
             return list(
                 session.execute(

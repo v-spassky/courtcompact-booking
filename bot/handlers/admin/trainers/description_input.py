@@ -1,5 +1,4 @@
 import logging
-from uuid import uuid4
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -28,7 +27,6 @@ class AdminTrainerDescriptionInput(TextInputHandler):
         description = None if self._text.strip() == '-' else self._text.strip()
 
         trainer = Trainer(
-            id=str(uuid4()),
             telegram_user_id=telegram_id,
             name=trainer_name,
             description=description,

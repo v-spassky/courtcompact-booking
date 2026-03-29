@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, timedelta
+from uuid import UUID
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
@@ -18,7 +19,7 @@ class ScheduleWeeklyShowCourts(Handler):
         context: ContextTypes.DEFAULT_TYPE,
         deps: Deps,
         start_of_week: datetime,
-        location_id: str | None,
+        location_id: UUID | None,
     ) -> None:
         super().__init__(update, context, deps)
         self._start_of_week = start_of_week
