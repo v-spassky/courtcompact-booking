@@ -40,9 +40,7 @@ class CourtScheduleForWeek(Handler):
 
         week_end = self._start_of_week + timedelta(days=6)
 
-        location = None
-        if court and court.location_id:
-            location = self._deps.location_repo.get(court.location_id)
+        location = court.location if court else None
 
         text = msgs.schedule_weekly_court(
             court_name=court_name,
@@ -88,7 +86,7 @@ class CourtScheduleForWeek(Handler):
                 for slot in day_slots:
                     if not slot.is_available and slot.booking_id:
                         booking = self._deps.booking_repo.get(slot.booking_id)
-                        if booking and booking.trainer_id:
+                        if booking and booking.trainer:
                             trainer_count += 1
 
                 text += msgs.schedule_weekly_day_row(

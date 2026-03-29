@@ -2,7 +2,7 @@ from collections.abc import Generator
 from contextlib import contextmanager
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session, selectinload, sessionmaker
 
 from db.models import Court, Location
 
@@ -45,4 +45,10 @@ class LocationRepository:
 
     def get_courts(self, location_id: str) -> list[Court]:
         with self._session() as session:
-            return list(session.execute(select(Court).where(Court.location_id == location_id)).scalars().all())
+            return list(
+                session.execute(
+                    select(Court).where(Court.location_id == location_id).options(selectinload(Court.location))
+                )
+                .scalars()
+                .all()
+            )

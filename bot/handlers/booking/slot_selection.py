@@ -77,8 +77,7 @@ class BookingSlotSelection(Handler):
         )
 
         if booking:
-            booked_court = self._deps.court_repo.get(booking.court_id)
-            court_name = booked_court.name if booked_court else msgs.unknown_court
+            court_name = booking.court.name if booking.court else msgs.unknown_court
 
             if self._update.callback_query.from_user:
                 _log_user_action(
@@ -86,12 +85,8 @@ class BookingSlotSelection(Handler):
                     f'created booking: {court_name} on {booking.start_time.strftime("%d.%m.%Y %H:%M")}',
                 )
 
-            booked_trainer = None
-            trainer_name = None
-            if booking.trainer_id:
-                booked_trainer = self._deps.trainer_repo.get(booking.trainer_id)
-                if booked_trainer:
-                    trainer_name = booked_trainer.name
+            trainer_name = booking.trainer.name if booking.trainer else None
+            booked_trainer = booking.trainer
 
             text = msgs.booking_confirmed(
                 court_name=court_name,

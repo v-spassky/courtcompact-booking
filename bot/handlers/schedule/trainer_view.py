@@ -48,7 +48,7 @@ class ViewTrainerSchedule(Handler):
             for slot in time_slots:
                 if slot.booking_id:
                     booking = self._deps.booking_repo.get(slot.booking_id)
-                    if booking and str(booking.trainer_id) == str(trainer.id):
+                    if booking and booking.trainer and str(booking.trainer.id) == str(trainer.id):
                         all_bookings.append(booking)
 
         text = msgs.trainer_schedule_header(name=trainer.name, description=trainer.description)
@@ -68,8 +68,7 @@ class ViewTrainerSchedule(Handler):
             for date_key in sorted(bookings_by_date.keys()):
                 text += f'📆 {date_key.strftime("%d.%m.%Y (%a)")}\n'
                 for booking in sorted(bookings_by_date[date_key], key=lambda b: b.start_time):
-                    court = self._deps.court_repo.get(booking.court_id)
-                    court_name = court.name if court else msgs.unknown_court
+                    court_name = booking.court.name if booking.court else msgs.unknown_court
                     time_range = f'{booking.start_time.strftime("%H:%M")}-{booking.end_time.strftime("%H:%M")}'
                     text += f'   • {time_range} - {court_name}\n'
                 text += '\n'

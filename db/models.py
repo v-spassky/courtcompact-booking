@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, create_engine
-from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, relationship, sessionmaker
 
 
 class Base(DeclarativeBase):
@@ -23,6 +23,7 @@ class Court(Base):
     name: Mapped[str] = mapped_column(String(255))
     description: Mapped[str | None] = mapped_column(Text)
     location_id: Mapped[str | None] = mapped_column(String(36), ForeignKey('locations.id'))
+    location: Mapped['Location | None'] = relationship(lazy='raise')
 
 
 class Trainer(Base):
@@ -53,6 +54,9 @@ class Booking(Base):
     start_time: Mapped[datetime] = mapped_column(DateTime)
     end_time: Mapped[datetime] = mapped_column(DateTime)
     created_at: Mapped[datetime] = mapped_column(DateTime)
+    court: Mapped['Court'] = relationship(lazy='raise')
+    student: Mapped['Student | None'] = relationship(lazy='raise')
+    trainer: Mapped['Trainer | None'] = relationship(lazy='raise')
 
 
 def make_session_factory(db_url: str) -> sessionmaker[Session]:

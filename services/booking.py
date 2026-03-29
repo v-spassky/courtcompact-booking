@@ -70,8 +70,9 @@ class BookingService:
 
         try:
             self.bookings.save(booking)
+            saved = self.bookings.get(booking.id)
             logger.info(f'Created booking {booking.id}')
-            return booking
+            return saved
         except Exception as e:
             logger.error(f'Failed to create booking: {e}')
             return None
@@ -86,16 +87,12 @@ class BookingService:
         is_authorized = False
 
         # Check if user is the student
-        if booking.student_id:
-            student = self.students.get(booking.student_id)
-            if student and student.telegram_user_id == user_id:
-                is_authorized = True
+        if booking.student and booking.student.telegram_user_id == user_id:
+            is_authorized = True
 
         # Check if user is the trainer
-        if not is_authorized and booking.trainer_id:
-            trainer = self.trainers.get(booking.trainer_id)
-            if trainer and trainer.telegram_user_id == user_id:
-                is_authorized = True
+        if not is_authorized and booking.trainer and booking.trainer.telegram_user_id == user_id:
+            is_authorized = True
 
         if not is_authorized:
             logger.warning(f'User {user_id} not authorized to cancel booking {booking_id}')

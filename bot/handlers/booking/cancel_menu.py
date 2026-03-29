@@ -32,8 +32,7 @@ class CancelBookingMenu(Handler):
 
         keyboard = []
         for booking in sorted(future_bookings, key=lambda x: x.start_time):
-            court = self._deps.court_repo.get(booking.court_id)
-            court_name = court.name if court else msgs.unknown_entity
+            court_name = booking.court.name if booking.court else msgs.unknown_entity
 
             button_text = f'{court_name} - {booking.start_time.strftime("%d/%m %H:%M")}'
             keyboard.append([InlineKeyboardButton(button_text, callback_data=f'cancel_booking_{booking.id}')])

@@ -4,5 +4,9 @@
     "localization/ru.py",
     ".venv/**",
     "uv.lock"
+  ],
+  "words": [
+    "selectinload",
+    "sessionmaker"
   ]
 }

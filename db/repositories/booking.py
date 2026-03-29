@@ -3,7 +3,8 @@ from contextlib import contextmanager
 from datetime import datetime
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session, selectinload, sessionmaker
+from sqlalchemy.orm.interfaces import LoaderOption
 
 from db.models import Booking
 
@@ -24,6 +25,9 @@ class BookingRepository:
         finally:
             session.close()
 
+    def _booking_options(self) -> list[LoaderOption]:
+        return [selectinload(Booking.court), selectinload(Booking.student), selectinload(Booking.trainer)]
+
     def save(self, booking: Booking) -> None:
         if not booking.created_at:
             booking.created_at = datetime.utcnow()
@@ -32,20 +36,38 @@ class BookingRepository:
 
     def get(self, booking_id: str) -> Booking | None:
         with self._session() as session:
-            return session.get(Booking, booking_id)
+            return session.execute(
+                select(Booking).where(Booking.id == booking_id).options(*self._booking_options())
+            ).scalar_one_or_none()
 
     def get_by_student(self, student_id: str) -> list[Booking]:
         with self._session() as session:
-            return list(session.execute(select(Booking).where(Booking.student_id == student_id)).scalars().all())
+            return list(
+                session.execute(
+                    select(Booking).where(Booking.student_id == student_id).options(*self._booking_options())
+                )
+                .scalars()
+                .all()
+            )
 
     def get_by_trainer(self, trainer_id: str) -> list[Booking]:
         with self._session() as session:
-            return list(session.execute(select(Booking).where(Booking.trainer_id == trainer_id)).scalars().all())
+            return list(
+                session.execute(
+                    select(Booking).where(Booking.trainer_id == trainer_id).options(*self._booking_options())
+                )
+                .scalars()
+                .all()
+            )
 
     def get_in_range(self, start: datetime, end: datetime) -> list[Booking]:
         with self._session() as session:
             return list(
-                session.execute(select(Booking).where(Booking.start_time <= end, Booking.end_time >= start))
+                session.execute(
+                    select(Booking)
+                    .where(Booking.start_time <= end, Booking.end_time >= start)
+                    .options(*self._booking_options())
+                )
                 .scalars()
                 .all()
             )

@@ -37,9 +37,7 @@ class CourtScheduleForDay(Handler):
             if str(slot.court_id) == self._court_id and slot.start_time.date() == self._date.date()
         ]
 
-        location = None
-        if court and court.location_id:
-            location = self._deps.location_repo.get(court.location_id)
+        location = court.location if court else None
 
         text = msgs.schedule_court_day(
             court_name=court_name,
@@ -69,13 +67,10 @@ class CourtScheduleForDay(Handler):
                     if slot.booking_id:
                         booking = self._deps.booking_repo.get(slot.booking_id)
                         if booking:
-                            student = self._deps.student_repo.get(booking.student_id) if booking.student_id else None
-                            if student:
-                                booking_info += f' ({student.name})'
-                            if booking.trainer_id:
-                                trainer = self._deps.trainer_repo.get(booking.trainer_id)
-                                if trainer:
-                                    booking_info += f' 👨‍🏫 {trainer.name}'
+                            if booking.student:
+                                booking_info += f' ({booking.student.name})'
+                            if booking.trainer:
+                                booking_info += f' 👨‍🏫 {booking.trainer.name}'
                     text += f'❌ {booking_info}\n'
 
             if not has_slots:

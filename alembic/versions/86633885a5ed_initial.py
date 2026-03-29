@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 86694fe0dfef
+Revision ID: 86633885a5ed
 Revises: 
-Create Date: 2026-03-29 18:34:46.123254
+Create Date: 2026-03-29 18:56:23.551591
 
 """
 from __future__ import annotations
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 from alembic import op
 
 
-revision: str = '86694fe0dfef'
+revision: str = '86633885a5ed'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

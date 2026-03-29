@@ -34,10 +34,9 @@ class BookingCancellation(Handler):
             await self._update.callback_query.edit_message_text(msgs.booking_not_found, reply_markup=reply_markup)
             return
 
-        court = self._deps.court_repo.get(booking.court_id)
-        court_name = court.name if court else msgs.unknown_court
-        student = self._deps.student_repo.get(booking.student_id) if booking.student_id else None
-        trainer = self._deps.trainer_repo.get(booking.trainer_id) if booking.trainer_id else None
+        court_name = booking.court.name if booking.court else msgs.unknown_court
+        student = booking.student
+        trainer = booking.trainer
 
         is_student_cancelling = student and student.telegram_user_id == self._user_id
         is_trainer_cancelling = trainer and trainer.telegram_user_id == self._user_id
