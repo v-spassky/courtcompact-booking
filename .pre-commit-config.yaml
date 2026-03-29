@@ -6,7 +6,7 @@ repos:
         entry: "uv run ruff format"
         language: system
         types: [python]
-        files: ^(bot|config|db|localization|services)/|^main\.py$
+        files: ^(bot|config|db|localization|services|tests)/|^main\.py$
 
   - repo: local
     hooks:
@@ -15,7 +15,7 @@ repos:
         entry: "uv run ruff check"
         language: system
         types: [python]
-        files: ^(bot|config|db|localization|services)/|^main\.py$
+        files: ^(bot|config|db|localization|services|tests)/|^main\.py$
 
   - repo: local
     hooks:
@@ -24,7 +24,7 @@ repos:
         entry: "uv run isort"
         language: system
         types: [python]
-        files: ^(bot|config|db|localization|services)/|^main\.py$
+        files: ^(bot|config|db|localization|services|tests)/|^main\.py$
 
   - repo: local
     hooks:
@@ -33,4 +33,13 @@ repos:
         entry: "uv run mypy"
         language: system
         types: [python]
-        files: ^(bot|config|db|localization|services)/|^main\.py$
+        files: ^(bot|config|db|localization|services|tests)/|^main\.py$
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: "uv run pytest"
+        language: system
+        pass_filenames: false
+        always_run: true

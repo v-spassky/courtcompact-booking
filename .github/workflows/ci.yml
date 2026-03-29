@@ -27,16 +27,20 @@ jobs:
 
       - name: Run ruff linter
         run: |
-          uv run ruff check bot/ config/ db/ localization/ services/ main.py
+          uv run ruff check bot/ config/ db/ localization/ services/ tests/ main.py
 
       - name: Run ruff formatter
         run: |
-          uv run ruff format --check bot/ config/ db/ localization/ services/ main.py
+          uv run ruff format --check bot/ config/ db/ localization/ services/ tests/ main.py
 
       - name: Run isort
         run: |
-          uv run isort bot/ config/ db/ localization/ services/ main.py --check
+          uv run isort bot/ config/ db/ localization/ services/ tests/ main.py --check
 
       - name: Run mypy
         run: |
-          uv run mypy bot/ config/ db/ localization/ services/ main.py
+          uv run mypy bot/ config/ db/ localization/ services/ tests/ main.py
+
+      - name: Run pytest
+        run: |
+          uv run pytest
