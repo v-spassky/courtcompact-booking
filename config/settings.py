@@ -1,3 +1,4 @@
+import sys
 from datetime import datetime, timedelta, timezone, tzinfo
 
 from dateutil import tz as dateutil_tz
@@ -38,7 +39,10 @@ class Settings(BaseSettings):
         return timezone(timedelta(hours=sign * hours, minutes=sign * minutes))
 
 
-settings = Settings()  # type: ignore[call-arg]
+if 'pytest' in sys.modules:
+    settings = Settings(telegram_bot_token='test-token', db_url='sqlite:///:memory:', timezone=timezone.utc)
+else:
+    settings = Settings()  # type: ignore[call-arg]
 
 
 def now_kiev() -> datetime:

@@ -6,6 +6,8 @@
     "uv.lock"
   ],
   "words": [
+    "dateutil",
+    "gettz",
     "selectinload",
     "sessionmaker"
   ]
