@@ -45,14 +45,14 @@ async def _handle_admin_court_description_input(
         if location_id:
             location = deps.location_repo.get(location_id)
             if location:
-                text += f'\n📍 Локация: {location.name}'
+                text += msgs.admin_court_location_line(name=location.name)
 
         if court_description:
-            text += f'\n📝 Описание: {court_description}'
+            text += msgs.admin_court_description_line(desc=court_description)
 
         keyboard = [
-            [InlineKeyboardButton('➕ Создать ещё', callback_data='admin_create_court')],
-            [InlineKeyboardButton('◀️ К кортам', callback_data='admin_courts')],
+            [InlineKeyboardButton(msgs.btn_create_another, callback_data='admin_create_court')],
+            [InlineKeyboardButton(msgs.btn_back_to_courts, callback_data='admin_courts')],
             [InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -60,6 +60,6 @@ async def _handle_admin_court_description_input(
 
     except Exception:
         logger.exception('Failed to create court')
-        keyboard = [[InlineKeyboardButton('◀️ К кортам', callback_data='admin_courts')]]
+        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_courts, callback_data='admin_courts')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(msgs.admin_court_create_error, reply_markup=reply_markup)

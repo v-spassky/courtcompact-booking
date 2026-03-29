@@ -34,7 +34,7 @@ async def _handle_admin_create_court_start(update: Update, context: ContextTypes
     if not location:
         keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.callback_query.edit_message_text('❌ Локация не найдена.', reply_markup=reply_markup)
+        await update.callback_query.edit_message_text(msgs.admin_location_not_found, reply_markup=reply_markup)
         return
 
     _clear_admin_state(context)
@@ -42,11 +42,7 @@ async def _handle_admin_create_court_start(update: Update, context: ContextTypes
     context.user_data['admin_court_location_id'] = str(location.id)
     context.user_data['admin_state'] = 'awaiting_court_name'
 
-    text = f"""🎾 Создание корта
-
-📍 Локация: {location.name}
-
-Шаг 2/3: Введите название корта (например: "Корт 1" или "Центральный корт"):"""
+    text = msgs.admin_court_create_step2(location_name=location.name)
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_courts')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

@@ -10,6 +10,7 @@ from bot.handlers.admin import courts, locations
 from bot.handlers.admin import menu as admin_menu
 from bot.handlers.admin import students, trainers
 from config.settings import now_kiev
+from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,8 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
         await auth._show_authorization_request(update, context)
         return
 
+    msgs = get_messages()
+
     if data == 'main_menu':
         await auth.show_main_menu(update, context, edit_message=True)
     elif data == 'ignore':
@@ -43,12 +46,12 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
     elif data == 'select_date_schedule':
         now = now_kiev()
         calendar_markup = auth._create_calendar(now.year, now.month)
-        await query.edit_message_text('📅 Выберите дату для просмотра расписания:', reply_markup=calendar_markup)
+        await query.edit_message_text(msgs.schedule_select_date, reply_markup=calendar_markup)
     elif data.startswith('cal_'):
         parts = data.split('_')
         year, month = int(parts[1]), int(parts[2])
         calendar_markup = auth._create_calendar(year, month)
-        await query.edit_message_text('📅 Выберите дату для просмотра расписания:', reply_markup=calendar_markup)
+        await query.edit_message_text(msgs.schedule_select_date, reply_markup=calendar_markup)
     elif data.startswith('date_'):
         parts = data.split('_')
         year, month, day = int(parts[1]), int(parts[2]), int(parts[3])

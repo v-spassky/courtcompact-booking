@@ -32,7 +32,7 @@ async def _handle_admin_delete_student_execute(update: Update, context: ContextT
     if not student:
         keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.callback_query.edit_message_text('❌ Ученик не найден.', reply_markup=reply_markup)
+        await update.callback_query.edit_message_text(msgs.admin_student_not_found, reply_markup=reply_markup)
         return
 
     try:
@@ -41,12 +41,12 @@ async def _handle_admin_delete_student_execute(update: Update, context: ContextT
         _log_user_action(update.effective_user, f'deleted student: {student_name}')
 
         text = msgs.admin_student_deleted(name=student_name)
-        keyboard = [[InlineKeyboardButton('◀️ К ученикам', callback_data='admin_students')]]
+        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.callback_query.edit_message_text(text, reply_markup=reply_markup)
 
     except Exception:
         logger.exception('Failed to delete student')
-        keyboard = [[InlineKeyboardButton('◀️ К ученикам', callback_data='admin_students')]]
+        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.callback_query.edit_message_text(msgs.admin_student_delete_error, reply_markup=reply_markup)

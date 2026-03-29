@@ -34,7 +34,7 @@ async def _handle_cancel_booking_menu(update: Update, context: ContextTypes.DEFA
         keyboard = []
         for booking in sorted(future_bookings, key=lambda x: x.start_time):
             court = deps.court_repo.get(booking.court_id)
-            court_name = court.name if court else 'Неизвестный'
+            court_name = court.name if court else msgs.unknown_entity
 
             button_text = f'{court_name} - {booking.start_time.strftime("%d/%m %H:%M")}'
             keyboard.append([InlineKeyboardButton(button_text, callback_data=f'cancel_booking_{booking.id}')])

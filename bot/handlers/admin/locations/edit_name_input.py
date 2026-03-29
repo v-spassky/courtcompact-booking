@@ -27,7 +27,7 @@ async def _handle_admin_edit_location_name_input(update: Update, context: Contex
 
     if name.strip() != '-':
         if len(name) < 1 or len(name) > 100:
-            text = '❌ Название должно быть от 1 до 100 символов. Попробуйте снова.'
+            text = msgs.admin_location_name_too_long_edit
             keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_locations')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await update.message.reply_text(text, reply_markup=reply_markup)
@@ -39,14 +39,7 @@ async def _handle_admin_edit_location_name_input(update: Update, context: Contex
     context.user_data['admin_state'] = 'awaiting_edit_location_maps_link'
 
     new_name = context.user_data['admin_location_name']
-    current_link = location.google_maps_link if location.google_maps_link else '(не указана)'
-
-    text = f"""✏️ Редактирование локации
-
-Новое название: {new_name}
-Текущая ссылка: {current_link}
-
-Шаг 2/2: Отправьте новую ссылку Google Maps (или "-" оставить, "--" очистить):"""
+    text = msgs.admin_location_edit_step2(new_name=new_name, maps_link=location.google_maps_link)
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_locations')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

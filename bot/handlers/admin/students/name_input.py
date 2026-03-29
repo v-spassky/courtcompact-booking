@@ -15,9 +15,9 @@ async def _handle_admin_student_name_input(update: Update, context: ContextTypes
 
     if not name or name == '-':
         context.user_data.pop('admin_state', None)
-        text = '❌ Имя ученика не может быть пустым.'
+        text = msgs.admin_student_name_empty
         keyboard = [
-            [InlineKeyboardButton('🔄 Попробовать снова', callback_data='admin_create_student')],
+            [InlineKeyboardButton(msgs.btn_retry, callback_data='admin_create_student')],
             [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -27,11 +27,7 @@ async def _handle_admin_student_name_input(update: Update, context: ContextTypes
     context.user_data['admin_student_name'] = name
     context.user_data['admin_state'] = 'awaiting_student_phone'
 
-    text = f"""👥 Создание ученика
-
-Имя: {name}
-
-Шаг 2/2: Введите номер телефона ученика (например, +7 999 123 45 67):"""
+    text = msgs.admin_student_create_step2(name=name)
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

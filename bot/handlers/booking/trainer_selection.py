@@ -43,7 +43,7 @@ async def _handle_trainer_selection_for_booking(
 
         assert court_id is not None
         court_obj = deps.court_repo.get(court_id)
-        court_name = court_obj.name if court_obj else 'Неизвестный корт'
+        court_name = court_obj.name if court_obj else msgs.unknown_court
 
         now = now_kiev()
         calendar_markup = _create_booking_calendar(now.year, now.month, court_id, trainer_id, deps)

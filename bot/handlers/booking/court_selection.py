@@ -20,7 +20,7 @@ async def _handle_court_selection_for_booking(
 
     try:
         court = deps.court_repo.get(court_id)
-        court_name = court.name if court else 'Неизвестный корт'
+        court_name = court.name if court else msgs.unknown_court
 
         user_trainer = deps.trainer_repo.get_by_telegram_id(user_id)
         if user_trainer:

@@ -57,14 +57,14 @@ async def _handle_admin_edit_trainer_description_input(
 
         text = msgs.admin_trainer_updated(name=trainer.name)
         keyboard = [
-            [InlineKeyboardButton('✏️ Редактировать ещё', callback_data='admin_edit_trainer')],
-            [InlineKeyboardButton('◀️ К тренерам', callback_data='admin_trainers')],
+            [InlineKeyboardButton(msgs.btn_edit_another, callback_data='admin_edit_trainer')],
+            [InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(text, reply_markup=reply_markup)
 
     except Exception:
         logger.exception('Failed to edit trainer')
-        keyboard = [[InlineKeyboardButton('◀️ К тренерам', callback_data='admin_trainers')]]
+        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(msgs.admin_trainer_update_error, reply_markup=reply_markup)

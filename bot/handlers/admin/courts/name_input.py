@@ -16,9 +16,9 @@ async def _handle_admin_court_name_input(update: Update, context: ContextTypes.D
     deps = get_deps(context)
 
     if len(name) < 1 or len(name) > 100:
-        text = '❌ Название корта должно быть от 1 до 100 символов. Попробуйте снова.'
+        text = msgs.admin_court_name_too_long
         keyboard = [
-            [InlineKeyboardButton('🔄 Попробовать снова', callback_data='admin_create_court')],
+            [InlineKeyboardButton(msgs.btn_retry, callback_data='admin_create_court')],
             [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_courts')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -30,18 +30,13 @@ async def _handle_admin_court_name_input(update: Update, context: ContextTypes.D
     context.user_data['admin_state'] = 'awaiting_court_description'
 
     location_id = context.user_data.get('admin_court_location_id')
-    location_name = 'Не указана'
+    location_name = msgs.not_specified
     if location_id:
         location = deps.location_repo.get(location_id)
         if location:
             location_name = location.name
 
-    text = f"""🎾 Создание корта
-
-📍 Локация: {location_name}
-Название: {name}
-
-Шаг 3/3: Введите описание корта (или отправьте "-" чтобы пропустить):"""
+    text = msgs.admin_court_create_step3(location_name=location_name, court_name=name)
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_courts')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

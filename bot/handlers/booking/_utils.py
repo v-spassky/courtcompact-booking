@@ -7,6 +7,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot.deps import Deps
 from config.settings import now_kiev
+from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +49,7 @@ def _check_date_availability(date: DateType, court_id: str, trainer_id: str | No
 def _create_booking_calendar(
     year: int, month: int, court_id: str, trainer_id: str | None, deps: Deps
 ) -> InlineKeyboardMarkup:
+    msgs = get_messages()
     keyboard = []
 
     court_id_short = str(court_id)[:8]
@@ -56,8 +58,7 @@ def _create_booking_calendar(
     month_name = cal.month_name[month]
     keyboard.append([InlineKeyboardButton(f'{month_name} {year}', callback_data='ignore')])
 
-    day_names = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
-    keyboard.append([InlineKeyboardButton(day, callback_data='ignore') for day in day_names])
+    keyboard.append([InlineKeyboardButton(day, callback_data='ignore') for day in msgs.day_names])
 
     month_calendar = cal.monthcalendar(year, month)
     today = now_kiev().date()
@@ -92,7 +93,7 @@ def _create_booking_calendar(
     else:
         nav_row.append(InlineKeyboardButton(' ', callback_data='ignore'))
 
-    nav_row.append(InlineKeyboardButton('🏠 Меню', callback_data='main_menu'))
+    nav_row.append(InlineKeyboardButton(msgs.btn_menu, callback_data='main_menu'))
 
     next_month = month + 1 if month < 12 else 1
     next_year = year if month < 12 else year + 1

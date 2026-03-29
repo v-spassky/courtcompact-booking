@@ -33,7 +33,7 @@ async def _handle_admin_delete_trainer_execute(update: Update, context: ContextT
     if not trainer:
         keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_trainers')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.callback_query.edit_message_text('❌ Тренер не найден.', reply_markup=reply_markup)
+        await update.callback_query.edit_message_text(msgs.admin_trainer_not_found, reply_markup=reply_markup)
         return
 
     try:
@@ -42,12 +42,12 @@ async def _handle_admin_delete_trainer_execute(update: Update, context: ContextT
         _log_user_action(update.effective_user, f'deleted trainer: {trainer_name}')
 
         text = msgs.admin_trainer_deleted(name=trainer_name)
-        keyboard = [[InlineKeyboardButton('◀️ К тренерам', callback_data='admin_trainers')]]
+        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.callback_query.edit_message_text(text, reply_markup=reply_markup)
 
     except Exception:
         logger.exception('Failed to delete trainer')
-        keyboard = [[InlineKeyboardButton('◀️ К тренерам', callback_data='admin_trainers')]]
+        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.callback_query.edit_message_text(msgs.admin_trainer_delete_error, reply_markup=reply_markup)

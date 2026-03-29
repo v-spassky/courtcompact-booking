@@ -24,9 +24,7 @@ async def _handle_admin_create_trainer_start(update: Update, context: ContextTyp
     assert context.user_data is not None
     context.user_data['admin_state'] = 'awaiting_trainer_name'
 
-    text = """👨‍🏫 Создание тренера
-
-Шаг 1/4: Введите имя тренера:"""
+    text = msgs.admin_trainer_create_step1()
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

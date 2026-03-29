@@ -25,9 +25,9 @@ async def _handle_admin_student_phone_input(update: Update, context: ContextType
 
     if not phone or phone == '-':
         context.user_data.pop('admin_state', None)
-        text = '❌ Номер телефона обязателен для ученика.'
+        text = msgs.admin_student_phone_required
         keyboard = [
-            [InlineKeyboardButton('🔄 Попробовать снова', callback_data='admin_create_student')],
+            [InlineKeyboardButton(msgs.btn_retry, callback_data='admin_create_student')],
             [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -38,7 +38,7 @@ async def _handle_admin_student_phone_input(update: Update, context: ContextType
     if existing:
         _clear_admin_state(context)
         keyboard = [
-            [InlineKeyboardButton('🔄 Попробовать снова', callback_data='admin_create_student')],
+            [InlineKeyboardButton(msgs.btn_retry, callback_data='admin_create_student')],
             [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -60,17 +60,17 @@ async def _handle_admin_student_phone_input(update: Update, context: ContextType
             _log_user_action(update.effective_user, f'created student: {student_name}')
 
         text = msgs.admin_student_created(name=student_name)
-        text += f'\n📱 Телефон: {phone}'
+        text += msgs.admin_student_phone_line(phone=phone)
 
         keyboard = [
-            [InlineKeyboardButton('➕ Создать ещё', callback_data='admin_create_student')],
-            [InlineKeyboardButton('◀️ К ученикам', callback_data='admin_students')],
+            [InlineKeyboardButton(msgs.btn_create_another, callback_data='admin_create_student')],
+            [InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(text, reply_markup=reply_markup)
 
     except Exception:
         logger.exception('Failed to create student')
-        keyboard = [[InlineKeyboardButton('◀️ К ученикам', callback_data='admin_students')]]
+        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(msgs.admin_student_create_error, reply_markup=reply_markup)

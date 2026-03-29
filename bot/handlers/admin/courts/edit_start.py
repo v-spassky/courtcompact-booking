@@ -34,7 +34,7 @@ async def _handle_admin_edit_court_start(update: Update, context: ContextTypes.D
     if not court:
         keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.callback_query.edit_message_text('❌ Корт не найден.', reply_markup=reply_markup)
+        await update.callback_query.edit_message_text(msgs.admin_court_not_found, reply_markup=reply_markup)
         return
 
     _clear_admin_state(context)
@@ -42,13 +42,7 @@ async def _handle_admin_edit_court_start(update: Update, context: ContextTypes.D
     context.user_data['admin_court_id'] = str(court.id)
     context.user_data['admin_state'] = 'awaiting_edit_court_name'
 
-    desc_text = court.description if court.description else '(не указано)'
-    text = f"""✏️ Редактирование корта
-
-Текущее название: {court.name}
-Текущее описание: {desc_text}
-
-Шаг 1/2: Введите новое название (или "-" чтобы оставить текущее):"""
+    text = msgs.admin_court_edit_step1(name=court.name, description=court.description)
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_courts')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

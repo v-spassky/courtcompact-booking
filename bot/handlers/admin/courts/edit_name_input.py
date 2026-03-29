@@ -27,7 +27,7 @@ async def _handle_admin_edit_court_name_input(update: Update, context: ContextTy
 
     if name.strip() != '-':
         if len(name) < 1 or len(name) > 100:
-            text = '❌ Название должно быть от 1 до 100 символов. Попробуйте снова.'
+            text = msgs.admin_court_name_too_long_edit
             keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_courts')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await update.message.reply_text(text, reply_markup=reply_markup)
@@ -39,13 +39,7 @@ async def _handle_admin_edit_court_name_input(update: Update, context: ContextTy
     context.user_data['admin_state'] = 'awaiting_edit_court_description'
 
     new_name = context.user_data['admin_court_name']
-    desc_text = court.description if court.description else '(не указано)'
-    text = f"""✏️ Редактирование корта
-
-Новое название: {new_name}
-Текущее описание: {desc_text}
-
-Шаг 2/2: Введите новое описание (или "-" чтобы оставить текущее, или "--" чтобы удалить):"""
+    text = msgs.admin_court_edit_step2(name=new_name, description=court.description)
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_courts')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

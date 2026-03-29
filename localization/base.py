@@ -293,6 +293,51 @@ class Messages(ABC):
     def generic_error(self) -> str: ...
 
     # -------------------------------------------------------------------------
+    # Shared / Navigation extras
+    # -------------------------------------------------------------------------
+
+    @property
+    @abstractmethod
+    def day_names(self) -> list[str]: ...
+
+    @property
+    @abstractmethod
+    def btn_menu(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def unknown_court(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def unknown_entity(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def fallback_student_name(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def fallback_trainer_name(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def not_specified(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def schedule_select_date(self) -> str: ...
+
+    @abstractmethod
+    def booking_detail_trainer(self, name: str) -> str: ...
+
+    @abstractmethod
+    def booking_detail_notes(self, notes: str) -> str: ...
+
+    @abstractmethod
+    def booking_detail_court(self, name: str) -> str: ...
+
+    # -------------------------------------------------------------------------
     # Admin — shared
     # -------------------------------------------------------------------------
 
@@ -339,6 +384,82 @@ class Messages(ABC):
     @property
     @abstractmethod
     def btn_confirm_delete(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_back_to_courts(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_back_to_trainers_list(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_back_to_locations(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_back_to_students(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_create_another(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_edit_another(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_retry(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_add_student(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_edit_student(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_delete_student(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_admin_create_court(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_admin_edit_court(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_admin_delete_court(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_admin_create_trainer(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_admin_edit_trainer(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_admin_delete_trainer(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_admin_create_location(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_admin_edit_location(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_admin_delete_location(self) -> str: ...
 
     # -------------------------------------------------------------------------
     # Admin — courts
@@ -406,6 +527,48 @@ class Messages(ABC):
     @property
     @abstractmethod
     def admin_court_delete_error(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def admin_court_no_locations(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def btn_create_location(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def admin_court_not_found(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def admin_court_location_not_found(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def admin_court_name_too_long(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def admin_court_name_too_long_edit(self) -> str: ...
+
+    @abstractmethod
+    def admin_court_create_step2(self, location_name: str) -> str: ...
+
+    @abstractmethod
+    def admin_court_create_step3(self, location_name: str, court_name: str) -> str: ...
+
+    @abstractmethod
+    def admin_court_edit_step1(self, name: str, description: str | None) -> str: ...
+
+    @abstractmethod
+    def admin_court_edit_step2(self, name: str, description: str | None) -> str: ...
+
+    @abstractmethod
+    def admin_court_location_line(self, name: str) -> str: ...
+
+    @abstractmethod
+    def admin_court_description_line(self, desc: str) -> str: ...
 
     # -------------------------------------------------------------------------
     # Admin — trainers
@@ -478,6 +641,53 @@ class Messages(ABC):
     @abstractmethod
     def admin_trainer_delete_error(self) -> str: ...
 
+    @property
+    @abstractmethod
+    def admin_trainer_not_found(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def admin_trainer_name_too_long(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def admin_trainer_name_too_long_edit(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def admin_trainer_id_not_a_number(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def admin_trainer_id_not_a_number_edit(self) -> str: ...
+
+    @abstractmethod
+    def admin_trainer_id_exists(self, telegram_id: int, name: str) -> str: ...
+
+    @abstractmethod
+    def admin_trainer_id_taken(self, name: str) -> str: ...
+
+    @abstractmethod
+    def admin_trainer_description_line(self, desc: str) -> str: ...
+
+    @abstractmethod
+    def admin_trainer_create_step1(self) -> str: ...
+
+    @abstractmethod
+    def admin_trainer_create_step2(self, name: str) -> str: ...
+
+    @abstractmethod
+    def admin_trainer_create_step3(self, name: str, telegram_id: int) -> str: ...
+
+    @abstractmethod
+    def admin_trainer_edit_step1(self, name: str, telegram_id: int, description: str | None) -> str: ...
+
+    @abstractmethod
+    def admin_trainer_edit_step2(self, new_name: str, telegram_id: int) -> str: ...
+
+    @abstractmethod
+    def admin_trainer_edit_step3(self, new_name: str, new_telegram_id: int, description: str | None) -> str: ...
+
     # -------------------------------------------------------------------------
     # Admin — locations
     # -------------------------------------------------------------------------
@@ -541,6 +751,33 @@ class Messages(ABC):
     @abstractmethod
     def admin_location_delete_error(self) -> str: ...
 
+    @property
+    @abstractmethod
+    def admin_location_not_found(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def admin_location_name_too_long(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def admin_location_name_too_long_edit(self) -> str: ...
+
+    @abstractmethod
+    def admin_location_courts_warning(self, count: int) -> str: ...
+
+    @abstractmethod
+    def admin_location_create_step1(self) -> str: ...
+
+    @abstractmethod
+    def admin_location_create_step2(self, name: str) -> str: ...
+
+    @abstractmethod
+    def admin_location_edit_step1(self, name: str, maps_link: str | None) -> str: ...
+
+    @abstractmethod
+    def admin_location_edit_step2(self, new_name: str, maps_link: str | None) -> str: ...
+
     # -------------------------------------------------------------------------
     # Admin — students
     # -------------------------------------------------------------------------
@@ -603,3 +840,41 @@ class Messages(ABC):
     @property
     @abstractmethod
     def admin_student_delete_error(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def admin_student_not_found(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def admin_student_name_empty(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def admin_student_phone_required(self) -> str: ...
+
+    @abstractmethod
+    def admin_student_phone_taken(self, name: str) -> str: ...
+
+    @abstractmethod
+    def admin_student_phone_line(self, phone: str) -> str: ...
+
+    @property
+    @abstractmethod
+    def student_status_authorized(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def student_status_unauthorized(self) -> str: ...
+
+    @abstractmethod
+    def admin_student_create_step1(self) -> str: ...
+
+    @abstractmethod
+    def admin_student_create_step2(self, name: str) -> str: ...
+
+    @abstractmethod
+    def admin_student_edit_step1(self, name: str, phone: str, status: str) -> str: ...
+
+    @abstractmethod
+    def admin_student_edit_step2(self, new_name: str, phone: str) -> str: ...

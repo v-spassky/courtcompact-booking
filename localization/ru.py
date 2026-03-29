@@ -347,6 +347,51 @@ class RussianMessages(Messages):
         return '❌ Ошибка. Пожалуйста, попробуйте снова.'
 
     # -------------------------------------------------------------------------
+    # Shared / Navigation extras
+    # -------------------------------------------------------------------------
+
+    @property
+    def day_names(self) -> list[str]:
+        return ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+
+    @property
+    def btn_menu(self) -> str:
+        return '🏠 Меню'
+
+    @property
+    def unknown_court(self) -> str:
+        return 'Неизвестный корт'
+
+    @property
+    def unknown_entity(self) -> str:
+        return 'Неизвестный'
+
+    @property
+    def fallback_student_name(self) -> str:
+        return 'Студент'
+
+    @property
+    def fallback_trainer_name(self) -> str:
+        return 'Тренер'
+
+    @property
+    def not_specified(self) -> str:
+        return '(не указано)'
+
+    @property
+    def schedule_select_date(self) -> str:
+        return '📅 Выберите дату для просмотра расписания:'
+
+    def booking_detail_trainer(self, name: str) -> str:
+        return f'👨\u200d🏫 Тренер: {name}\n'
+
+    def booking_detail_notes(self, notes: str) -> str:
+        return f'💬 Заметки: {notes}\n'
+
+    def booking_detail_court(self, name: str) -> str:
+        return f'🎾 Корт: {name}\n'
+
+    # -------------------------------------------------------------------------
     # Admin — shared
     # -------------------------------------------------------------------------
 
@@ -393,6 +438,82 @@ class RussianMessages(Messages):
     @property
     def btn_confirm_delete(self) -> str:
         return '🗑️ Да, удалить'
+
+    @property
+    def btn_back_to_courts(self) -> str:
+        return '◀️ К кортам'
+
+    @property
+    def btn_back_to_trainers_list(self) -> str:
+        return '◀️ К тренерам'
+
+    @property
+    def btn_back_to_locations(self) -> str:
+        return '◀️ К локациям'
+
+    @property
+    def btn_back_to_students(self) -> str:
+        return '◀️ К ученикам'
+
+    @property
+    def btn_create_another(self) -> str:
+        return '➕ Создать ещё'
+
+    @property
+    def btn_edit_another(self) -> str:
+        return '✏️ Редактировать ещё'
+
+    @property
+    def btn_retry(self) -> str:
+        return '🔄 Попробовать снова'
+
+    @property
+    def btn_add_student(self) -> str:
+        return '➕ Добавить ученика'
+
+    @property
+    def btn_edit_student(self) -> str:
+        return '✏️ Редактировать ученика'
+
+    @property
+    def btn_delete_student(self) -> str:
+        return '🗑️ Удалить ученика'
+
+    @property
+    def btn_admin_create_court(self) -> str:
+        return '➕ Создать корт'
+
+    @property
+    def btn_admin_edit_court(self) -> str:
+        return '✏️ Изменить корт'
+
+    @property
+    def btn_admin_delete_court(self) -> str:
+        return '🗑️ Удалить корт'
+
+    @property
+    def btn_admin_create_trainer(self) -> str:
+        return '➕ Создать тренера'
+
+    @property
+    def btn_admin_edit_trainer(self) -> str:
+        return '✏️ Изменить тренера'
+
+    @property
+    def btn_admin_delete_trainer(self) -> str:
+        return '🗑️ Удалить тренера'
+
+    @property
+    def btn_admin_create_location(self) -> str:
+        return '➕ Создать локацию'
+
+    @property
+    def btn_admin_edit_location(self) -> str:
+        return '✏️ Изменить локацию'
+
+    @property
+    def btn_admin_delete_location(self) -> str:
+        return '🗑️ Удалить локацию'
 
     # -------------------------------------------------------------------------
     # Admin — courts
@@ -460,6 +581,62 @@ class RussianMessages(Messages):
     @property
     def admin_court_delete_error(self) -> str:
         return '❌ Не удалось удалить корт. Пожалуйста, попробуйте снова.'
+
+    @property
+    def admin_court_no_locations(self) -> str:
+        return '❌ Сначала создайте хотя бы одну локацию!'
+
+    @property
+    def btn_create_location(self) -> str:
+        return '➕ Создать локацию'
+
+    @property
+    def admin_court_not_found(self) -> str:
+        return '❌ Корт не найден.'
+
+    @property
+    def admin_court_location_not_found(self) -> str:
+        return '❌ Локация не найдена.'
+
+    @property
+    def admin_court_name_too_long(self) -> str:
+        return '❌ Название корта должно быть от 1 до 100 символов. Попробуйте снова.'
+
+    @property
+    def admin_court_name_too_long_edit(self) -> str:
+        return '❌ Название должно быть от 1 до 100 символов. Попробуйте снова.'
+
+    def admin_court_create_step2(self, location_name: str) -> str:
+        return (
+            f'🎾 Создание корта\n\n📍 Локация: {location_name}\n\n'
+            'Шаг 2/3: Введите название корта (например: "Корт 1" или "Центральный корт"):'
+        )
+
+    def admin_court_create_step3(self, location_name: str, court_name: str) -> str:
+        return (
+            f'🎾 Создание корта\n\n📍 Локация: {location_name}\nНазвание: {court_name}\n\n'
+            'Шаг 3/3: Введите описание корта (или отправьте "-" чтобы пропустить):'
+        )
+
+    def admin_court_edit_step1(self, name: str, description: str | None) -> str:
+        desc_text = description if description else self.not_specified
+        return (
+            f'✏️ Редактирование корта\n\nТекущее название: {name}\nТекущее описание: {desc_text}\n\n'
+            'Шаг 1/2: Введите новое название (или "-" чтобы оставить текущее):'
+        )
+
+    def admin_court_edit_step2(self, name: str, description: str | None) -> str:
+        desc_text = description if description else self.not_specified
+        return (
+            f'✏️ Редактирование корта\n\nНовое название: {name}\nТекущее описание: {desc_text}\n\n'
+            'Шаг 2/2: Введите новое описание (или "-" чтобы оставить текущее, или "--" чтобы удалить):'
+        )
+
+    def admin_court_location_line(self, name: str) -> str:
+        return f'\n📍 Локация: {name}'
+
+    def admin_court_description_line(self, desc: str) -> str:
+        return f'\n📝 Описание: {desc}'
 
     # -------------------------------------------------------------------------
     # Admin — trainers
@@ -532,6 +709,73 @@ class RussianMessages(Messages):
     def admin_trainer_delete_error(self) -> str:
         return '❌ Не удалось удалить тренера. Пожалуйста, попробуйте снова.'
 
+    @property
+    def admin_trainer_not_found(self) -> str:
+        return '❌ Тренер не найден.'
+
+    @property
+    def admin_trainer_name_too_long(self) -> str:
+        return '❌ Имя тренера должно быть от 1 до 100 символов. Попробуйте снова.'
+
+    @property
+    def admin_trainer_name_too_long_edit(self) -> str:
+        return '❌ Имя должно быть от 1 до 100 символов. Попробуйте снова.'
+
+    @property
+    def admin_trainer_id_not_a_number(self) -> str:
+        return '❌ Telegram ID должен быть числом. Попробуйте снова.'
+
+    @property
+    def admin_trainer_id_not_a_number_edit(self) -> str:
+        return '❌ Telegram ID должен быть числом.'
+
+    def admin_trainer_id_exists(self, telegram_id: int, name: str) -> str:
+        return f'❌ Тренер с Telegram ID {telegram_id} уже существует ({name}).'
+
+    def admin_trainer_id_taken(self, name: str) -> str:
+        return f'❌ Этот Telegram ID уже используется тренером {name}.'
+
+    def admin_trainer_description_line(self, desc: str) -> str:
+        return f'📝 Описание: {desc}\n'
+
+    def admin_trainer_create_step1(self) -> str:
+        return '👨\u200d🏫 Создание тренера\n\nШаг 1/4: Введите имя тренера:'
+
+    def admin_trainer_create_step2(self, name: str) -> str:
+        return (
+            f'👨\u200d🏫 Создание тренера\n\nИмя: {name}\n\n'
+            'Шаг 2/4: Введите Telegram ID тренера (число):\n\n'
+            '💡 Тренер может узнать свой ID, написав боту @userinfobot'
+        )
+
+    def admin_trainer_create_step3(self, name: str, telegram_id: int) -> str:
+        return (
+            f'👨\u200d🏫 Создание тренера\n\nИмя: {name}\nTelegram ID: {telegram_id}\n\n'
+            'Шаг 3/3: Введите описание тренера (или "-" чтобы пропустить):'
+        )
+
+    def admin_trainer_edit_step1(self, name: str, telegram_id: int, description: str | None) -> str:
+        desc_text = description if description else self.not_specified
+        return (
+            f'✏️ Редактирование тренера\n\nТекущие данные:\n'
+            f'👨\u200d🏫 Имя: {name}\n🆔 Telegram ID: {telegram_id}\n📝 Описание: {desc_text}\n\n'
+            'Шаг 1/3: Введите новое имя (или "-" чтобы оставить текущее):'
+        )
+
+    def admin_trainer_edit_step2(self, new_name: str, telegram_id: int) -> str:
+        return (
+            f'✏️ Редактирование тренера\n\nНовое имя: {new_name}\nТекущий Telegram ID: {telegram_id}\n\n'
+            'Шаг 2/3: Введите новый Telegram ID (или "-" чтобы оставить текущий):'
+        )
+
+    def admin_trainer_edit_step3(self, new_name: str, new_telegram_id: int, description: str | None) -> str:
+        desc_text = description if description else self.not_specified
+        return (
+            f'✏️ Редактирование тренера\n\nИмя: {new_name}\nTelegram ID: {new_telegram_id}\n'
+            f'Текущее описание: {desc_text}\n\n'
+            'Шаг 3/3: Введите новое описание (или "-" чтобы оставить, "--" чтобы очистить):'
+        )
+
     # -------------------------------------------------------------------------
     # Admin — locations
     # -------------------------------------------------------------------------
@@ -595,6 +839,45 @@ class RussianMessages(Messages):
     def admin_location_delete_error(self) -> str:
         return '❌ Не удалось удалить локацию. Пожалуйста, попробуйте снова.'
 
+    @property
+    def admin_location_not_found(self) -> str:
+        return '❌ Локация не найдена.'
+
+    @property
+    def admin_location_name_too_long(self) -> str:
+        return '❌ Название локации должно быть от 1 до 100 символов. Попробуйте снова.'
+
+    @property
+    def admin_location_name_too_long_edit(self) -> str:
+        return '❌ Название должно быть от 1 до 100 символов. Попробуйте снова.'
+
+    def admin_location_courts_warning(self, count: int) -> str:
+        return f'\n\n⚠️ К этой локации привязано {count} корт(ов)!'
+
+    def admin_location_create_step1(self) -> str:
+        return '📍 Создание локации\n\nШаг 1/2: Введите название локации (например: "Теннисный клуб Центральный"):'
+
+    def admin_location_create_step2(self, name: str) -> str:
+        return (
+            f'📍 Создание локации\n\nНазвание: {name}\n\n'
+            'Шаг 2/2: Отправьте ссылку на Google Maps или "-" чтобы пропустить:\n\n'
+            '💡 Откройте нужную локацию в Google Maps и скопируйте ссылку из адресной строки'
+        )
+
+    def admin_location_edit_step1(self, name: str, maps_link: str | None) -> str:
+        link_text = maps_link if maps_link else self.not_specified
+        return (
+            f'✏️ Редактирование локации\n\nТекущее название: {name}\nGoogle Maps: {link_text}\n\n'
+            'Шаг 1/2: Введите новое название (или "-" чтобы оставить текущее):'
+        )
+
+    def admin_location_edit_step2(self, new_name: str, maps_link: str | None) -> str:
+        link_text = maps_link if maps_link else self.not_specified
+        return (
+            f'✏️ Редактирование локации\n\nНовое название: {new_name}\nТекущая ссылка: {link_text}\n\n'
+            'Шаг 2/2: Отправьте новую ссылку Google Maps (или "-" оставить, "--" очистить):'
+        )
+
     # -------------------------------------------------------------------------
     # Admin — students
     # -------------------------------------------------------------------------
@@ -657,3 +940,50 @@ class RussianMessages(Messages):
     @property
     def admin_student_delete_error(self) -> str:
         return '❌ Не удалось удалить ученика. Пожалуйста, попробуйте снова.'
+
+    @property
+    def admin_student_not_found(self) -> str:
+        return '❌ Ученик не найден.'
+
+    @property
+    def admin_student_name_empty(self) -> str:
+        return '❌ Имя ученика не может быть пустым.'
+
+    @property
+    def admin_student_phone_required(self) -> str:
+        return '❌ Номер телефона обязателен для ученика.'
+
+    def admin_student_phone_taken(self, name: str) -> str:
+        return f'❌ Номер телефона уже используется учеником: {name}'
+
+    def admin_student_phone_line(self, phone: str) -> str:
+        return f'\n📱 Телефон: {phone}'
+
+    @property
+    def student_status_authorized(self) -> str:
+        return 'Авторизован'
+
+    @property
+    def student_status_unauthorized(self) -> str:
+        return 'Не авторизован'
+
+    def admin_student_create_step1(self) -> str:
+        return '👥 Создание ученика\n\nШаг 1/2: Введите имя ученика:'
+
+    def admin_student_create_step2(self, name: str) -> str:
+        return (
+            f'👥 Создание ученика\n\nИмя: {name}\n\n'
+            'Шаг 2/2: Введите номер телефона ученика (например, +7 999 123 45 67):'
+        )
+
+    def admin_student_edit_step1(self, name: str, phone: str, status: str) -> str:
+        return (
+            f'✏️ Редактирование ученика\n\nТекущее имя: {name}\nТелефон: {phone}\nСтатус: {status}\n\n'
+            'Шаг 1/2: Введите новое имя (или "-" чтобы оставить текущее):'
+        )
+
+    def admin_student_edit_step2(self, new_name: str, phone: str) -> str:
+        return (
+            f'✏️ Редактирование ученика\n\nНовое имя: {new_name}\nТекущий телефон: {phone}\n\n'
+            'Шаг 2/2: Введите новый телефон (или "-" чтобы оставить текущий):'
+        )

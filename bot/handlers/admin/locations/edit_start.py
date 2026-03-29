@@ -34,7 +34,7 @@ async def _handle_admin_edit_location_start(update: Update, context: ContextType
     if not location:
         keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_locations')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.callback_query.edit_message_text('❌ Локация не найдена.', reply_markup=reply_markup)
+        await update.callback_query.edit_message_text(msgs.admin_location_not_found, reply_markup=reply_markup)
         return
 
     _clear_admin_state(context)
@@ -42,14 +42,7 @@ async def _handle_admin_edit_location_start(update: Update, context: ContextType
     context.user_data['admin_location_id'] = str(location.id)
     context.user_data['admin_state'] = 'awaiting_edit_location_name'
 
-    maps_link = location.google_maps_link if location.google_maps_link else '(не указана)'
-
-    text = f"""✏️ Редактирование локации
-
-Текущее название: {location.name}
-Google Maps: {maps_link}
-
-Шаг 1/2: Введите новое название (или "-" чтобы оставить текущее):"""
+    text = msgs.admin_location_edit_step1(name=location.name, maps_link=location.google_maps_link)
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_locations')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

@@ -33,7 +33,7 @@ async def _handle_admin_delete_court_execute(update: Update, context: ContextTyp
     if not court:
         keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.callback_query.edit_message_text('❌ Корт не найден.', reply_markup=reply_markup)
+        await update.callback_query.edit_message_text(msgs.admin_court_not_found, reply_markup=reply_markup)
         return
 
     try:
@@ -43,12 +43,12 @@ async def _handle_admin_delete_court_execute(update: Update, context: ContextTyp
         _log_user_action(update.effective_user, f'deleted court: {court_name}')
 
         text = msgs.admin_court_deleted(name=court_name)
-        keyboard = [[InlineKeyboardButton('◀️ К кортам', callback_data='admin_courts')]]
+        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_courts, callback_data='admin_courts')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.callback_query.edit_message_text(text, reply_markup=reply_markup)
 
     except Exception:
         logger.exception('Failed to delete court')
-        keyboard = [[InlineKeyboardButton('◀️ К кортам', callback_data='admin_courts')]]
+        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_courts, callback_data='admin_courts')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.callback_query.edit_message_text(msgs.admin_court_delete_error, reply_markup=reply_markup)

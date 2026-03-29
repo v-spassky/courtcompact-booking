@@ -30,7 +30,7 @@ async def _handle_admin_edit_student_phone_input(
         _clear_admin_state(context)
         keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text('❌ Ученик не найден.', reply_markup=reply_markup)
+        await update.message.reply_text(msgs.admin_student_not_found, reply_markup=reply_markup)
         return
 
     new_phone = phone if phone and phone != '-' else student.phone
@@ -39,8 +39,8 @@ async def _handle_admin_edit_student_phone_input(
         existing = deps.student_repo.get_by_phone(new_phone)
         if existing and str(existing.id) != student_id:
             _clear_admin_state(context)
-            text = f'❌ Номер телефона уже используется учеником: {existing.name}'
-            keyboard = [[InlineKeyboardButton('◀️ К ученикам', callback_data='admin_students')]]
+            text = msgs.admin_student_phone_taken(name=existing.name)
+            keyboard = [[InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await update.message.reply_text(text, reply_markup=reply_markup)
             return
@@ -58,14 +58,14 @@ async def _handle_admin_edit_student_phone_input(
         text = msgs.admin_student_updated(name=student.name)
 
         keyboard = [
-            [InlineKeyboardButton('✏️ Редактировать ещё', callback_data='admin_edit_student')],
-            [InlineKeyboardButton('◀️ К ученикам', callback_data='admin_students')],
+            [InlineKeyboardButton(msgs.btn_edit_another, callback_data='admin_edit_student')],
+            [InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(text, reply_markup=reply_markup)
 
     except Exception:
         logger.exception('Failed to edit student')
-        keyboard = [[InlineKeyboardButton('◀️ К ученикам', callback_data='admin_students')]]
+        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(msgs.admin_student_update_error, reply_markup=reply_markup)

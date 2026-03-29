@@ -42,11 +42,11 @@ async def _handle_admin_trainer_description_input(
         text = msgs.admin_trainer_created(name=trainer_name)
         text += f'\n🆔 Telegram ID: {telegram_id}\n'
         if description:
-            text += f'📝 Описание: {description}\n'
+            text += msgs.admin_trainer_description_line(desc=description)
 
         keyboard = [
-            [InlineKeyboardButton('➕ Создать ещё', callback_data='admin_create_trainer')],
-            [InlineKeyboardButton('◀️ К тренерам', callback_data='admin_trainers')],
+            [InlineKeyboardButton(msgs.btn_create_another, callback_data='admin_create_trainer')],
+            [InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')],
             [InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -54,6 +54,6 @@ async def _handle_admin_trainer_description_input(
 
     except Exception:
         logger.exception('Failed to create trainer')
-        keyboard = [[InlineKeyboardButton('◀️ К тренерам', callback_data='admin_trainers')]]
+        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(msgs.admin_trainer_create_error, reply_markup=reply_markup)

@@ -23,7 +23,7 @@ async def _handle_court_schedule_for_day(
     try:
         time_slots = deps.schedule_service.get_all_time_slots_for_date(date)
         court = deps.court_repo.get(court_id)
-        court_name = court.name if court else 'Неизвестный корт'
+        court_name = court.name if court else msgs.unknown_court
 
         court_slots = [
             slot for slot in time_slots if str(slot.court_id) == court_id and slot.start_time.date() == date.date()

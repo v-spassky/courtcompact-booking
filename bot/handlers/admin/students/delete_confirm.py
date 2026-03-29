@@ -32,7 +32,7 @@ async def _handle_admin_delete_student_confirm(update: Update, context: ContextT
     if not student:
         keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.callback_query.edit_message_text('❌ Ученик не найден.', reply_markup=reply_markup)
+        await update.callback_query.edit_message_text(msgs.admin_student_not_found, reply_markup=reply_markup)
         return
 
     text = msgs.admin_student_confirm_delete(name=student.name)

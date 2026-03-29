@@ -36,14 +36,14 @@ async def _handle_admin_edit_trainer_id_input(update: Update, context: ContextTy
             telegram_id = int(id_text.strip())
             existing = deps.trainer_repo.get_by_telegram_id(telegram_id)
             if existing and str(existing.id) != trainer_id:
-                text = f'❌ Этот Telegram ID уже используется тренером {existing.name}.'
+                text = msgs.admin_trainer_id_taken(name=existing.name)
                 keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 await update.message.reply_text(text, reply_markup=reply_markup)
                 return
             context.user_data['admin_trainer_telegram_id'] = telegram_id
         except ValueError:
-            text = '❌ Telegram ID должен быть числом.'
+            text = msgs.admin_trainer_id_not_a_number_edit
             keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await update.message.reply_text(text, reply_markup=reply_markup)
@@ -53,15 +53,11 @@ async def _handle_admin_edit_trainer_id_input(update: Update, context: ContextTy
 
     context.user_data['admin_state'] = 'awaiting_edit_trainer_description'
 
-    desc_text = trainer.description if trainer.description else '(не указано)'
-
-    text = f"""✏️ Редактирование тренера
-
-Имя: {context.user_data['admin_trainer_name']}
-Telegram ID: {context.user_data['admin_trainer_telegram_id']}
-Текущее описание: {desc_text}
-
-Шаг 3/3: Введите новое описание (или "-" чтобы оставить, "--" чтобы очистить):"""
+    text = msgs.admin_trainer_edit_step3(
+        new_name=context.user_data['admin_trainer_name'],
+        new_telegram_id=context.user_data['admin_trainer_telegram_id'],
+        description=trainer.description,
+    )
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

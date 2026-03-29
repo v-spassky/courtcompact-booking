@@ -33,7 +33,7 @@ async def _handle_admin_edit_trainer_name_input(update: Update, context: Context
 
     if name.strip() != '-':
         if len(name) < 1 or len(name) > 100:
-            text = '❌ Имя должно быть от 1 до 100 символов. Попробуйте снова.'
+            text = msgs.admin_trainer_name_too_long_edit
             keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await update.message.reply_text(text, reply_markup=reply_markup)
@@ -44,12 +44,10 @@ async def _handle_admin_edit_trainer_name_input(update: Update, context: Context
 
     context.user_data['admin_state'] = 'awaiting_edit_trainer_telegram_id'
 
-    text = f"""✏️ Редактирование тренера
-
-Новое имя: {context.user_data['admin_trainer_name']}
-Текущий Telegram ID: {trainer.telegram_user_id}
-
-Шаг 2/3: Введите новый Telegram ID (или "-" чтобы оставить текущий):"""
+    text = msgs.admin_trainer_edit_step2(
+        new_name=context.user_data['admin_trainer_name'],
+        telegram_id=trainer.telegram_user_id,
+    )
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

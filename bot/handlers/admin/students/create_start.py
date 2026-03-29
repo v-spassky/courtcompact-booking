@@ -24,9 +24,7 @@ async def _handle_admin_create_student_start(update: Update, context: ContextTyp
     assert context.user_data is not None
     context.user_data['admin_state'] = 'awaiting_student_name'
 
-    text = """👥 Создание ученика
-
-Шаг 1/2: Введите имя ученика:"""
+    text = msgs.admin_student_create_step1()
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

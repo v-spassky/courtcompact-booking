@@ -33,7 +33,7 @@ async def _handle_admin_edit_student_start(update: Update, context: ContextTypes
     if not student:
         keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.callback_query.edit_message_text('❌ Ученик не найден.', reply_markup=reply_markup)
+        await update.callback_query.edit_message_text(msgs.admin_student_not_found, reply_markup=reply_markup)
         return
 
     _clear_admin_state(context)
@@ -41,14 +41,8 @@ async def _handle_admin_edit_student_start(update: Update, context: ContextTypes
     context.user_data['admin_student_id'] = str(student.id)
     context.user_data['admin_state'] = 'awaiting_edit_student_name'
 
-    status = 'Авторизован' if student.telegram_user_id else 'Не авторизован'
-    text = f"""✏️ Редактирование ученика
-
-Текущее имя: {student.name}
-Телефон: {student.phone}
-Статус: {status}
-
-Шаг 1/2: Введите новое имя (или "-" чтобы оставить текущее):"""
+    status = msgs.student_status_authorized if student.telegram_user_id else msgs.student_status_unauthorized
+    text = msgs.admin_student_edit_step1(name=student.name, phone=student.phone, status=status)
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

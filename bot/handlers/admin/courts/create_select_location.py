@@ -27,9 +27,9 @@ async def _handle_admin_create_court_select_location(update: Update, context: Co
     locations = deps.location_repo.get_active()
 
     if not locations:
-        text = '❌ Сначала создайте хотя бы одну локацию!'
+        text = msgs.admin_court_no_locations
         keyboard = [
-            [InlineKeyboardButton('➕ Создать локацию', callback_data='admin_create_location')],
+            [InlineKeyboardButton(msgs.btn_create_location, callback_data='admin_create_location')],
             [InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)

@@ -26,7 +26,7 @@ async def _handle_booking_cancellation(
             return
 
         court = deps.court_repo.get(booking.court_id)
-        court_name = court.name if court else 'Неизвестный корт'
+        court_name = court.name if court else msgs.unknown_court
         student = deps.student_repo.get(booking.student_id) if booking.student_id else None
         trainer = deps.trainer_repo.get(booking.trainer_id) if booking.trainer_id else None
 
@@ -52,7 +52,7 @@ async def _handle_booking_cancellation(
                 notify_keyboard = [[InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')]]
                 notify_markup = InlineKeyboardMarkup(notify_keyboard)
                 if is_student_cancelling and trainer and trainer.telegram_user_id != user_id:
-                    student_name = query.from_user.full_name if query.from_user else 'Студент'
+                    student_name = query.from_user.full_name if query.from_user else msgs.fallback_student_name
                     notify_text += msgs.booking_cancelled_by_student(student_name=student_name)
                     await context.bot.send_message(
                         chat_id=trainer.telegram_user_id, text=notify_text, reply_markup=notify_markup
@@ -63,7 +63,7 @@ async def _handle_booking_cancellation(
                     and student.telegram_user_id
                     and student.telegram_user_id != user_id
                 ):
-                    trainer_name = trainer.name if trainer else 'Тренер'
+                    trainer_name = trainer.name if trainer else msgs.fallback_trainer_name
                     notify_text += msgs.booking_cancelled_by_trainer(trainer_name=trainer_name)
                     await context.bot.send_message(
                         chat_id=student.telegram_user_id, text=notify_text, reply_markup=notify_markup

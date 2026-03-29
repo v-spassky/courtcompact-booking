@@ -14,9 +14,9 @@ async def _handle_admin_location_name_input(update: Update, context: ContextType
     msgs = get_messages()
 
     if len(name) < 1 or len(name) > 100:
-        text = '❌ Название локации должно быть от 1 до 100 символов. Попробуйте снова.'
+        text = msgs.admin_location_name_too_long
         keyboard = [
-            [InlineKeyboardButton('🔄 Попробовать снова', callback_data='admin_create_location')],
+            [InlineKeyboardButton(msgs.btn_retry, callback_data='admin_create_location')],
             [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_locations')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -27,13 +27,7 @@ async def _handle_admin_location_name_input(update: Update, context: ContextType
     context.user_data['admin_location_name'] = name
     context.user_data['admin_state'] = 'awaiting_location_maps_link'
 
-    text = f"""📍 Создание локации
-
-Название: {name}
-
-Шаг 2/2: Отправьте ссылку на Google Maps или "-" чтобы пропустить:
-
-💡 Откройте нужную локацию в Google Maps и скопируйте ссылку из адресной строки"""
+    text = msgs.admin_location_create_step2(name=name)
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_locations')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

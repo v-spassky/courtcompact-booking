@@ -64,7 +64,7 @@ async def _handle_view_trainer_schedule(update: Update, context: ContextTypes.DE
                 text += f'📆 {date_key.strftime("%d.%m.%Y (%a)")}\n'
                 for booking in sorted(bookings_by_date[date_key], key=lambda b: b.start_time):
                     court = deps.court_repo.get(booking.court_id)
-                    court_name = court.name if court else 'Неизвестный корт'
+                    court_name = court.name if court else msgs.unknown_court
                     time_range = f'{booking.start_time.strftime("%H:%M")}-{booking.end_time.strftime("%H:%M")}'
                     text += f'   • {time_range} - {court_name}\n'
                 text += '\n'

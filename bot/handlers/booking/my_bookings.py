@@ -40,18 +40,18 @@ async def _handle_my_bookings(update: Update, context: ContextTypes.DEFAULT_TYPE
         text = msgs.my_bookings_title
         for booking in sorted(future_bookings, key=lambda x: x.start_time):
             court = deps.court_repo.get(booking.court_id)
-            court_name = court.name if court else 'Неизвестный корт'
+            court_name = court.name if court else msgs.unknown_court
 
-            text += f'🎾 {court_name}\n'
+            text += msgs.booking_detail_court(name=court_name)
             text += f'📅 {booking.start_time.strftime("%d/%m/%Y %H:%M")} - {booking.end_time.strftime("%H:%M")}\n'
 
             if booking.trainer_id:
                 trainer = deps.trainer_repo.get(booking.trainer_id)
                 if trainer:
-                    text += f'👨‍🏫 Тренер: {trainer.name}\n'
+                    text += msgs.booking_detail_trainer(name=trainer.name)
 
             if booking.notes:
-                text += f'💬 Заметки: {booking.notes}\n'
+                text += msgs.booking_detail_notes(notes=booking.notes)
             text += f'🆔 ID: {str(booking.id)[:8]}\n\n'
 
         keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]

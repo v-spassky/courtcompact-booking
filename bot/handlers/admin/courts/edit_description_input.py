@@ -48,14 +48,14 @@ async def _handle_admin_edit_court_description_input(
 
         text = msgs.admin_court_updated(name=court.name)
         keyboard = [
-            [InlineKeyboardButton('✏️ Редактировать ещё', callback_data='admin_edit_court')],
-            [InlineKeyboardButton('◀️ К кортам', callback_data='admin_courts')],
+            [InlineKeyboardButton(msgs.btn_edit_another, callback_data='admin_edit_court')],
+            [InlineKeyboardButton(msgs.btn_back_to_courts, callback_data='admin_courts')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(text, reply_markup=reply_markup)
 
     except Exception:
         logger.exception('Failed to edit court')
-        keyboard = [[InlineKeyboardButton('◀️ К кортам', callback_data='admin_courts')]]
+        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_courts, callback_data='admin_courts')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(msgs.admin_court_update_error, reply_markup=reply_markup)

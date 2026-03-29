@@ -25,7 +25,7 @@ async def _handle_admin_edit_student_name_input(update: Update, context: Context
         _clear_admin_state(context)
         keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text('❌ Ученик не найден.', reply_markup=reply_markup)
+        await update.message.reply_text(msgs.admin_student_not_found, reply_markup=reply_markup)
         return
 
     if name and name != '-':
@@ -35,12 +35,7 @@ async def _handle_admin_edit_student_name_input(update: Update, context: Context
 
     context.user_data['admin_state'] = 'awaiting_edit_student_phone'
 
-    text = f"""✏️ Редактирование ученика
-
-Новое имя: {context.user_data['admin_student_name']}
-Текущий телефон: {student.phone}
-
-Шаг 2/2: Введите новый телефон (или "-" чтобы оставить текущий):"""
+    text = msgs.admin_student_edit_step2(new_name=context.user_data['admin_student_name'], phone=student.phone)
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

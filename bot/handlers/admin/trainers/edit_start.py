@@ -34,7 +34,7 @@ async def _handle_admin_edit_trainer_start(update: Update, context: ContextTypes
     if not trainer:
         keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_trainers')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.callback_query.edit_message_text('❌ Тренер не найден.', reply_markup=reply_markup)
+        await update.callback_query.edit_message_text(msgs.admin_trainer_not_found, reply_markup=reply_markup)
         return
 
     _clear_admin_state(context)
@@ -42,16 +42,11 @@ async def _handle_admin_edit_trainer_start(update: Update, context: ContextTypes
     context.user_data['admin_trainer_id'] = str(trainer.id)
     context.user_data['admin_state'] = 'awaiting_edit_trainer_name'
 
-    desc_text = trainer.description if trainer.description else '(не указано)'
-
-    text = f"""✏️ Редактирование тренера
-
-Текущие данные:
-👨‍🏫 Имя: {trainer.name}
-🆔 Telegram ID: {trainer.telegram_user_id}
-📝 Описание: {desc_text}
-
-Шаг 1/3: Введите новое имя (или "-" чтобы оставить текущее):"""
+    text = msgs.admin_trainer_edit_step1(
+        name=trainer.name,
+        telegram_id=trainer.telegram_user_id,
+        description=trainer.description,
+    )
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

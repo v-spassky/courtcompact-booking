@@ -23,7 +23,7 @@ async def _handle_court_schedule_for_week(
 
     try:
         court = deps.court_repo.get(court_id)
-        court_name = court.name if court else 'Неизвестный корт'
+        court_name = court.name if court else msgs.unknown_court
 
         all_slots = []
         for i in range(7):
@@ -59,13 +59,12 @@ async def _handle_court_schedule_for_week(
             if slot_date in slots_by_day:
                 slots_by_day[slot_date].append(slot)
 
-        day_names = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
         for i in range(7):
             day = start_of_week + timedelta(days=i)
             day_date = day.date()
             day_slots = slots_by_day.get(day_date, [])
 
-            day_name = day_names[day.weekday()]
+            day_name = msgs.day_names[day.weekday()]
 
             if not day_slots:
                 text += msgs.schedule_weekly_day_row(

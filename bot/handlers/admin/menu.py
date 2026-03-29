@@ -54,9 +54,9 @@ async def _handle_admin_courts_menu(update: Update, context: ContextTypes.DEFAUL
     text = msgs.admin_courts_menu(count=len(courts))
 
     keyboard = [
-        [InlineKeyboardButton(f'{msgs.btn_create} корт', callback_data='admin_create_court')],
-        [InlineKeyboardButton(f'{msgs.btn_edit} корт', callback_data='admin_edit_court')],
-        [InlineKeyboardButton(f'{msgs.btn_delete} корт', callback_data='admin_delete_court')],
+        [InlineKeyboardButton(msgs.btn_admin_create_court, callback_data='admin_create_court')],
+        [InlineKeyboardButton(msgs.btn_admin_edit_court, callback_data='admin_edit_court')],
+        [InlineKeyboardButton(msgs.btn_admin_delete_court, callback_data='admin_delete_court')],
         [InlineKeyboardButton(msgs.btn_back, callback_data='admin_menu')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -81,9 +81,9 @@ async def _handle_admin_trainers_menu(update: Update, context: ContextTypes.DEFA
     text = msgs.admin_trainers_menu(count=len(trainers))
 
     keyboard = [
-        [InlineKeyboardButton(f'{msgs.btn_create} тренера', callback_data='admin_create_trainer')],
-        [InlineKeyboardButton(f'{msgs.btn_edit} тренера', callback_data='admin_edit_trainer')],
-        [InlineKeyboardButton(f'{msgs.btn_delete} тренера', callback_data='admin_delete_trainer')],
+        [InlineKeyboardButton(msgs.btn_admin_create_trainer, callback_data='admin_create_trainer')],
+        [InlineKeyboardButton(msgs.btn_admin_edit_trainer, callback_data='admin_edit_trainer')],
+        [InlineKeyboardButton(msgs.btn_admin_delete_trainer, callback_data='admin_delete_trainer')],
         [InlineKeyboardButton(msgs.btn_back, callback_data='admin_menu')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -108,9 +108,9 @@ async def _handle_admin_locations_menu(update: Update, context: ContextTypes.DEF
     text = msgs.admin_locations_menu(count=len(locations))
 
     keyboard = [
-        [InlineKeyboardButton(f'{msgs.btn_create} локацию', callback_data='admin_create_location')],
-        [InlineKeyboardButton(f'{msgs.btn_edit} локацию', callback_data='admin_edit_location')],
-        [InlineKeyboardButton(f'{msgs.btn_delete} локацию', callback_data='admin_delete_location')],
+        [InlineKeyboardButton(msgs.btn_admin_create_location, callback_data='admin_create_location')],
+        [InlineKeyboardButton(msgs.btn_admin_edit_location, callback_data='admin_edit_location')],
+        [InlineKeyboardButton(msgs.btn_admin_delete_location, callback_data='admin_delete_location')],
         [InlineKeyboardButton(msgs.btn_back, callback_data='admin_menu')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -139,9 +139,9 @@ async def _handle_admin_students_menu(update: Update, context: ContextTypes.DEFA
     )
 
     keyboard = [
-        [InlineKeyboardButton('➕ Добавить ученика', callback_data='admin_create_student')],
-        [InlineKeyboardButton('✏️ Редактировать ученика', callback_data='admin_edit_student')],
-        [InlineKeyboardButton('🗑️ Удалить ученика', callback_data='admin_delete_student')],
+        [InlineKeyboardButton(msgs.btn_add_student, callback_data='admin_create_student')],
+        [InlineKeyboardButton(msgs.btn_edit_student, callback_data='admin_edit_student')],
+        [InlineKeyboardButton(msgs.btn_delete_student, callback_data='admin_delete_student')],
         [InlineKeyboardButton(msgs.btn_back, callback_data='admin_menu')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)

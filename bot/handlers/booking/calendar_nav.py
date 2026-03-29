@@ -42,7 +42,7 @@ async def _handle_booking_calendar_navigation(update: Update, context: ContextTy
                     break
 
         court_obj = deps.court_repo.get(court_id) if court_id else None
-        court_name = court_obj.name if court_obj else 'Неизвестный корт'
+        court_name = court_obj.name if court_obj else msgs.unknown_court
 
         calendar_markup = _create_booking_calendar(year, month, court_id or '', trainer_id, deps)
 

@@ -45,7 +45,7 @@ async def _handle_booking_date_selection(update: Update, context: ContextTypes.D
                     break
 
         court_obj = deps.court_repo.get(court_id) if court_id else None
-        court_name = court_obj.name if court_obj else 'Неизвестный корт'
+        court_name = court_obj.name if court_obj else msgs.unknown_court
 
         time_slots = deps.schedule_service.get_all_time_slots_for_date(selected_date)
         court_slots = [slot for slot in time_slots if str(slot.court_id) == str(court_id)]

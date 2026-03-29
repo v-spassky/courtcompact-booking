@@ -40,8 +40,8 @@ async def _save_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             text += f'\n🗺️ <a href="{google_maps_link}">Google Maps</a>'
 
         keyboard = [
-            [InlineKeyboardButton('➕ Создать ещё', callback_data='admin_create_location')],
-            [InlineKeyboardButton('◀️ К локациям', callback_data='admin_locations')],
+            [InlineKeyboardButton(msgs.btn_create_another, callback_data='admin_create_location')],
+            [InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')],
             [InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -51,6 +51,6 @@ async def _save_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
     except Exception:
         logger.exception('Failed to create location')
-        keyboard = [[InlineKeyboardButton('◀️ К локациям', callback_data='admin_locations')]]
+        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(msgs.admin_location_create_error, reply_markup=reply_markup)

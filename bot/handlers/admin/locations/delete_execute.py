@@ -33,7 +33,7 @@ async def _handle_admin_delete_location_execute(update: Update, context: Context
     if not location:
         keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_locations')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.callback_query.edit_message_text('❌ Локация не найдена.', reply_markup=reply_markup)
+        await update.callback_query.edit_message_text(msgs.admin_location_not_found, reply_markup=reply_markup)
         return
 
     try:
@@ -42,12 +42,12 @@ async def _handle_admin_delete_location_execute(update: Update, context: Context
         _log_user_action(update.effective_user, f'deleted location: {location_name}')
 
         text = msgs.admin_location_deleted(name=location_name)
-        keyboard = [[InlineKeyboardButton('◀️ К локациям', callback_data='admin_locations')]]
+        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.callback_query.edit_message_text(text, reply_markup=reply_markup)
 
     except Exception:
         logger.exception('Failed to delete location')
-        keyboard = [[InlineKeyboardButton('◀️ К локациям', callback_data='admin_locations')]]
+        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.callback_query.edit_message_text(msgs.admin_location_delete_error, reply_markup=reply_markup)

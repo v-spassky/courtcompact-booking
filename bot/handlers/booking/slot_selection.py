@@ -73,7 +73,7 @@ async def _handle_booking_slot_selection(
 
         if booking:
             booked_court = deps.court_repo.get(booking.court_id)
-            court_name = booked_court.name if booked_court else 'Неизвестный корт'
+            court_name = booked_court.name if booked_court else msgs.unknown_court
 
             if query.from_user:
                 _log_user_action(
@@ -101,7 +101,7 @@ async def _handle_booking_slot_selection(
 
             if booked_trainer and not is_trainer_booking and booked_trainer.telegram_user_id != user_id:
                 try:
-                    student_name = query.from_user.full_name if query.from_user else 'Студент'
+                    student_name = query.from_user.full_name if query.from_user else msgs.fallback_student_name
                     notify_text = msgs.booking_new_notification(
                         student_name=student_name,
                         court_name=court_name,

@@ -14,9 +14,9 @@ async def _handle_admin_trainer_name_input(update: Update, context: ContextTypes
     msgs = get_messages()
 
     if len(name) < 1 or len(name) > 100:
-        text = '❌ Имя тренера должно быть от 1 до 100 символов. Попробуйте снова.'
+        text = msgs.admin_trainer_name_too_long
         keyboard = [
-            [InlineKeyboardButton('🔄 Попробовать снова', callback_data='admin_create_trainer')],
+            [InlineKeyboardButton(msgs.btn_retry, callback_data='admin_create_trainer')],
             [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -27,13 +27,7 @@ async def _handle_admin_trainer_name_input(update: Update, context: ContextTypes
     context.user_data['admin_trainer_name'] = name
     context.user_data['admin_state'] = 'awaiting_trainer_telegram_id'
 
-    text = f"""👨‍🏫 Создание тренера
-
-Имя: {name}
-
-Шаг 2/4: Введите Telegram ID тренера (число):
-
-💡 Тренер может узнать свой ID, написав боту @userinfobot"""
+    text = msgs.admin_trainer_create_step2(name=name)
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

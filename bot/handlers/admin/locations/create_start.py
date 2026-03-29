@@ -24,9 +24,7 @@ async def _handle_admin_create_location_start(update: Update, context: ContextTy
     assert context.user_data is not None
     context.user_data['admin_state'] = 'awaiting_location_name'
 
-    text = """📍 Создание локации
-
-Шаг 1/2: Введите название локации (например: "Теннисный клуб Центральный"):"""
+    text = msgs.admin_location_create_step1()
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_locations')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

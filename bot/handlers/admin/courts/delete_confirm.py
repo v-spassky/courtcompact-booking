@@ -33,7 +33,7 @@ async def _handle_admin_delete_court_confirm(update: Update, context: ContextTyp
     if not court:
         keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.callback_query.edit_message_text('❌ Корт не найден.', reply_markup=reply_markup)
+        await update.callback_query.edit_message_text(msgs.admin_court_not_found, reply_markup=reply_markup)
         return
 
     text = msgs.admin_court_confirm_delete(name=court.name)

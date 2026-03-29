@@ -33,17 +33,13 @@ async def _handle_admin_delete_location_confirm(update: Update, context: Context
     if not location:
         keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_locations')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.callback_query.edit_message_text('❌ Локация не найдена.', reply_markup=reply_markup)
+        await update.callback_query.edit_message_text(msgs.admin_location_not_found, reply_markup=reply_markup)
         return
 
     courts = deps.location_repo.get_courts(location.id)
-    warning = ''
-    if courts:
-        warning = f'\n\n⚠️ К этой локации привязано {len(courts)} корт(ов)!'
-
     text = msgs.admin_location_confirm_delete(name=location.name)
-    if warning:
-        text += warning
+    if courts:
+        text += msgs.admin_location_courts_warning(count=len(courts))
 
     keyboard = [
         [

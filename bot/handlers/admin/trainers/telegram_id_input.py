@@ -19,9 +19,9 @@ async def _handle_admin_trainer_id_input(update: Update, context: ContextTypes.D
     try:
         telegram_id = int(id_text.strip())
     except ValueError:
-        text = '❌ Telegram ID должен быть числом. Попробуйте снова.'
+        text = msgs.admin_trainer_id_not_a_number
         keyboard = [
-            [InlineKeyboardButton('🔄 Попробовать снова', callback_data='admin_create_trainer')],
+            [InlineKeyboardButton(msgs.btn_retry, callback_data='admin_create_trainer')],
             [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -31,10 +31,10 @@ async def _handle_admin_trainer_id_input(update: Update, context: ContextTypes.D
 
     existing = deps.trainer_repo.get_by_telegram_id(telegram_id)
     if existing:
-        text = f'❌ Тренер с Telegram ID {telegram_id} уже существует ({existing.name}).'
+        text = msgs.admin_trainer_id_exists(telegram_id=telegram_id, name=existing.name)
         keyboard = [
-            [InlineKeyboardButton('🔄 Попробовать снова', callback_data='admin_create_trainer')],
-            [InlineKeyboardButton('◀️ К тренерам', callback_data='admin_trainers')],
+            [InlineKeyboardButton(msgs.btn_retry, callback_data='admin_create_trainer')],
+            [InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(text, reply_markup=reply_markup)
@@ -44,12 +44,7 @@ async def _handle_admin_trainer_id_input(update: Update, context: ContextTypes.D
     context.user_data['admin_trainer_telegram_id'] = telegram_id
     context.user_data['admin_state'] = 'awaiting_trainer_description'
 
-    text = f"""👨‍🏫 Создание тренера
-
-Имя: {trainer_name}
-Telegram ID: {telegram_id}
-
-Шаг 3/3: Введите описание тренера (или "-" чтобы пропустить):"""
+    text = msgs.admin_trainer_create_step3(name=trainer_name, telegram_id=telegram_id)
 
     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
     reply_markup = InlineKeyboardMarkup(keyboard)

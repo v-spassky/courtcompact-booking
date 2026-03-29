@@ -33,7 +33,7 @@ async def _handle_admin_delete_trainer_confirm(update: Update, context: ContextT
     if not trainer:
         keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_trainers')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.callback_query.edit_message_text('❌ Тренер не найден.', reply_markup=reply_markup)
+        await update.callback_query.edit_message_text(msgs.admin_trainer_not_found, reply_markup=reply_markup)
         return
 
     text = msgs.admin_trainer_confirm_delete(name=trainer.name)
