@@ -1,14 +1,24 @@
 import logging
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 from config.settings import now_kiev
-from db.models import Booking, TimeSlot
+from db.models import Booking
 from db.repositories.booking import BookingRepository
 from db.repositories.court import CourtRepository
 from db.repositories.student import StudentRepository
 from db.repositories.trainer import TrainerRepository
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class TimeSlot:
+    start_time: datetime
+    end_time: datetime
+    court_id: str
+    is_available: bool
+    booking_id: str | None
 
 
 class ScheduleService:

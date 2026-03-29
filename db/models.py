@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, create_engine
@@ -54,15 +53,6 @@ class Booking(Base):
     start_time: Mapped[datetime] = mapped_column(DateTime)
     end_time: Mapped[datetime] = mapped_column(DateTime)
     created_at: Mapped[datetime] = mapped_column(DateTime)
-
-
-@dataclass
-class TimeSlot:
-    start_time: datetime
-    end_time: datetime
-    court_id: str
-    is_available: bool = True
-    booking_id: str | None = None
 
 
 def make_session_factory(db_url: str) -> sessionmaker[Session]:
