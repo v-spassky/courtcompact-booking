@@ -30,17 +30,14 @@ class TrainerSelectionForBooking(Handler):
         parts = self._callback_data.split('_')
         trainer_id_short = parts[2] if parts[2] != 'none' else None
         court_id_short = parts[3]
-
         courts = self._deps.court_repo.get_all()
         court_id: UUID | None = None
         for court in courts:
             if str(court.id).startswith(court_id_short):
                 court_id = court.id
                 break
-
         if not court_id:
             raise ValueError(f'Court not found for ID starting with {court_id_short}')
-
         trainer_id = None
         trainer_name = None
         if trainer_id_short and trainer_id_short != 'none':
@@ -50,15 +47,11 @@ class TrainerSelectionForBooking(Handler):
                     trainer_id = trainer.id
                     trainer_name = trainer.user.name
                     break
-
         court_obj = self._deps.court_repo.get(court_id)
         court_name = court_obj.name if court_obj else msgs.unknown_court
-
         now = now_kiev()
         calendar_markup = _create_booking_calendar(now.year, now.month, court_id, trainer_id, self._deps)
-
         text = msgs.booking_select_date(court_name=court_name, trainer_name=trainer_name)
-
         await self._update.callback_query.edit_message_text(text, reply_markup=calendar_markup)
 
     async def _on_error(self, error: Exception) -> None:

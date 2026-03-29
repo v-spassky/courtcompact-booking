@@ -29,7 +29,6 @@ class AdminDeleteStudentExecute(Handler):
         assert self._update.callback_query is not None
         assert self._update.effective_user is not None
         msgs = get_messages()
-
         student_id_short = self._callback_data.replace('admin_confirm_delete_student_', '')
         students = self._deps.student_repo.get_all()
         student = None
@@ -37,17 +36,14 @@ class AdminDeleteStudentExecute(Handler):
             if str(s.id).startswith(student_id_short):
                 student = s
                 break
-
         if not student:
             keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(msgs.admin_student_not_found, reply_markup=reply_markup)
             return
-
         student_name = student.user.name if student.user else student.phone
         self._deps.student_repo.delete(student.id)
         _log_user_action(self._update.effective_user, f'deleted student: {student_name}')
-
         text = msgs.admin_student_deleted(name=student_name)
         keyboard = [[InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')]]
         reply_markup = InlineKeyboardMarkup(keyboard)

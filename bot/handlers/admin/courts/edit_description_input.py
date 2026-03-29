@@ -21,18 +21,14 @@ class AdminEditCourtDescriptionInput(TextInputHandler):
         msgs = get_messages()
         court_id = self._context.user_data.get('admin_court_id')
         new_name = self._context.user_data.get('admin_court_name')
-
         if not court_id:
             _clear_admin_state(self._context)
             return
-
         court = self._deps.court_repo.get(UUID(court_id))
         if not court:
             _clear_admin_state(self._context)
             return
-
         _clear_admin_state(self._context)
-
         if new_name is not None:
             court.name = new_name
         if self._text.strip() == '-':
@@ -41,11 +37,9 @@ class AdminEditCourtDescriptionInput(TextInputHandler):
             court.description = None
         else:
             court.description = self._text.strip()
-
         self._deps.court_repo.save(court)
         if self._update.effective_user:
             _log_user_action(self._update.effective_user, f'edited court: {court.name}')
-
         text = msgs.admin_court_updated(name=court.name)
         keyboard = [
             [InlineKeyboardButton(msgs.btn_edit_another, callback_data='admin_edit_court')],

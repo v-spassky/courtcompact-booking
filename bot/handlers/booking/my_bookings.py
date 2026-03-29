@@ -18,36 +18,27 @@ class MyBookings(Handler):
         assert self._update.effective_user is not None
         msgs = get_messages()
         user_id = self._update.effective_user.id
-
         bookings = self._deps.schedule_service.get_user_bookings(user_id)
-
         if not bookings:
             keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(msgs.my_bookings_empty, reply_markup=reply_markup)
             return
-
         now = now_kiev()
         future_bookings = [b for b in bookings if b.start_time > now]
-
         if not future_bookings:
             keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(msgs.my_bookings_no_upcoming, reply_markup=reply_markup)
             return
-
         text = msgs.my_bookings_title
         for booking in sorted(future_bookings, key=lambda x: x.start_time):
             court_name = booking.court.name if booking.court else msgs.unknown_court
-
             text += msgs.booking_detail_court(name=court_name)
             text += f'📅 {booking.start_time.strftime("%d/%m/%Y %H:%M")} - {booking.end_time.strftime("%H:%M")}\n'
-
             if booking.trainer:
                 text += msgs.booking_detail_trainer(name=booking.trainer.user.name)
-
             text += f'🆔 ID: {str(booking.id)[:8]}\n\n'
-
         keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)

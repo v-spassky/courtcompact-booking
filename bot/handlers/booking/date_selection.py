@@ -23,23 +23,19 @@ class BookingDateSelection(Handler):
     async def _process(self) -> None:
         assert self._update.callback_query is not None
         msgs = get_messages()
-
         parts = self._callback_data.split('_')
         court_id_short = parts[2]
         trainer_id_short = parts[3]
         year = int(parts[4])
         month = int(parts[5])
         day = int(parts[6])
-
         selected_date = datetime(year, month, day)
-
         courts = self._deps.court_repo.get_all()
         court_id: UUID | None = None
         for court in courts:
             if str(court.id).startswith(court_id_short):
                 court_id = court.id
                 break
-
         trainer_id = None
         trainer_name = None
         if trainer_id_short != 'none':
@@ -49,13 +45,10 @@ class BookingDateSelection(Handler):
                     trainer_id = trainer.id
                     trainer_name = trainer.user.name
                     break
-
         court_obj = self._deps.court_repo.get(court_id) if court_id else None
         court_name = court_obj.name if court_obj else msgs.unknown_court
-
         time_slots = self._deps.schedule_service.get_all_time_slots_for_date(selected_date)
         court_slots = [slot for slot in time_slots if slot.court_id == court_id]
-
         trainer_busy_times = set()
         if trainer_id:
             all_slots = self._deps.schedule_service.get_all_time_slots_for_date(selected_date)
@@ -64,7 +57,6 @@ class BookingDateSelection(Handler):
                     booking = self._deps.booking_repo.get(other_slot.booking_id)
                     if booking and booking.trainer_id == trainer_id:
                         trainer_busy_times.add((booking.start_time, booking.end_time))
-
         if not court_slots:
             keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -72,23 +64,19 @@ class BookingDateSelection(Handler):
                 msgs.booking_no_slots_for_date, reply_markup=reply_markup
             )
             return
-
         text = msgs.booking_select_slot(
             court_name=court_name,
             date=selected_date.strftime('%d.%m.%Y'),
             trainer_name=trainer_name,
         )
-
         buttons = []
         for slot in sorted(court_slots, key=lambda s: s.start_time):
             is_available = slot.is_available
-
             if is_available and trainer_id:
                 for busy_start, busy_end in trainer_busy_times:
                     if slot.start_time < busy_end and slot.end_time > busy_start:
                         is_available = False
                         break
-
             if is_available:
                 time_str = f'{slot.start_time.strftime("%H:%M")}-{slot.end_time.strftime("%H:%M")}'
                 date_str = selected_date.strftime('%Y%m%d')
@@ -97,19 +85,15 @@ class BookingDateSelection(Handler):
             else:
                 time_str = msgs.slot_occupied
                 slot_callback = 'ignore'
-
             buttons.append(InlineKeyboardButton(time_str, callback_data=slot_callback))
-
         keyboard = []
         for i in range(0, len(buttons), 2):
             row = [buttons[i]]
             if i + 1 < len(buttons):
                 row.append(buttons[i + 1])
             keyboard.append(row)
-
         keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
         reply_markup = InlineKeyboardMarkup(keyboard)
-
         await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
 
     async def _on_error(self, error: Exception) -> None:

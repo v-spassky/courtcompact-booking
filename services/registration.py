@@ -24,7 +24,6 @@ class RegistrationService:
         existing = self._students.get_by_phone(phone)
         if existing:
             return existing
-
         student = Student(user_id=None, phone=phone)
         self._students.save(student)
         logger.info(f'Registered new student (Phone: {phone})')
@@ -34,12 +33,10 @@ class RegistrationService:
         existing = self._trainers.get_by_telegram_id(telegram_user_id)
         if existing:
             return existing
-
         user = self._users.get_by_telegram_id(telegram_user_id)
         if user is None:
             user = User(telegram_user_id=telegram_user_id, name=name)
             self._users.save(user)
-
         trainer = Trainer(user_id=user.id, description=description)
         self._trainers.save(trainer)
         logger.info(f'Registered new trainer: {name} (Telegram ID: {telegram_user_id})')

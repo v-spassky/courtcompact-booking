@@ -84,29 +84,24 @@ class ScheduleService:
     def get_all_time_slots_for_date(self, date: datetime) -> list[TimeSlot]:
         courts = self.courts.get_all()
         all_slots = []
-
         for court in courts:
             slots = self.get_available_time_slots(court.id, date)
             all_slots.extend(slots)
-
         return all_slots
 
     def get_user_bookings(self, telegram_user_id: int) -> list[Booking]:
         bookings = []
         seen_ids: set[UUID] = set()
-
         student = self.students.get_by_telegram_id(telegram_user_id)
         if student:
             for b in self.bookings.get_by_student(student.id):
                 if b.id not in seen_ids:
                     bookings.append(b)
                     seen_ids.add(b.id)
-
         trainer = self.trainers.get_by_telegram_id(telegram_user_id)
         if trainer:
             for b in self.bookings.get_by_trainer(trainer.id):
                 if b.id not in seen_ids:
                     bookings.append(b)
                     seen_ids.add(b.id)
-
         return bookings

@@ -23,11 +23,8 @@ class AdminCreateCourtSelectLocation(Handler):
     async def _process(self) -> None:
         assert self._update.callback_query is not None
         msgs = get_messages()
-
         _clear_admin_state(self._context)
-
         locations = self._deps.location_repo.get_all()
-
         if not locations:
             text = msgs.admin_court_no_locations
             keyboard = [
@@ -37,9 +34,7 @@ class AdminCreateCourtSelectLocation(Handler):
             reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
             return
-
         text = msgs.admin_court_select_location
-
         keyboard = []
         for location in locations:
             location_id_short = str(location.id)[:8]
@@ -49,8 +44,6 @@ class AdminCreateCourtSelectLocation(Handler):
             keyboard.append(
                 [InlineKeyboardButton(button_text, callback_data=f'admin_court_location_{location_id_short}')]
             )
-
         keyboard.append([InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_courts')])
         reply_markup = InlineKeyboardMarkup(keyboard)
-
         await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)

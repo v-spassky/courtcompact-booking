@@ -28,16 +28,13 @@ class AdminDeleteLocationConfirm(Handler):
     async def _process(self) -> None:
         assert self._update.callback_query is not None
         msgs = get_messages()
-
         location_id_short = self._callback_data.replace('admin_delete_location_', '')
-
         locations = self._deps.location_repo.get_all()
         location = None
         for loc in locations:
             if str(loc.id).startswith(location_id_short):
                 location = loc
                 break
-
         if not location:
             keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_locations')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -45,12 +42,10 @@ class AdminDeleteLocationConfirm(Handler):
                 msgs.admin_location_not_found, reply_markup=reply_markup
             )
             return
-
         courts = self._deps.location_repo.get_courts(location.id)
         text = msgs.admin_location_confirm_delete(name=location.name)
         if courts:
             text += msgs.admin_location_courts_warning(count=len(courts))
-
         keyboard = [
             [
                 InlineKeyboardButton(
@@ -61,5 +56,4 @@ class AdminDeleteLocationConfirm(Handler):
             [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_locations')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-
         await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)

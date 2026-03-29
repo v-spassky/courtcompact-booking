@@ -22,12 +22,10 @@ class AdminEditLocationNameInput(TextInputHandler):
         if not location_id:
             _clear_admin_state(self._context)
             return
-
         location = self._deps.location_repo.get(UUID(location_id))
         if not location:
             _clear_admin_state(self._context)
             return
-
         if self._text.strip() != '-':
             if len(self._text) < 1 or len(self._text) > 100:
                 text = msgs.admin_location_name_too_long_edit
@@ -38,12 +36,9 @@ class AdminEditLocationNameInput(TextInputHandler):
             self._context.user_data['admin_location_name'] = self._text.strip()
         else:
             self._context.user_data['admin_location_name'] = location.name
-
         self._context.user_data['admin_state'] = 'awaiting_edit_location_maps_link'
-
         new_name = self._context.user_data['admin_location_name']
         text = msgs.admin_location_edit_step2(new_name=new_name, maps_link=location.maps_link)
-
         keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_locations')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.message.reply_text(text, reply_markup=reply_markup)

@@ -29,16 +29,13 @@ class AdminDeleteLocationExecute(Handler):
         assert self._update.callback_query is not None
         assert self._update.effective_user is not None
         msgs = get_messages()
-
         location_id_short = self._callback_data.replace('admin_confirm_delete_location_', '')
-
         locations = self._deps.location_repo.get_all()
         location = None
         for loc in locations:
             if str(loc.id).startswith(location_id_short):
                 location = loc
                 break
-
         if not location:
             keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_locations')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -46,11 +43,9 @@ class AdminDeleteLocationExecute(Handler):
                 msgs.admin_location_not_found, reply_markup=reply_markup
             )
             return
-
         location_name = location.name
         self._deps.location_repo.delete(location.id)
         _log_user_action(self._update.effective_user, f'deleted location: {location_name}')
-
         text = msgs.admin_location_deleted(name=location_name)
         keyboard = [[InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')]]
         reply_markup = InlineKeyboardMarkup(keyboard)

@@ -31,16 +31,13 @@ class ScheduleWeeklyShowCourts(Handler):
     async def _process(self) -> None:
         assert self._update.callback_query is not None
         msgs = get_messages()
-
         location = None
         if self._location_id:
             location = self._deps.location_repo.get(self._location_id)
             courts = self._deps.location_repo.get_courts(self._location_id)
         else:
             courts = self._deps.court_repo.get_all()
-
         week_end = self._start_of_week + timedelta(days=6)
-
         if not courts:
             text = msgs.schedule_weekly_no_courts(location_name=location.name if location else None)
             keyboard = [
@@ -50,24 +47,20 @@ class ScheduleWeeklyShowCourts(Handler):
             reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
             return
-
         text = msgs.schedule_weekly_select_court(
             start=self._start_of_week.strftime('%d.%m'),
             end=week_end.strftime('%d.%m.%Y'),
             location_name=location.name if location else None,
             maps_link=location.maps_link if location else None,
         )
-
         keyboard = []
         for court in courts:
             court_callback = f'court_week_{court.id}_{self._start_of_week.year}_{self._start_of_week.month}_{self._start_of_week.day}'
             keyboard.append([InlineKeyboardButton(f'🎾 {court.name}', callback_data=court_callback)])
-
         if location:
             keyboard.append([InlineKeyboardButton(msgs.btn_select_other_location, callback_data='schedule_weekly')])
         keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
         reply_markup = InlineKeyboardMarkup(keyboard)
-
         await self._update.callback_query.edit_message_text(
             text, reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True
         )

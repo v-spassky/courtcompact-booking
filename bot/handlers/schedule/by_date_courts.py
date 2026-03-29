@@ -31,14 +31,12 @@ class ScheduleForDateShowCourts(Handler):
     async def _process(self) -> None:
         assert self._update.callback_query is not None
         msgs = get_messages()
-
         location = None
         if self._location_id:
             location = self._deps.location_repo.get(self._location_id)
             courts = self._deps.location_repo.get_courts(self._location_id)
         else:
             courts = self._deps.court_repo.get_all()
-
         if not courts:
             text = msgs.schedule_no_courts(location_name=location.name if location else None)
             keyboard = [
@@ -53,18 +51,15 @@ class ScheduleForDateShowCourts(Handler):
             reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
             return
-
         text = msgs.schedule_select_court(
             date=self._date.strftime('%d.%m.%Y'),
             location_name=location.name if location else None,
             maps_link=location.maps_link if location else None,
         )
-
         keyboard = []
         for court in courts:
             court_callback = f'court_day_{court.id}_{self._date.year}_{self._date.month}_{self._date.day}'
             keyboard.append([InlineKeyboardButton(f'🎾 {court.name}', callback_data=court_callback)])
-
         if location:
             keyboard.append(
                 [
@@ -76,7 +71,6 @@ class ScheduleForDateShowCourts(Handler):
             )
         keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
         reply_markup = InlineKeyboardMarkup(keyboard)
-
         await self._update.callback_query.edit_message_text(
             text, reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True
         )

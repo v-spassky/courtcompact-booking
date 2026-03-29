@@ -22,39 +22,31 @@ class AdminEditTrainerDescriptionInput(TextInputHandler):
         if not trainer_id:
             _clear_admin_state(self._context)
             return
-
         trainers = self._deps.trainer_repo.get_all()
         trainer = None
         for t in trainers:
             if str(t.id) == trainer_id:
                 trainer = t
                 break
-
         if not trainer:
             _clear_admin_state(self._context)
             return
-
         new_name = self._context.user_data.get('admin_trainer_name', trainer.user.name)
         new_telegram_id = self._context.user_data.get('admin_trainer_telegram_id', trainer.user.telegram_user_id)
-
         if self._text.strip() == '-':
             new_description = trainer.description
         elif self._text.strip() == '--':
             new_description = None
         else:
             new_description = self._text.strip()
-
         _clear_admin_state(self._context)
-
         trainer.user.name = new_name
         trainer.user.telegram_user_id = new_telegram_id
         trainer.description = new_description
-
         self._deps.user_repo.save(trainer.user)
         self._deps.trainer_repo.save(trainer)
         if self._update.effective_user:
             _log_user_action(self._update.effective_user, f'edited trainer: {trainer.user.name}')
-
         text = msgs.admin_trainer_updated(name=trainer.user.name)
         keyboard = [
             [InlineKeyboardButton(msgs.btn_edit_another, callback_data='admin_edit_trainer')],

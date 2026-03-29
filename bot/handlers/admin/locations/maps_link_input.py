@@ -16,5 +16,4 @@ class AdminLocationMapsLinkInput(TextInputHandler):
             self._context.user_data['admin_location_maps_link'] = None
         else:
             self._context.user_data['admin_location_maps_link'] = self._text.strip()
-
         await _save_location(self._update, self._context)

@@ -29,26 +29,21 @@ class AdminDeleteTrainerExecute(Handler):
         assert self._update.callback_query is not None
         assert self._update.effective_user is not None
         msgs = get_messages()
-
         trainer_id_short = self._callback_data.replace('admin_confirm_delete_trainer_', '')
-
         trainers = self._deps.trainer_repo.get_all()
         trainer = None
         for t in trainers:
             if str(t.id).startswith(trainer_id_short):
                 trainer = t
                 break
-
         if not trainer:
             keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_trainers')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(msgs.admin_trainer_not_found, reply_markup=reply_markup)
             return
-
         trainer_name = trainer.user.name
         self._deps.trainer_repo.delete(trainer.id)
         _log_user_action(self._update.effective_user, f'deleted trainer: {trainer_name}')
-
         text = msgs.admin_trainer_deleted(name=trainer_name)
         keyboard = [[InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')]]
         reply_markup = InlineKeyboardMarkup(keyboard)

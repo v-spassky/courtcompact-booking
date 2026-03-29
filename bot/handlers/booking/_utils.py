@@ -17,17 +17,12 @@ def _check_date_availability(date: DateType, court_id: UUID, trainer_id: UUID | 
     try:
         date_datetime = datetime.combine(date, datetime.min.time())
         time_slots = deps.schedule_service.get_all_time_slots_for_date(date_datetime)
-
         court_slots = [slot for slot in time_slots if slot.court_id == court_id]
-
         if not trainer_id:
             return any(slot.is_available for slot in court_slots)
-
         available_slots = [slot for slot in court_slots if slot.is_available]
-
         if not available_slots:
             return False
-
         for slot in available_slots:
             trainer_busy = False
             all_day_slots = deps.schedule_service.get_all_time_slots_for_date(date_datetime)
@@ -40,7 +35,6 @@ def _check_date_availability(date: DateType, court_id: UUID, trainer_id: UUID | 
                             break
             if not trainer_busy:
                 return True
-
         return False
     except Exception:
         logger.exception('Error checking date availability')

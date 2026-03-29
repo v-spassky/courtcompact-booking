@@ -21,11 +21,8 @@ class AdminTrainerDescriptionInput(TextInputHandler):
         msgs = get_messages()
         trainer_name = self._context.user_data.get('admin_trainer_name', 'Unknown')
         telegram_id = self._context.user_data.get('admin_trainer_telegram_id', 0)
-
         _clear_admin_state(self._context)
-
         description = None if self._text.strip() == '-' else self._text.strip()
-
         user = self._deps.user_repo.get_by_telegram_id(telegram_id)
         if user is None:
             user = User(telegram_user_id=telegram_id, name=trainer_name)
@@ -33,18 +30,14 @@ class AdminTrainerDescriptionInput(TextInputHandler):
         else:
             user.name = trainer_name
             self._deps.user_repo.save(user)
-
         trainer = Trainer(user_id=user.id, description=description)
         self._deps.trainer_repo.save(trainer)
-
         if self._update.effective_user:
             _log_user_action(self._update.effective_user, f'created trainer: {trainer_name} (ID: {telegram_id})')
-
         text = msgs.admin_trainer_created(name=trainer_name)
         text += f'\n🆔 Telegram ID: {telegram_id}\n'
         if description:
             text += msgs.admin_trainer_description_line(desc=description)
-
         keyboard = [
             [InlineKeyboardButton(msgs.btn_create_another, callback_data='admin_create_trainer')],
             [InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')],

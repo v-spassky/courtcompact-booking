@@ -23,31 +23,23 @@ class AdminCourtDescriptionInput(TextInputHandler):
         court_name = self._context.user_data.get('admin_court_name', 'Unknown')
         location_id_str = self._context.user_data.get('admin_court_location_id')
         location_id = UUID(location_id_str) if location_id_str else None
-
         _clear_admin_state(self._context)
-
         court_description = None if self._text.strip() == '-' else self._text.strip()
-
         court = Court(
             name=court_name,
             description=court_description,
             location_id=location_id,
         )
         self._deps.court_repo.save(court)
-
         if self._update.effective_user:
             _log_user_action(self._update.effective_user, f'created court: {court_name}')
-
         text = msgs.admin_court_created(name=court_name)
-
         if location_id:
             location = self._deps.location_repo.get(location_id)
             if location:
                 text += msgs.admin_court_location_line(name=location.name)
-
         if court_description:
             text += msgs.admin_court_description_line(desc=court_description)
-
         keyboard = [
             [InlineKeyboardButton(msgs.btn_create_another, callback_data='admin_create_court')],
             [InlineKeyboardButton(msgs.btn_back_to_courts, callback_data='admin_courts')],

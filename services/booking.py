@@ -79,20 +79,15 @@ class BookingService:
         if not booking:
             logger.warning(f'Booking {booking_id} not found')
             return False
-
         # Check if user has permission to cancel
         is_authorized = False
-
         if booking.student and booking.student.user and booking.student.user.telegram_user_id == user_id:
             is_authorized = True
-
         if not is_authorized and booking.trainer and booking.trainer.user.telegram_user_id == user_id:
             is_authorized = True
-
         if not is_authorized:
             logger.warning(f'User {user_id} not authorized to cancel booking {booking_id}')
             return False
-
         try:
             success = self.bookings.delete(booking.id)
             if success:
@@ -105,9 +100,7 @@ class BookingService:
     def _is_time_slot_available(self, court_id: UUID, start_time: datetime, end_time: datetime) -> bool:
         bookings = self.bookings.get_in_range(start_time, end_time)
         court_bookings = [b for b in bookings if b.court_id == court_id]
-
         for booking in court_bookings:
             if start_time < booking.end_time and end_time > booking.start_time:
                 return False
-
         return True

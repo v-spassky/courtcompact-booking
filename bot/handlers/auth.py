@@ -68,15 +68,11 @@ def _get_student_for_user(user_id: int, deps: Deps) -> Student | None:
 def _create_calendar(year: int, month: int) -> InlineKeyboardMarkup:
     msgs = get_messages()
     keyboard = []
-
     month_name = cal.month_name[month]
     keyboard.append([InlineKeyboardButton(f'{month_name} {year}', callback_data='ignore')])
-
     keyboard.append([InlineKeyboardButton(day, callback_data='ignore') for day in msgs.day_names])
-
     month_calendar = cal.monthcalendar(year, month)
     today = now_kiev().date()
-
     for week in month_calendar:
         row = []
         for day in week:
@@ -90,7 +86,6 @@ def _create_calendar(year: int, month: int) -> InlineKeyboardMarkup:
                 else:
                     row.append(InlineKeyboardButton('·', callback_data='ignore'))
         keyboard.append(row)
-
     nav_row = []
     prev_month = month - 1 if month > 1 else 12
     prev_year = year if month > 1 else year - 1
@@ -98,15 +93,11 @@ def _create_calendar(year: int, month: int) -> InlineKeyboardMarkup:
         nav_row.append(InlineKeyboardButton('◀️', callback_data=f'cal_{prev_year}_{prev_month}'))
     else:
         nav_row.append(InlineKeyboardButton(' ', callback_data='ignore'))
-
     nav_row.append(InlineKeyboardButton(msgs.btn_menu, callback_data='main_menu'))
-
     next_month = month + 1 if month < 12 else 1
     next_year = year if month < 12 else year + 1
     nav_row.append(InlineKeyboardButton('▶️', callback_data=f'cal_{next_year}_{next_month}'))
-
     keyboard.append(nav_row)
-
     return InlineKeyboardMarkup(keyboard)
 
 
@@ -118,16 +109,13 @@ def _create_calendar(year: int, month: int) -> InlineKeyboardMarkup:
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message or not update.effective_user:
         return
-
     msgs = get_messages()
     deps = get_deps(context)
     _log_user_action(update.effective_user, 'used /start command')
     user_id = update.effective_user.id
-
     if not _is_authorized(user_id, deps):
         await _show_authorization_request(update, context)
         return
-
     keyboard = [
         [InlineKeyboardButton(msgs.btn_schedule_by_date, callback_data='select_date_schedule')],
         [InlineKeyboardButton(msgs.btn_schedule_weekly, callback_data='schedule_weekly')],
@@ -136,10 +124,8 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         [InlineKeyboardButton(msgs.btn_my_bookings, callback_data='my_bookings')],
         [InlineKeyboardButton(msgs.btn_cancel_booking, callback_data='cancel_booking')],
     ]
-
     if _is_admin(user_id, deps):
         keyboard.append([InlineKeyboardButton(msgs.btn_admin_panel, callback_data='admin_menu')])
-
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(msgs.welcome_start, reply_markup=reply_markup)
 
@@ -148,7 +134,6 @@ async def _show_authorization_request(update: Update, context: ContextTypes.DEFA
     msgs = get_messages()
     keyboard = [[KeyboardButton(msgs.btn_share_phone, request_contact=True)]]
     reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
-
     if update.message:
         await update.message.reply_text(msgs.auth_request, reply_markup=reply_markup)
     elif update.callback_query:
@@ -160,24 +145,19 @@ async def _show_authorization_request(update: Update, context: ContextTypes.DEFA
 async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message or not update.message.contact or not update.effective_user:
         return
-
     msgs = get_messages()
     deps = get_deps(context)
     contact = update.message.contact
     user_id = update.effective_user.id
-
     if contact.user_id != user_id:
         await update.message.reply_text(
             msgs.auth_wrong_contact,
             reply_markup=ReplyKeyboardRemove(),
         )
         return
-
     phone = contact.phone_number
     _log_user_action(update.effective_user, f'shared phone number: {phone}')
-
     student = deps.student_repo.get_by_phone(phone)
-
     if student:
         # Create or update User record for this student
         db_user = deps.user_repo.get_by_telegram_id(user_id)
@@ -189,17 +169,13 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 name=update.effective_user.full_name or update.effective_user.username or str(user_id),
             )
             deps.user_repo.save(db_user)
-
         # Link student to user if not yet linked
         if student.user_id is None:
             student.user_id = db_user.id
             deps.student_repo.save(student)
-
         student_name = db_user.name
         _log_user_action(update.effective_user, f'authorized as student: {student_name}')
-
         await update.message.reply_text(msgs.auth_success(student_name), reply_markup=ReplyKeyboardRemove())
-
         keyboard = [
             [InlineKeyboardButton(msgs.btn_schedule_by_date, callback_data='select_date_schedule')],
             [InlineKeyboardButton(msgs.btn_schedule_weekly, callback_data='schedule_weekly')],
@@ -208,10 +184,8 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             [InlineKeyboardButton(msgs.btn_my_bookings, callback_data='my_bookings')],
             [InlineKeyboardButton(msgs.btn_cancel_booking, callback_data='cancel_booking')],
         ]
-
         if _is_admin(user_id, deps):
             keyboard.append([InlineKeyboardButton(msgs.btn_admin_panel, callback_data='admin_menu')])
-
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(msgs.welcome_after_auth, reply_markup=reply_markup)
     else:
@@ -232,12 +206,9 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, edi
         [InlineKeyboardButton(msgs.btn_my_bookings, callback_data='my_bookings')],
         [InlineKeyboardButton(msgs.btn_cancel_booking, callback_data='cancel_booking')],
     ]
-
     if update.effective_user and _is_admin(update.effective_user.id, deps):
         keyboard.append([InlineKeyboardButton(msgs.btn_admin_panel, callback_data='admin_menu')])
-
     reply_markup = InlineKeyboardMarkup(keyboard)
-
     if edit_message and update.callback_query:
         await update.callback_query.edit_message_text(msgs.welcome_after_auth, reply_markup=reply_markup)
     elif update.message:
@@ -266,15 +237,12 @@ async def handle_unknown_message(update: Update, context: ContextTypes.DEFAULT_T
 
     if not update.message or not update.effective_user:
         return
-
     msgs = get_messages()
     deps = get_deps(context)
     user_id = update.effective_user.id
     message_text = (update.message.text or '').strip()
-
     assert context.user_data is not None
     admin_state = context.user_data.get('admin_state')
-
     if admin_state and _is_admin(user_id, deps):
         if admin_state == 'awaiting_location_name':
             await AdminLocationNameInput(update, context, deps, message_text).handle()
@@ -330,7 +298,6 @@ async def handle_unknown_message(update: Update, context: ContextTypes.DEFAULT_T
         elif admin_state == 'awaiting_edit_student_phone':
             await AdminEditStudentPhoneInput(update, context, deps, message_text).handle()
             return
-
     keyboard = [[InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(msgs.unknown_command, reply_markup=reply_markup)

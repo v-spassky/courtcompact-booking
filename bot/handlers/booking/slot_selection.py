@@ -26,13 +26,11 @@ class BookingSlotSelection(Handler):
     async def _process(self) -> None:
         assert self._update.callback_query is not None
         msgs = get_messages()
-
         parts = self._callback_data.split('_')
         court_id_short = parts[2]
         trainer_id_short = parts[3]
         date_str = parts[4]
         time_code = parts[5]
-
         year = int(date_str[0:4])
         month = int(date_str[4:6])
         day = int(date_str[6:8])
@@ -40,17 +38,14 @@ class BookingSlotSelection(Handler):
         minute = int(time_code[2:4]) if len(time_code) >= 4 else 0
         start_time = datetime(year, month, day, hour, minute, 0)
         end_time = start_time + timedelta(minutes=30)
-
         courts = self._deps.court_repo.get_all()
         court_id = None
         for court in courts:
             if str(court.id).startswith(court_id_short):
                 court_id = court.id
                 break
-
         if not court_id:
             raise ValueError(f'Court not found for ID starting with {court_id_short}')
-
         trainer_id = None
         if trainer_id_short and trainer_id_short != 'none':
             trainers = self._deps.trainer_repo.get_all()
@@ -58,16 +53,13 @@ class BookingSlotSelection(Handler):
                 if str(trainer.id).startswith(trainer_id_short):
                     trainer_id = trainer.id
                     break
-
         user_trainer = self._deps.trainer_repo.get_by_telegram_id(self._user_id)
         is_trainer_booking = user_trainer is not None and trainer_id == user_trainer.id
-
         student_id = None
         if not is_trainer_booking:
             student = _get_student_for_user(self._user_id, self._deps)
             if student:
                 student_id = student.id
-
         booking = self._deps.booking_service.create_booking(
             court_id=court_id,
             start_time=start_time,
@@ -75,19 +67,15 @@ class BookingSlotSelection(Handler):
             student_id=student_id,
             trainer_id=trainer_id,
         )
-
         if booking:
             court_name = booking.court.name if booking.court else msgs.unknown_court
-
             if self._update.callback_query.from_user:
                 _log_user_action(
                     self._update.callback_query.from_user,
                     f'created booking: {court_name} on {booking.start_time.strftime("%d.%m.%Y %H:%M")}',
                 )
-
             trainer_name = booking.trainer.user.name if booking.trainer else None
             booked_trainer = booking.trainer
-
             text = msgs.booking_confirmed(
                 court_name=court_name,
                 date=booking.start_time.strftime('%d.%m.%Y'),
@@ -95,11 +83,9 @@ class BookingSlotSelection(Handler):
                 trainer_name=trainer_name,
                 booking_id=str(booking.id)[:8],
             )
-
             keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
-
             if booked_trainer and not is_trainer_booking and booked_trainer.user.telegram_user_id != self._user_id:
                 try:
                     student_name = (

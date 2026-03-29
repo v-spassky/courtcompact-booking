@@ -66,24 +66,17 @@ logger = logging.getLogger(__name__)
 async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.callback_query or not update.effective_user:
         return
-
     await update.callback_query.answer()
-
     callback_data = update.callback_query.data
     if callback_data is None:
         return
-
     deps = get_deps(context)
-
     if callback_data != 'ignore':
         _log_user_action(update.effective_user, f'clicked button: {callback_data}')
-
     if callback_data != 'ignore' and not _is_authorized(update.effective_user.id, deps):
         await _show_authorization_request(update, context)
         return
-
     msgs = get_messages()
-
     if callback_data == 'main_menu':
         await show_main_menu(update, context, edit_message=True)
     elif callback_data == 'ignore':

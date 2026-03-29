@@ -18,17 +18,14 @@ class AdminEditLocationMapsLinkInput(TextInputHandler):
         if not location_id:
             _clear_admin_state(self._context)
             return
-
         location = self._deps.location_repo.get(UUID(location_id))
         if not location:
             _clear_admin_state(self._context)
             return
-
         if self._text.strip() == '--':
             self._context.user_data['admin_location_maps_link'] = None
         elif self._text.strip() == '-':
             self._context.user_data['admin_location_maps_link'] = location.maps_link
         else:
             self._context.user_data['admin_location_maps_link'] = self._text.strip()
-
         await _save_edited_location(self._update, self._context)

@@ -19,23 +19,18 @@ async def _save_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     deps = get_deps(context)
     location_name = context.user_data.get('admin_location_name', 'Unknown')
     maps_link = context.user_data.get('admin_location_maps_link')
-
     _clear_admin_state(context)
-
     try:
         location = Location(
             name=location_name,
             maps_link=maps_link,
         )
         deps.location_repo.save(location)
-
         if update.effective_user:
             _log_user_action(update.effective_user, f'created location: {location_name}')
-
         text = msgs.admin_location_created(name=location_name)
         if maps_link:
             text += f'\n🗺️ <a href="{maps_link}">Google Maps</a>'
-
         keyboard = [
             [InlineKeyboardButton(msgs.btn_create_another, callback_data='admin_create_location')],
             [InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')],
@@ -45,7 +40,6 @@ async def _save_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await update.message.reply_text(
             text, reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True
         )
-
     except Exception:
         logger.exception('Failed to create location')
         keyboard = [[InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')]]

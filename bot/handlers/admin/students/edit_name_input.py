@@ -22,7 +22,6 @@ class AdminEditStudentNameInput(TextInputHandler):
         if not student_id:
             _clear_admin_state(self._context)
             return
-
         student = self._deps.student_repo.get(UUID(student_id))
         if not student:
             _clear_admin_state(self._context)
@@ -30,19 +29,15 @@ class AdminEditStudentNameInput(TextInputHandler):
             reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.message.reply_text(msgs.admin_student_not_found, reply_markup=reply_markup)
             return
-
         current_name = student.user.name if student.user else ''
         if self._text and self._text != '-':
             self._context.user_data['admin_student_name'] = self._text
         else:
             self._context.user_data['admin_student_name'] = current_name
-
         self._context.user_data['admin_state'] = 'awaiting_edit_student_phone'
-
         text = msgs.admin_student_edit_step2(
             new_name=self._context.user_data['admin_student_name'], phone=student.phone
         )
-
         keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.message.reply_text(text, reply_markup=reply_markup)

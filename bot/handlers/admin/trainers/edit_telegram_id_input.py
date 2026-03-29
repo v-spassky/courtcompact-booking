@@ -21,18 +21,15 @@ class AdminEditTrainerTelegramIdInput(TextInputHandler):
         if not trainer_id:
             _clear_admin_state(self._context)
             return
-
         trainers = self._deps.trainer_repo.get_all()
         trainer = None
         for t in trainers:
             if str(t.id) == trainer_id:
                 trainer = t
                 break
-
         if not trainer:
             _clear_admin_state(self._context)
             return
-
         if self._text.strip() != '-':
             try:
                 telegram_id = int(self._text.strip())
@@ -52,15 +49,12 @@ class AdminEditTrainerTelegramIdInput(TextInputHandler):
                 return
         else:
             self._context.user_data['admin_trainer_telegram_id'] = trainer.user.telegram_user_id
-
         self._context.user_data['admin_state'] = 'awaiting_edit_trainer_description'
-
         text = msgs.admin_trainer_edit_step3(
             new_name=self._context.user_data['admin_trainer_name'],
             new_telegram_id=self._context.user_data['admin_trainer_telegram_id'],
             description=trainer.description,
         )
-
         keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.message.reply_text(text, reply_markup=reply_markup)

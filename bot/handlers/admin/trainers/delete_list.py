@@ -23,10 +23,8 @@ class AdminDeleteTrainerList(Handler):
     async def _process(self) -> None:
         assert self._update.callback_query is not None
         msgs = get_messages()
-
         _clear_admin_state(self._context)
         trainers = self._deps.trainer_repo.get_all()
-
         if not trainers:
             keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_trainers')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -34,7 +32,6 @@ class AdminDeleteTrainerList(Handler):
                 msgs.admin_trainer_no_trainers, reply_markup=reply_markup
             )
             return
-
         keyboard = []
         for trainer in trainers:
             trainer_id_short = str(trainer.id)[:8]
@@ -47,7 +44,6 @@ class AdminDeleteTrainerList(Handler):
             )
         keyboard.append([InlineKeyboardButton(msgs.btn_back, callback_data='admin_trainers')])
         reply_markup = InlineKeyboardMarkup(keyboard)
-
         await self._update.callback_query.edit_message_text(
             msgs.admin_trainer_select_to_delete, reply_markup=reply_markup
         )

@@ -23,16 +23,13 @@ class AdminEditCourtList(Handler):
     async def _process(self) -> None:
         assert self._update.callback_query is not None
         msgs = get_messages()
-
         _clear_admin_state(self._context)
         courts = self._deps.court_repo.get_all()
-
         if not courts:
             keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(msgs.admin_court_no_courts, reply_markup=reply_markup)
             return
-
         keyboard = []
         for court in courts:
             court_id_short = str(court.id)[:8]
@@ -41,5 +38,4 @@ class AdminEditCourtList(Handler):
             )
         keyboard.append([InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')])
         reply_markup = InlineKeyboardMarkup(keyboard)
-
         await self._update.callback_query.edit_message_text(msgs.admin_court_select_to_edit, reply_markup=reply_markup)

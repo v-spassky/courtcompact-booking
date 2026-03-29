@@ -29,30 +29,23 @@ class AdminEditCourtStart(Handler):
     async def _process(self) -> None:
         assert self._update.callback_query is not None
         msgs = get_messages()
-
         court_id_short = self._callback_data.replace('admin_edit_court_', '')
-
         courts = self._deps.court_repo.get_all()
         court = None
         for c in courts:
             if str(c.id).startswith(court_id_short):
                 court = c
                 break
-
         if not court:
             keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(msgs.admin_court_not_found, reply_markup=reply_markup)
             return
-
         _clear_admin_state(self._context)
         assert self._context.user_data is not None
         self._context.user_data['admin_court_id'] = str(court.id)
         self._context.user_data['admin_state'] = 'awaiting_edit_court_name'
-
         text = msgs.admin_court_edit_step1(name=court.name, description=court.description)
-
         keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_courts')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-
         await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)

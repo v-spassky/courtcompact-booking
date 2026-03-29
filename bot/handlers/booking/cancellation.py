@@ -27,36 +27,28 @@ class BookingCancellation(Handler):
         assert self._update.callback_query is not None
         msgs = get_messages()
         booking_id = UUID(self._callback_data.split('_')[2])
-
         booking = self._deps.booking_repo.get(booking_id)
         if not booking:
             keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(msgs.booking_not_found, reply_markup=reply_markup)
             return
-
         court_name = booking.court.name if booking.court else msgs.unknown_court
         student = booking.student
         trainer = booking.trainer
-
         is_student_cancelling = student and student.user and student.user.telegram_user_id == self._user_id
         is_trainer_cancelling = trainer and trainer.user.telegram_user_id == self._user_id
-
         success = self._deps.booking_service.cancel_booking(booking_id, self._user_id)
-
         keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-
         if success:
             _log_user_action(self._update.callback_query.from_user, f'cancelled booking: {booking_id}')
             await self._update.callback_query.edit_message_text(msgs.booking_cancelled, reply_markup=reply_markup)
-
             notify_text = msgs.booking_cancelled_notification(
                 court_name=court_name,
                 date=booking.start_time.strftime('%d.%m.%Y'),
                 time=f'{booking.start_time.strftime("%H:%M")} - {booking.end_time.strftime("%H:%M")}',
             )
-
             try:
                 notify_keyboard = [[InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')]]
                 notify_markup = InlineKeyboardMarkup(notify_keyboard)
