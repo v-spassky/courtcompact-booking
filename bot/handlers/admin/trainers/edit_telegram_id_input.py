@@ -1,64 +1,66 @@
 import logging
 
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import ContextTypes
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-from bot.deps import get_deps
 from bot.handlers.admin._utils import _clear_admin_state
+from bot.handlers.base import TextInputHandler
 from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
 
-async def _handle_admin_edit_trainer_id_input(update: Update, context: ContextTypes.DEFAULT_TYPE, id_text: str) -> None:
-    assert update.message is not None
-    assert context.user_data is not None
-    msgs = get_messages()
-    deps = get_deps(context)
-    trainer_id = context.user_data.get('admin_trainer_id')
-    if not trainer_id:
-        _clear_admin_state(context)
-        return
+class AdminEditTrainerTelegramIdInput(TextInputHandler):
+    async def _authorize(self) -> bool:
+        return True
 
-    trainers = deps.trainer_repo.get_all()
-    trainer = None
-    for t in trainers:
-        if str(t.id) == trainer_id:
-            trainer = t
-            break
+    async def _process(self) -> None:
+        assert self._update.message is not None
+        assert self._context.user_data is not None
+        msgs = get_messages()
+        trainer_id = self._context.user_data.get('admin_trainer_id')
+        if not trainer_id:
+            _clear_admin_state(self._context)
+            return
 
-    if not trainer:
-        _clear_admin_state(context)
-        return
+        trainers = self._deps.trainer_repo.get_all()
+        trainer = None
+        for t in trainers:
+            if str(t.id) == trainer_id:
+                trainer = t
+                break
 
-    if id_text.strip() != '-':
-        try:
-            telegram_id = int(id_text.strip())
-            existing = deps.trainer_repo.get_by_telegram_id(telegram_id)
-            if existing and str(existing.id) != trainer_id:
-                text = msgs.admin_trainer_id_taken(name=existing.name)
+        if not trainer:
+            _clear_admin_state(self._context)
+            return
+
+        if self._text.strip() != '-':
+            try:
+                telegram_id = int(self._text.strip())
+                existing = self._deps.trainer_repo.get_by_telegram_id(telegram_id)
+                if existing and str(existing.id) != trainer_id:
+                    text = msgs.admin_trainer_id_taken(name=existing.name)
+                    keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    await self._update.message.reply_text(text, reply_markup=reply_markup)
+                    return
+                self._context.user_data['admin_trainer_telegram_id'] = telegram_id
+            except ValueError:
+                text = msgs.admin_trainer_id_not_a_number_edit
                 keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
-                await update.message.reply_text(text, reply_markup=reply_markup)
+                await self._update.message.reply_text(text, reply_markup=reply_markup)
                 return
-            context.user_data['admin_trainer_telegram_id'] = telegram_id
-        except ValueError:
-            text = msgs.admin_trainer_id_not_a_number_edit
-            keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await update.message.reply_text(text, reply_markup=reply_markup)
-            return
-    else:
-        context.user_data['admin_trainer_telegram_id'] = trainer.telegram_user_id
+        else:
+            self._context.user_data['admin_trainer_telegram_id'] = trainer.telegram_user_id
 
-    context.user_data['admin_state'] = 'awaiting_edit_trainer_description'
+        self._context.user_data['admin_state'] = 'awaiting_edit_trainer_description'
 
-    text = msgs.admin_trainer_edit_step3(
-        new_name=context.user_data['admin_trainer_name'],
-        new_telegram_id=context.user_data['admin_trainer_telegram_id'],
-        description=trainer.description,
-    )
+        text = msgs.admin_trainer_edit_step3(
+            new_name=self._context.user_data['admin_trainer_name'],
+            new_telegram_id=self._context.user_data['admin_trainer_telegram_id'],
+            description=trainer.description,
+        )
 
-    keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text(text, reply_markup=reply_markup)
+        keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await self._update.message.reply_text(text, reply_markup=reply_markup)

@@ -1,41 +1,45 @@
 import logging
 
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import ContextTypes
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-from bot.deps import get_deps
 from bot.handlers.admin._utils import _clear_admin_state
 from bot.handlers.auth import _is_admin
+from bot.handlers.base import Handler
 from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
 
-async def _handle_admin_edit_court_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if not update.callback_query or not update.effective_user:
-        return
+class AdminEditCourtList(Handler):
+    async def _authorize(self) -> bool:
+        assert self._update.callback_query is not None
+        assert self._update.effective_user is not None
+        msgs = get_messages()
+        if not _is_admin(self._update.effective_user.id):
+            await self._update.callback_query.edit_message_text(msgs.admin_no_access)
+            return False
+        return True
 
-    msgs = get_messages()
-    deps = get_deps(context)
+    async def _process(self) -> None:
+        assert self._update.callback_query is not None
+        msgs = get_messages()
 
-    if not _is_admin(update.effective_user.id):
-        await update.callback_query.edit_message_text(msgs.admin_no_access)
-        return
+        _clear_admin_state(self._context)
+        courts = self._deps.court_repo.get_all()
 
-    _clear_admin_state(context)
-    courts = deps.court_repo.get_all()
+        if not courts:
+            keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await self._update.callback_query.edit_message_text(msgs.admin_court_no_courts, reply_markup=reply_markup)
+            return
 
-    if not courts:
-        keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')]]
+        keyboard = []
+        for court in courts:
+            court_id_short = str(court.id)[:8]
+            keyboard.append(
+                [InlineKeyboardButton(f'🎾 {court.name}', callback_data=f'admin_edit_court_{court_id_short}')]
+            )
+        keyboard.append([InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')])
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.callback_query.edit_message_text(msgs.admin_court_no_courts, reply_markup=reply_markup)
-        return
 
-    keyboard = []
-    for court in courts:
-        court_id_short = str(court.id)[:8]
-        keyboard.append([InlineKeyboardButton(f'🎾 {court.name}', callback_data=f'admin_edit_court_{court_id_short}')])
-    keyboard.append([InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')])
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    await update.callback_query.edit_message_text(msgs.admin_court_select_to_edit, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(msgs.admin_court_select_to_edit, reply_markup=reply_markup)

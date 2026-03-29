@@ -1,46 +1,48 @@
 import logging
 
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import ContextTypes
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-from bot.deps import get_deps
 from bot.handlers.admin._utils import _clear_admin_state
+from bot.handlers.base import TextInputHandler
 from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
 
-async def _handle_admin_edit_location_name_input(update: Update, context: ContextTypes.DEFAULT_TYPE, name: str) -> None:
-    assert update.message is not None
-    assert context.user_data is not None
-    msgs = get_messages()
-    deps = get_deps(context)
-    location_id = context.user_data.get('admin_location_id')
-    if not location_id:
-        _clear_admin_state(context)
-        return
+class AdminEditLocationNameInput(TextInputHandler):
+    async def _authorize(self) -> bool:
+        return True
 
-    location = deps.location_repo.get(location_id)
-    if not location:
-        _clear_admin_state(context)
-        return
-
-    if name.strip() != '-':
-        if len(name) < 1 or len(name) > 100:
-            text = msgs.admin_location_name_too_long_edit
-            keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_locations')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await update.message.reply_text(text, reply_markup=reply_markup)
+    async def _process(self) -> None:
+        assert self._update.message is not None
+        assert self._context.user_data is not None
+        msgs = get_messages()
+        location_id = self._context.user_data.get('admin_location_id')
+        if not location_id:
+            _clear_admin_state(self._context)
             return
-        context.user_data['admin_location_name'] = name.strip()
-    else:
-        context.user_data['admin_location_name'] = location.name
 
-    context.user_data['admin_state'] = 'awaiting_edit_location_maps_link'
+        location = self._deps.location_repo.get(location_id)
+        if not location:
+            _clear_admin_state(self._context)
+            return
 
-    new_name = context.user_data['admin_location_name']
-    text = msgs.admin_location_edit_step2(new_name=new_name, maps_link=location.maps_link)
+        if self._text.strip() != '-':
+            if len(self._text) < 1 or len(self._text) > 100:
+                text = msgs.admin_location_name_too_long_edit
+                keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_locations')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                await self._update.message.reply_text(text, reply_markup=reply_markup)
+                return
+            self._context.user_data['admin_location_name'] = self._text.strip()
+        else:
+            self._context.user_data['admin_location_name'] = location.name
 
-    keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_locations')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text(text, reply_markup=reply_markup)
+        self._context.user_data['admin_state'] = 'awaiting_edit_location_maps_link'
+
+        new_name = self._context.user_data['admin_location_name']
+        text = msgs.admin_location_edit_step2(new_name=new_name, maps_link=location.maps_link)
+
+        keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_locations')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await self._update.message.reply_text(text, reply_markup=reply_markup)

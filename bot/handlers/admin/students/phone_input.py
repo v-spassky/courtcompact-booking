@@ -1,76 +1,79 @@
 import logging
 from uuid import uuid4
 
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import ContextTypes
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-from bot.deps import get_deps
 from bot.handlers.admin._utils import _clear_admin_state
 from bot.handlers.auth import _log_user_action
+from bot.handlers.base import TextInputHandler
 from db.models import Student
 from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
 
-async def _handle_admin_student_phone_input(update: Update, context: ContextTypes.DEFAULT_TYPE, phone: str) -> None:
-    assert update.message is not None
-    assert context.user_data is not None
-    msgs = get_messages()
-    deps = get_deps(context)
-    student_name = context.user_data.get('admin_student_name', '')
-    if not student_name:
-        _clear_admin_state(context)
-        return
+class AdminStudentPhoneInput(TextInputHandler):
+    async def _authorize(self) -> bool:
+        return True
 
-    if not phone or phone == '-':
-        context.user_data.pop('admin_state', None)
-        text = msgs.admin_student_phone_required
-        keyboard = [
-            [InlineKeyboardButton(msgs.btn_retry, callback_data='admin_create_student')],
-            [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')],
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(text, reply_markup=reply_markup)
-        return
+    async def _process(self) -> None:
+        assert self._update.message is not None
+        assert self._context.user_data is not None
+        msgs = get_messages()
+        student_name = self._context.user_data.get('admin_student_name', '')
+        if not student_name:
+            _clear_admin_state(self._context)
+            return
 
-    existing = deps.student_repo.get_by_phone(phone)
-    if existing:
-        _clear_admin_state(context)
-        keyboard = [
-            [InlineKeyboardButton(msgs.btn_retry, callback_data='admin_create_student')],
-            [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')],
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(msgs.admin_student_phone_exists, reply_markup=reply_markup)
-        return
+        if not self._text or self._text == '-':
+            self._context.user_data.pop('admin_state', None)
+            text = msgs.admin_student_phone_required
+            keyboard = [
+                [InlineKeyboardButton(msgs.btn_retry, callback_data='admin_create_student')],
+                [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')],
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await self._update.message.reply_text(text, reply_markup=reply_markup)
+            return
 
-    _clear_admin_state(context)
+        existing = self._deps.student_repo.get_by_phone(self._text)
+        if existing:
+            _clear_admin_state(self._context)
+            keyboard = [
+                [InlineKeyboardButton(msgs.btn_retry, callback_data='admin_create_student')],
+                [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')],
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await self._update.message.reply_text(msgs.admin_student_phone_exists, reply_markup=reply_markup)
+            return
 
-    try:
+        _clear_admin_state(self._context)
+
         student = Student(
             id=str(uuid4()),
             name=student_name,
-            phone=phone,
+            phone=self._text,
             telegram_user_id=None,
         )
-        deps.student_repo.save(student)
+        self._deps.student_repo.save(student)
 
-        if update.effective_user:
-            _log_user_action(update.effective_user, f'created student: {student_name}')
+        if self._update.effective_user:
+            _log_user_action(self._update.effective_user, f'created student: {student_name}')
 
         text = msgs.admin_student_created(name=student_name)
-        text += msgs.admin_student_phone_line(phone=phone)
+        text += msgs.admin_student_phone_line(phone=self._text)
 
         keyboard = [
             [InlineKeyboardButton(msgs.btn_create_another, callback_data='admin_create_student')],
             [InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(text, reply_markup=reply_markup)
+        await self._update.message.reply_text(text, reply_markup=reply_markup)
 
-    except Exception:
+    async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to create student')
+        msgs = get_messages()
+        assert self._update.message is not None
         keyboard = [[InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(msgs.admin_student_create_error, reply_markup=reply_markup)
+        await self._update.message.reply_text(msgs.admin_student_create_error, reply_markup=reply_markup)

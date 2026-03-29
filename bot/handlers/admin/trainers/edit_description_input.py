@@ -1,59 +1,58 @@
 import logging
 
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import ContextTypes
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-from bot.deps import get_deps
 from bot.handlers.admin._utils import _clear_admin_state
 from bot.handlers.auth import _log_user_action
+from bot.handlers.base import TextInputHandler
 from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
 
-async def _handle_admin_edit_trainer_description_input(
-    update: Update, context: ContextTypes.DEFAULT_TYPE, desc_text: str
-) -> None:
-    assert update.message is not None
-    assert context.user_data is not None
-    msgs = get_messages()
-    deps = get_deps(context)
-    trainer_id = context.user_data.get('admin_trainer_id')
-    if not trainer_id:
-        _clear_admin_state(context)
-        return
+class AdminEditTrainerDescriptionInput(TextInputHandler):
+    async def _authorize(self) -> bool:
+        return True
 
-    trainers = deps.trainer_repo.get_all()
-    trainer = None
-    for t in trainers:
-        if str(t.id) == trainer_id:
-            trainer = t
-            break
+    async def _process(self) -> None:
+        assert self._update.message is not None
+        assert self._context.user_data is not None
+        msgs = get_messages()
+        trainer_id = self._context.user_data.get('admin_trainer_id')
+        if not trainer_id:
+            _clear_admin_state(self._context)
+            return
 
-    if not trainer:
-        _clear_admin_state(context)
-        return
+        trainers = self._deps.trainer_repo.get_all()
+        trainer = None
+        for t in trainers:
+            if str(t.id) == trainer_id:
+                trainer = t
+                break
 
-    new_name = context.user_data.get('admin_trainer_name', trainer.name)
-    new_telegram_id = context.user_data.get('admin_trainer_telegram_id', trainer.telegram_user_id)
+        if not trainer:
+            _clear_admin_state(self._context)
+            return
 
-    if desc_text.strip() == '-':
-        new_description = trainer.description
-    elif desc_text.strip() == '--':
-        new_description = None
-    else:
-        new_description = desc_text.strip()
+        new_name = self._context.user_data.get('admin_trainer_name', trainer.name)
+        new_telegram_id = self._context.user_data.get('admin_trainer_telegram_id', trainer.telegram_user_id)
 
-    _clear_admin_state(context)
+        if self._text.strip() == '-':
+            new_description = trainer.description
+        elif self._text.strip() == '--':
+            new_description = None
+        else:
+            new_description = self._text.strip()
 
-    try:
+        _clear_admin_state(self._context)
+
         trainer.name = new_name
         trainer.telegram_user_id = new_telegram_id
         trainer.description = new_description
 
-        deps.trainer_repo.save(trainer)
-        if update.effective_user:
-            _log_user_action(update.effective_user, f'edited trainer: {trainer.name}')
+        self._deps.trainer_repo.save(trainer)
+        if self._update.effective_user:
+            _log_user_action(self._update.effective_user, f'edited trainer: {trainer.name}')
 
         text = msgs.admin_trainer_updated(name=trainer.name)
         keyboard = [
@@ -61,10 +60,12 @@ async def _handle_admin_edit_trainer_description_input(
             [InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(text, reply_markup=reply_markup)
+        await self._update.message.reply_text(text, reply_markup=reply_markup)
 
-    except Exception:
+    async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to edit trainer')
+        msgs = get_messages()
+        assert self._update.message is not None
         keyboard = [[InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(msgs.admin_trainer_update_error, reply_markup=reply_markup)
+        await self._update.message.reply_text(msgs.admin_trainer_update_error, reply_markup=reply_markup)

@@ -4,68 +4,84 @@ from datetime import datetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
-from bot.deps import get_deps
+from bot.deps import Deps
+from bot.handlers.base import Handler
 from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
 
-async def _handle_schedule_for_date_show_courts(
-    update: Update, context: ContextTypes.DEFAULT_TYPE, date: datetime, location_id: str | None
-) -> None:
-    if not update.callback_query:
-        return
+class ScheduleForDateShowCourts(Handler):
+    def __init__(
+        self,
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE,
+        deps: Deps,
+        date: datetime,
+        location_id: str | None,
+    ) -> None:
+        super().__init__(update, context, deps)
+        self._date = date
+        self._location_id = location_id
 
-    msgs = get_messages()
-    deps = get_deps(context)
+    async def _authorize(self) -> bool:
+        return True
 
-    try:
+    async def _process(self) -> None:
+        assert self._update.callback_query is not None
+        msgs = get_messages()
+
         location = None
-        if location_id:
-            location = deps.location_repo.get(location_id)
-            courts = deps.location_repo.get_courts(location_id)
+        if self._location_id:
+            location = self._deps.location_repo.get(self._location_id)
+            courts = self._deps.location_repo.get_courts(self._location_id)
         else:
-            courts = deps.court_repo.get_all()
+            courts = self._deps.court_repo.get_all()
 
         if not courts:
             text = msgs.schedule_no_courts(location_name=location.name if location else None)
             keyboard = [
                 [
                     InlineKeyboardButton(
-                        msgs.btn_select_other_location, callback_data=f'date_{date.year}_{date.month}_{date.day}'
+                        msgs.btn_select_other_location,
+                        callback_data=f'date_{self._date.year}_{self._date.month}_{self._date.day}',
                     )
                 ],
                 [InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')],
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+            await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
             return
 
         text = msgs.schedule_select_court(
-            date=date.strftime('%d.%m.%Y'),
+            date=self._date.strftime('%d.%m.%Y'),
             location_name=location.name if location else None,
             maps_link=location.maps_link if location else None,
         )
 
         keyboard = []
         for court in courts:
-            callback_data = f'court_day_{court.id}_{date.year}_{date.month}_{date.day}'
-            keyboard.append([InlineKeyboardButton(f'🎾 {court.name}', callback_data=callback_data)])
+            court_callback = f'court_day_{court.id}_{self._date.year}_{self._date.month}_{self._date.day}'
+            keyboard.append([InlineKeyboardButton(f'🎾 {court.name}', callback_data=court_callback)])
 
         if location:
             keyboard.append(
                 [
                     InlineKeyboardButton(
-                        msgs.btn_select_other_location, callback_data=f'date_{date.year}_{date.month}_{date.day}'
+                        msgs.btn_select_other_location,
+                        callback_data=f'date_{self._date.year}_{self._date.month}_{self._date.day}',
                     )
                 ]
             )
         keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        await update.callback_query.edit_message_text(
+        await self._update.callback_query.edit_message_text(
             text, reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True
         )
-    except Exception:
+
+    async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to show court selection')
-        await update.callback_query.edit_message_text(msgs.generic_error)
+        msgs = get_messages()
+        assert self._update.callback_query is not None
+        await self._update.callback_query.edit_message_text(msgs.generic_error)

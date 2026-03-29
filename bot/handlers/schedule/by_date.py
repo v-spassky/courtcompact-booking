@@ -4,28 +4,33 @@ from datetime import datetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
-from bot.deps import get_deps
-from bot.handlers.schedule.by_date_courts import _handle_schedule_for_date_show_courts
+from bot.deps import Deps
+from bot.handlers.base import Handler
+from bot.handlers.schedule.by_date_courts import ScheduleForDateShowCourts
 from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
 
-async def _handle_schedule_for_date(update: Update, context: ContextTypes.DEFAULT_TYPE, date: datetime) -> None:
-    if not update.callback_query:
-        return
+class ScheduleForDate(Handler):
+    def __init__(self, update: Update, context: ContextTypes.DEFAULT_TYPE, deps: Deps, date: datetime) -> None:
+        super().__init__(update, context, deps)
+        self._date = date
 
-    msgs = get_messages()
-    deps = get_deps(context)
+    async def _authorize(self) -> bool:
+        return True
 
-    try:
-        locations = deps.location_repo.get_all()
+    async def _process(self) -> None:
+        assert self._update.callback_query is not None
+        msgs = get_messages()
+
+        locations = self._deps.location_repo.get_all()
 
         if not locations:
-            await _handle_schedule_for_date_show_courts(update, context, date, None)
+            await ScheduleForDateShowCourts(self._update, self._context, self._deps, self._date, None).handle()
             return
 
-        text = msgs.schedule_select_location(date=date.strftime('%d.%m.%Y'))
+        text = msgs.schedule_select_location(date=self._date.strftime('%d.%m.%Y'))
 
         for location in locations:
             if location.maps_link:
@@ -36,15 +41,20 @@ async def _handle_schedule_for_date(update: Update, context: ContextTypes.DEFAUL
         keyboard = []
         for location in locations:
             location_id_short = str(location.id)[:8]
-            callback_data = f'schedule_location_{location_id_short}_{date.year}_{date.month}_{date.day}'
-            keyboard.append([InlineKeyboardButton(f'📍 {location.name}', callback_data=callback_data)])
+            loc_callback = (
+                f'schedule_location_{location_id_short}_{self._date.year}_{self._date.month}_{self._date.day}'
+            )
+            keyboard.append([InlineKeyboardButton(f'📍 {location.name}', callback_data=loc_callback)])
 
         keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        await update.callback_query.edit_message_text(
+        await self._update.callback_query.edit_message_text(
             text, reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True
         )
-    except Exception:
+
+    async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to show location selection')
-        await update.callback_query.edit_message_text(msgs.generic_error)
+        msgs = get_messages()
+        assert self._update.callback_query is not None
+        await self._update.callback_query.edit_message_text(msgs.generic_error)

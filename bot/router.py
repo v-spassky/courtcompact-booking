@@ -5,38 +5,32 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from bot.deps import get_deps
-from bot.handlers.admin.courts.create_select_location import _handle_admin_create_court_select_location
-from bot.handlers.admin.courts.create_start import _handle_admin_create_court_start
-from bot.handlers.admin.courts.delete_confirm import _handle_admin_delete_court_confirm
-from bot.handlers.admin.courts.delete_execute import _handle_admin_delete_court_execute
-from bot.handlers.admin.courts.delete_list import _handle_admin_delete_court_list
-from bot.handlers.admin.courts.edit_list import _handle_admin_edit_court_list
-from bot.handlers.admin.courts.edit_start import _handle_admin_edit_court_start
-from bot.handlers.admin.locations.create_start import _handle_admin_create_location_start
-from bot.handlers.admin.locations.delete_confirm import _handle_admin_delete_location_confirm
-from bot.handlers.admin.locations.delete_execute import _handle_admin_delete_location_execute
-from bot.handlers.admin.locations.delete_list import _handle_admin_delete_location_list
-from bot.handlers.admin.locations.edit_list import _handle_admin_edit_location_list
-from bot.handlers.admin.locations.edit_start import _handle_admin_edit_location_start
-from bot.handlers.admin.menu import (
-    _handle_admin_courts_menu,
-    _handle_admin_locations_menu,
-    _handle_admin_menu,
-    _handle_admin_students_menu,
-    _handle_admin_trainers_menu,
-)
-from bot.handlers.admin.students.create_start import _handle_admin_create_student_start
-from bot.handlers.admin.students.delete_confirm import _handle_admin_delete_student_confirm
-from bot.handlers.admin.students.delete_execute import _handle_admin_delete_student_execute
-from bot.handlers.admin.students.delete_list import _handle_admin_delete_student_list
-from bot.handlers.admin.students.edit_list import _handle_admin_edit_student_list
-from bot.handlers.admin.students.edit_start import _handle_admin_edit_student_start
-from bot.handlers.admin.trainers.create_start import _handle_admin_create_trainer_start
-from bot.handlers.admin.trainers.delete_confirm import _handle_admin_delete_trainer_confirm
-from bot.handlers.admin.trainers.delete_execute import _handle_admin_delete_trainer_execute
-from bot.handlers.admin.trainers.delete_list import _handle_admin_delete_trainer_list
-from bot.handlers.admin.trainers.edit_list import _handle_admin_edit_trainer_list
-from bot.handlers.admin.trainers.edit_start import _handle_admin_edit_trainer_start
+from bot.handlers.admin.courts.create_select_location import AdminCreateCourtSelectLocation
+from bot.handlers.admin.courts.create_start import AdminCreateCourtStart
+from bot.handlers.admin.courts.delete_confirm import AdminDeleteCourtConfirm
+from bot.handlers.admin.courts.delete_execute import AdminDeleteCourtExecute
+from bot.handlers.admin.courts.delete_list import AdminDeleteCourtList
+from bot.handlers.admin.courts.edit_list import AdminEditCourtList
+from bot.handlers.admin.courts.edit_start import AdminEditCourtStart
+from bot.handlers.admin.locations.create_start import AdminCreateLocationStart
+from bot.handlers.admin.locations.delete_confirm import AdminDeleteLocationConfirm
+from bot.handlers.admin.locations.delete_execute import AdminDeleteLocationExecute
+from bot.handlers.admin.locations.delete_list import AdminDeleteLocationList
+from bot.handlers.admin.locations.edit_list import AdminEditLocationList
+from bot.handlers.admin.locations.edit_start import AdminEditLocationStart
+from bot.handlers.admin.menu import AdminCourtsMenu, AdminLocationsMenu, AdminMenu, AdminStudentsMenu, AdminTrainersMenu
+from bot.handlers.admin.students.create_start import AdminCreateStudentStart
+from bot.handlers.admin.students.delete_confirm import AdminDeleteStudentConfirm
+from bot.handlers.admin.students.delete_execute import AdminDeleteStudentExecute
+from bot.handlers.admin.students.delete_list import AdminDeleteStudentList
+from bot.handlers.admin.students.edit_list import AdminEditStudentList
+from bot.handlers.admin.students.edit_start import AdminEditStudentStart
+from bot.handlers.admin.trainers.create_start import AdminCreateTrainerStart
+from bot.handlers.admin.trainers.delete_confirm import AdminDeleteTrainerConfirm
+from bot.handlers.admin.trainers.delete_execute import AdminDeleteTrainerExecute
+from bot.handlers.admin.trainers.delete_list import AdminDeleteTrainerList
+from bot.handlers.admin.trainers.edit_list import AdminEditTrainerList
+from bot.handlers.admin.trainers.edit_start import AdminEditTrainerStart
 from bot.handlers.auth import (
     _create_calendar,
     _is_authorized,
@@ -44,24 +38,24 @@ from bot.handlers.auth import (
     _show_authorization_request,
     show_main_menu,
 )
-from bot.handlers.booking.calendar_nav import _handle_booking_calendar_navigation
-from bot.handlers.booking.cancel_menu import _handle_cancel_booking_menu
-from bot.handlers.booking.cancellation import _handle_booking_cancellation
-from bot.handlers.booking.court_selection import _handle_court_selection_for_booking
-from bot.handlers.booking.date_selection import _handle_booking_date_selection
-from bot.handlers.booking.my_bookings import _handle_my_bookings
-from bot.handlers.booking.select_court import _handle_book_court
-from bot.handlers.booking.select_location import _handle_book_court_select_location
-from bot.handlers.booking.slot_selection import _handle_booking_slot_selection
-from bot.handlers.booking.trainer_selection import _handle_trainer_selection_for_booking
-from bot.handlers.schedule.by_date import _handle_schedule_for_date
-from bot.handlers.schedule.by_date_courts import _handle_schedule_for_date_show_courts
-from bot.handlers.schedule.court_day import _handle_court_schedule_for_day
-from bot.handlers.schedule.court_week import _handle_court_schedule_for_week
-from bot.handlers.schedule.trainer_menu import _handle_trainer_schedule_menu
-from bot.handlers.schedule.trainer_view import _handle_view_trainer_schedule
-from bot.handlers.schedule.weekly import _handle_schedule_weekly
-from bot.handlers.schedule.weekly_courts import _handle_schedule_weekly_show_courts
+from bot.handlers.booking.calendar_nav import BookingCalendarNavigation
+from bot.handlers.booking.cancel_menu import CancelBookingMenu
+from bot.handlers.booking.cancellation import BookingCancellation
+from bot.handlers.booking.court_selection import CourtSelectionForBooking
+from bot.handlers.booking.date_selection import BookingDateSelection
+from bot.handlers.booking.my_bookings import MyBookings
+from bot.handlers.booking.select_court import BookCourt
+from bot.handlers.booking.select_location import BookCourtSelectLocation
+from bot.handlers.booking.slot_selection import BookingSlotSelection
+from bot.handlers.booking.trainer_selection import TrainerSelectionForBooking
+from bot.handlers.schedule.by_date import ScheduleForDate
+from bot.handlers.schedule.by_date_courts import ScheduleForDateShowCourts
+from bot.handlers.schedule.court_day import CourtScheduleForDay
+from bot.handlers.schedule.court_week import CourtScheduleForWeek
+from bot.handlers.schedule.trainer_menu import TrainerScheduleMenu
+from bot.handlers.schedule.trainer_view import ViewTrainerSchedule
+from bot.handlers.schedule.weekly import ScheduleWeekly
+from bot.handlers.schedule.weekly_courts import ScheduleWeeklyShowCourts
 from config.settings import now_kiev
 from localization import get_messages
 
@@ -107,7 +101,7 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
         parts = callback_data.split('_')
         year, month, day = int(parts[1]), int(parts[2]), int(parts[3])
         selected_date = datetime(year, month, day)
-        await _handle_schedule_for_date(update, context, selected_date)
+        await ScheduleForDate(update, context, deps, selected_date).handle()
     elif callback_data.startswith('schedule_location_'):
         parts = callback_data.split('_')
         location_id_short = parts[2]
@@ -119,21 +113,21 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
             if str(loc.id).startswith(location_id_short):
                 location_id = str(loc.id)
                 break
-        await _handle_schedule_for_date_show_courts(update, context, selected_date, location_id)
+        await ScheduleForDateShowCourts(update, context, deps, selected_date, location_id).handle()
     elif callback_data.startswith('court_day_'):
         parts = callback_data.split('_')
         court_id = parts[2]
         year, month, day = int(parts[3]), int(parts[4]), int(parts[5])
         selected_date = datetime(year, month, day)
-        await _handle_court_schedule_for_day(update, context, court_id, selected_date)
+        await CourtScheduleForDay(update, context, deps, court_id, selected_date).handle()
     elif callback_data.startswith('court_week_'):
         parts = callback_data.split('_')
         court_id = parts[2]
         year, month, day = int(parts[3]), int(parts[4]), int(parts[5])
         start_of_week = datetime(year, month, day)
-        await _handle_court_schedule_for_week(update, context, court_id, start_of_week)
+        await CourtScheduleForWeek(update, context, deps, court_id, start_of_week).handle()
     elif callback_data == 'schedule_weekly':
-        await _handle_schedule_weekly(update, context)
+        await ScheduleWeekly(update, context, deps).handle()
     elif callback_data.startswith('weekly_location_'):
         parts = callback_data.split('_')
         location_id_short = parts[2]
@@ -145,94 +139,88 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
             if str(loc.id).startswith(location_id_short):
                 location_id = str(loc.id)
                 break
-        await _handle_schedule_weekly_show_courts(update, context, start_of_week, location_id)
+        await ScheduleWeeklyShowCourts(update, context, deps, start_of_week, location_id).handle()
     elif callback_data == 'trainer_schedule':
-        await _handle_trainer_schedule_menu(update, context)
+        await TrainerScheduleMenu(update, context, deps).handle()
     elif callback_data.startswith('view_trainer_'):
-        await _handle_view_trainer_schedule(update, context, callback_data)
+        await ViewTrainerSchedule(update, context, deps, callback_data).handle()
     elif callback_data.startswith('book_cal_'):
-        await _handle_booking_calendar_navigation(update, context, callback_data)
+        await BookingCalendarNavigation(update, context, deps, callback_data).handle()
     elif callback_data.startswith('book_date_'):
-        await _handle_booking_date_selection(update, context, callback_data)
+        await BookingDateSelection(update, context, deps, callback_data).handle()
     elif callback_data.startswith('book_slot_'):
-        await _handle_booking_slot_selection(update, context, callback_data, update.effective_user.id)
+        await BookingSlotSelection(update, context, deps, callback_data, update.effective_user.id).handle()
     elif callback_data == 'book_court':
-        await _handle_book_court_select_location(update, context)
+        await BookCourtSelectLocation(update, context, deps).handle()
     elif callback_data.startswith('book_location_'):
-        await _handle_book_court(update, context, callback_data)
+        await BookCourt(update, context, deps, callback_data).handle()
     elif callback_data == 'my_bookings':
-        await _handle_my_bookings(update, context)
+        await MyBookings(update, context, deps).handle()
     elif callback_data == 'cancel_booking':
-        await _handle_cancel_booking_menu(update, context)
+        await CancelBookingMenu(update, context, deps).handle()
     elif callback_data == 'admin_menu':
-        await _handle_admin_menu(update, context)
+        await AdminMenu(update, context, deps).handle()
     elif callback_data == 'admin_courts':
-        await _handle_admin_courts_menu(update, context)
+        await AdminCourtsMenu(update, context, deps).handle()
     elif callback_data == 'admin_trainers':
-        await _handle_admin_trainers_menu(update, context)
+        await AdminTrainersMenu(update, context, deps).handle()
     elif callback_data == 'admin_locations':
-        await _handle_admin_locations_menu(update, context)
+        await AdminLocationsMenu(update, context, deps).handle()
     elif callback_data == 'admin_create_location':
-        await _handle_admin_create_location_start(update, context)
+        await AdminCreateLocationStart(update, context, deps).handle()
     elif callback_data == 'admin_edit_location':
-        await _handle_admin_edit_location_list(update, context)
+        await AdminEditLocationList(update, context, deps).handle()
     elif callback_data.startswith('admin_edit_location_'):
-        await _handle_admin_edit_location_start(update, context, callback_data)
+        await AdminEditLocationStart(update, context, deps, callback_data).handle()
     elif callback_data == 'admin_delete_location':
-        await _handle_admin_delete_location_list(update, context)
+        await AdminDeleteLocationList(update, context, deps).handle()
     elif callback_data.startswith('admin_delete_location_'):
-        await _handle_admin_delete_location_confirm(update, context, callback_data)
+        await AdminDeleteLocationConfirm(update, context, deps, callback_data).handle()
     elif callback_data.startswith('admin_confirm_delete_location_'):
-        await _handle_admin_delete_location_execute(update, context, callback_data)
+        await AdminDeleteLocationExecute(update, context, deps, callback_data).handle()
     elif callback_data == 'admin_create_court':
-        await _handle_admin_create_court_select_location(update, context)
+        await AdminCreateCourtSelectLocation(update, context, deps).handle()
     elif callback_data.startswith('admin_court_location_'):
-        await _handle_admin_create_court_start(update, context, callback_data)
+        await AdminCreateCourtStart(update, context, deps, callback_data).handle()
     elif callback_data == 'admin_edit_court':
-        await _handle_admin_edit_court_list(update, context)
+        await AdminEditCourtList(update, context, deps).handle()
     elif callback_data.startswith('admin_edit_court_'):
-        await _handle_admin_edit_court_start(update, context, callback_data)
+        await AdminEditCourtStart(update, context, deps, callback_data).handle()
     elif callback_data == 'admin_delete_court':
-        await _handle_admin_delete_court_list(update, context)
+        await AdminDeleteCourtList(update, context, deps).handle()
     elif callback_data.startswith('admin_delete_court_'):
-        await _handle_admin_delete_court_confirm(update, context, callback_data)
+        await AdminDeleteCourtConfirm(update, context, deps, callback_data).handle()
     elif callback_data.startswith('admin_confirm_delete_court_'):
-        await _handle_admin_delete_court_execute(update, context, callback_data)
+        await AdminDeleteCourtExecute(update, context, deps, callback_data).handle()
     elif callback_data == 'admin_create_trainer':
-        await _handle_admin_create_trainer_start(update, context)
+        await AdminCreateTrainerStart(update, context, deps).handle()
     elif callback_data == 'admin_edit_trainer':
-        await _handle_admin_edit_trainer_list(update, context)
+        await AdminEditTrainerList(update, context, deps).handle()
     elif callback_data.startswith('admin_edit_trainer_'):
-        await _handle_admin_edit_trainer_start(update, context, callback_data)
+        await AdminEditTrainerStart(update, context, deps, callback_data).handle()
     elif callback_data == 'admin_delete_trainer':
-        await _handle_admin_delete_trainer_list(update, context)
+        await AdminDeleteTrainerList(update, context, deps).handle()
     elif callback_data.startswith('admin_delete_trainer_'):
-        await _handle_admin_delete_trainer_confirm(update, context, callback_data)
+        await AdminDeleteTrainerConfirm(update, context, deps, callback_data).handle()
     elif callback_data.startswith('admin_confirm_delete_trainer_'):
-        await _handle_admin_delete_trainer_execute(update, context, callback_data)
+        await AdminDeleteTrainerExecute(update, context, deps, callback_data).handle()
     elif callback_data == 'admin_students':
-        await _handle_admin_students_menu(update, context)
+        await AdminStudentsMenu(update, context, deps).handle()
     elif callback_data == 'admin_create_student':
-        await _handle_admin_create_student_start(update, context)
+        await AdminCreateStudentStart(update, context, deps).handle()
     elif callback_data == 'admin_edit_student':
-        await _handle_admin_edit_student_list(update, context)
+        await AdminEditStudentList(update, context, deps).handle()
     elif callback_data.startswith('admin_edit_student_'):
-        await _handle_admin_edit_student_start(update, context, callback_data)
+        await AdminEditStudentStart(update, context, deps, callback_data).handle()
     elif callback_data == 'admin_delete_student':
-        await _handle_admin_delete_student_list(update, context)
+        await AdminDeleteStudentList(update, context, deps).handle()
     elif callback_data.startswith('admin_delete_student_'):
-        await _handle_admin_delete_student_confirm(update, context, callback_data)
+        await AdminDeleteStudentConfirm(update, context, deps, callback_data).handle()
     elif callback_data.startswith('admin_confirm_delete_student_'):
-        await _handle_admin_delete_student_execute(update, context, callback_data)
+        await AdminDeleteStudentExecute(update, context, deps, callback_data).handle()
     elif callback_data.startswith('select_court_'):
-        await _handle_court_selection_for_booking(
-            update, context, update.callback_query, callback_data, update.effective_user.id
-        )
+        await CourtSelectionForBooking(update, context, deps, callback_data, update.effective_user.id).handle()
     elif callback_data.startswith('select_trainer_'):
-        await _handle_trainer_selection_for_booking(
-            update, context, update.callback_query, callback_data, update.effective_user.id
-        )
+        await TrainerSelectionForBooking(update, context, deps, callback_data, update.effective_user.id).handle()
     elif callback_data.startswith('cancel_booking_'):
-        await _handle_booking_cancellation(
-            update, context, update.callback_query, callback_data, update.effective_user.id
-        )
+        await BookingCancellation(update, context, deps, callback_data, update.effective_user.id).handle()

@@ -4,38 +4,46 @@ from datetime import datetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
-from bot.deps import get_deps
+from bot.deps import Deps
+from bot.handlers.base import Handler
 from config.settings import now_kiev
 from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
 
-async def _handle_court_schedule_for_day(
-    update: Update, context: ContextTypes.DEFAULT_TYPE, court_id: str, date: datetime
-) -> None:
-    if not update.callback_query:
-        return
+class CourtScheduleForDay(Handler):
+    def __init__(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE, deps: Deps, court_id: str, date: datetime
+    ) -> None:
+        super().__init__(update, context, deps)
+        self._court_id = court_id
+        self._date = date
 
-    msgs = get_messages()
-    deps = get_deps(context)
+    async def _authorize(self) -> bool:
+        return True
 
-    try:
-        time_slots = deps.schedule_service.get_all_time_slots_for_date(date)
-        court = deps.court_repo.get(court_id)
+    async def _process(self) -> None:
+        assert self._update.callback_query is not None
+        msgs = get_messages()
+
+        time_slots = self._deps.schedule_service.get_all_time_slots_for_date(self._date)
+        court = self._deps.court_repo.get(self._court_id)
         court_name = court.name if court else msgs.unknown_court
 
         court_slots = [
-            slot for slot in time_slots if str(slot.court_id) == court_id and slot.start_time.date() == date.date()
+            slot
+            for slot in time_slots
+            if str(slot.court_id) == self._court_id and slot.start_time.date() == self._date.date()
         ]
 
         location = None
         if court and court.location_id:
-            location = deps.location_repo.get(court.location_id)
+            location = self._deps.location_repo.get(court.location_id)
 
         text = msgs.schedule_court_day(
             court_name=court_name,
-            date=date.strftime('%d.%m.%Y'),
+            date=self._date.strftime('%d.%m.%Y'),
             location_name=location.name if location else None,
             maps_link=location.maps_link if location else None,
         )
@@ -59,13 +67,13 @@ async def _handle_court_schedule_for_day(
                 else:
                     booking_info = time_range
                     if slot.booking_id:
-                        booking = deps.booking_repo.get(slot.booking_id)
+                        booking = self._deps.booking_repo.get(slot.booking_id)
                         if booking:
-                            student = deps.student_repo.get(booking.student_id) if booking.student_id else None
+                            student = self._deps.student_repo.get(booking.student_id) if booking.student_id else None
                             if student:
                                 booking_info += f' ({student.name})'
                             if booking.trainer_id:
-                                trainer = deps.trainer_repo.get(booking.trainer_id)
+                                trainer = self._deps.trainer_repo.get(booking.trainer_id)
                                 if trainer:
                                     booking_info += f' 👨‍🏫 {trainer.name}'
                     text += f'❌ {booking_info}\n'
@@ -76,9 +84,12 @@ async def _handle_court_schedule_for_day(
         keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        await update.callback_query.edit_message_text(
+        await self._update.callback_query.edit_message_text(
             text, reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True
         )
-    except Exception:
+
+    async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to generate court schedule')
-        await update.callback_query.edit_message_text(msgs.schedule_court_error)
+        msgs = get_messages()
+        assert self._update.callback_query is not None
+        await self._update.callback_query.edit_message_text(msgs.schedule_court_error)

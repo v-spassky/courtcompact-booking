@@ -1,9 +1,10 @@
 import logging
 
-from telegram import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
-from bot.deps import get_deps
+from bot.deps import Deps
+from bot.handlers.base import Handler
 from bot.handlers.booking._utils import _create_booking_calendar
 from config.settings import now_kiev
 from localization import get_messages
@@ -11,28 +12,36 @@ from localization import get_messages
 logger = logging.getLogger(__name__)
 
 
-async def _handle_court_selection_for_booking(
-    update: Update, context: ContextTypes.DEFAULT_TYPE, query: CallbackQuery, data: str, user_id: int
-) -> None:
-    msgs = get_messages()
-    deps = get_deps(context)
-    court_id = data.split('_')[2]
+class CourtSelectionForBooking(Handler):
+    def __init__(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE, deps: Deps, callback_data: str, user_id: int
+    ) -> None:
+        super().__init__(update, context, deps)
+        self._callback_data = callback_data
+        self._user_id = user_id
 
-    try:
-        court = deps.court_repo.get(court_id)
+    async def _authorize(self) -> bool:
+        return True
+
+    async def _process(self) -> None:
+        assert self._update.callback_query is not None
+        msgs = get_messages()
+        court_id = self._callback_data.split('_')[2]
+
+        court = self._deps.court_repo.get(court_id)
         court_name = court.name if court else msgs.unknown_court
 
-        user_trainer = deps.trainer_repo.get_by_telegram_id(user_id)
+        user_trainer = self._deps.trainer_repo.get_by_telegram_id(self._user_id)
         if user_trainer:
             now = now_kiev()
-            calendar_markup = _create_booking_calendar(now.year, now.month, court_id, user_trainer.id, deps)
+            calendar_markup = _create_booking_calendar(now.year, now.month, court_id, user_trainer.id, self._deps)
 
             text = msgs.booking_select_date(court_name=court_name, trainer_name=user_trainer.name)
 
-            await query.edit_message_text(text, reply_markup=calendar_markup)
+            await self._update.callback_query.edit_message_text(text, reply_markup=calendar_markup)
             return
 
-        trainers = deps.trainer_repo.get_all()
+        trainers = self._deps.trainer_repo.get_all()
 
         keyboard = []
         keyboard.append(
@@ -52,7 +61,12 @@ async def _handle_court_selection_for_booking(
         keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        await query.edit_message_text(msgs.booking_select_trainer(court_name=court_name), reply_markup=reply_markup)
-    except Exception:
+        await self._update.callback_query.edit_message_text(
+            msgs.booking_select_trainer(court_name=court_name), reply_markup=reply_markup
+        )
+
+    async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to show trainer selection')
-        await query.edit_message_text(msgs.generic_error)
+        msgs = get_messages()
+        assert self._update.callback_query is not None
+        await self._update.callback_query.edit_message_text(msgs.generic_error)

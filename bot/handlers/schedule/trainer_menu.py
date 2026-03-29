@@ -1,28 +1,29 @@
 import logging
 
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import ContextTypes
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-from bot.deps import get_deps
+from bot.handlers.base import Handler
 from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
 
-async def _handle_trainer_schedule_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if not update.callback_query:
-        return
+class TrainerScheduleMenu(Handler):
+    async def _authorize(self) -> bool:
+        return True
 
-    msgs = get_messages()
-    deps = get_deps(context)
+    async def _process(self) -> None:
+        assert self._update.callback_query is not None
+        msgs = get_messages()
 
-    try:
-        trainers = deps.trainer_repo.get_all()
+        trainers = self._deps.trainer_repo.get_all()
 
         if not trainers:
             keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await update.callback_query.edit_message_text(msgs.trainer_schedule_no_trainers, reply_markup=reply_markup)
+            await self._update.callback_query.edit_message_text(
+                msgs.trainer_schedule_no_trainers, reply_markup=reply_markup
+            )
             return
 
         keyboard = []
@@ -33,7 +34,10 @@ async def _handle_trainer_schedule_menu(update: Update, context: ContextTypes.DE
         keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        await update.callback_query.edit_message_text(msgs.trainer_schedule_select, reply_markup=reply_markup)
-    except Exception:
+        await self._update.callback_query.edit_message_text(msgs.trainer_schedule_select, reply_markup=reply_markup)
+
+    async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to show trainer selection')
-        await update.callback_query.edit_message_text(msgs.generic_error)
+        msgs = get_messages()
+        assert self._update.callback_query is not None
+        await self._update.callback_query.edit_message_text(msgs.generic_error)

@@ -1,50 +1,49 @@
 import logging
 
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import ContextTypes
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-from bot.deps import get_deps
 from bot.handlers.admin._utils import _clear_admin_state
 from bot.handlers.auth import _log_user_action
+from bot.handlers.base import TextInputHandler
 from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
 
-async def _handle_admin_edit_court_description_input(
-    update: Update, context: ContextTypes.DEFAULT_TYPE, description: str
-) -> None:
-    assert update.message is not None
-    assert context.user_data is not None
-    msgs = get_messages()
-    deps = get_deps(context)
-    court_id = context.user_data.get('admin_court_id')
-    new_name = context.user_data.get('admin_court_name')
+class AdminEditCourtDescriptionInput(TextInputHandler):
+    async def _authorize(self) -> bool:
+        return True
 
-    if not court_id:
-        _clear_admin_state(context)
-        return
+    async def _process(self) -> None:
+        assert self._update.message is not None
+        assert self._context.user_data is not None
+        msgs = get_messages()
+        court_id = self._context.user_data.get('admin_court_id')
+        new_name = self._context.user_data.get('admin_court_name')
 
-    court = deps.court_repo.get(court_id)
-    if not court:
-        _clear_admin_state(context)
-        return
+        if not court_id:
+            _clear_admin_state(self._context)
+            return
 
-    _clear_admin_state(context)
+        court = self._deps.court_repo.get(court_id)
+        if not court:
+            _clear_admin_state(self._context)
+            return
 
-    try:
+        _clear_admin_state(self._context)
+
         if new_name is not None:
             court.name = new_name
-        if description.strip() == '-':
+        if self._text.strip() == '-':
             pass
-        elif description.strip() == '--':
+        elif self._text.strip() == '--':
             court.description = None
         else:
-            court.description = description.strip()
+            court.description = self._text.strip()
 
-        deps.court_repo.save(court)
-        if update.effective_user:
-            _log_user_action(update.effective_user, f'edited court: {court.name}')
+        self._deps.court_repo.save(court)
+        if self._update.effective_user:
+            _log_user_action(self._update.effective_user, f'edited court: {court.name}')
 
         text = msgs.admin_court_updated(name=court.name)
         keyboard = [
@@ -52,10 +51,12 @@ async def _handle_admin_edit_court_description_input(
             [InlineKeyboardButton(msgs.btn_back_to_courts, callback_data='admin_courts')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(text, reply_markup=reply_markup)
+        await self._update.message.reply_text(text, reply_markup=reply_markup)
 
-    except Exception:
+    async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to edit court')
+        msgs = get_messages()
+        assert self._update.message is not None
         keyboard = [[InlineKeyboardButton(msgs.btn_back_to_courts, callback_data='admin_courts')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(msgs.admin_court_update_error, reply_markup=reply_markup)
+        await self._update.message.reply_text(msgs.admin_court_update_error, reply_markup=reply_markup)

@@ -4,30 +4,41 @@ from datetime import datetime, timedelta
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
-from bot.deps import get_deps
+from bot.deps import Deps
+from bot.handlers.base import Handler
 from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
 
-async def _handle_schedule_weekly_show_courts(
-    update: Update, context: ContextTypes.DEFAULT_TYPE, start_of_week: datetime, location_id: str | None
-) -> None:
-    if not update.callback_query:
-        return
+class ScheduleWeeklyShowCourts(Handler):
+    def __init__(
+        self,
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE,
+        deps: Deps,
+        start_of_week: datetime,
+        location_id: str | None,
+    ) -> None:
+        super().__init__(update, context, deps)
+        self._start_of_week = start_of_week
+        self._location_id = location_id
 
-    msgs = get_messages()
-    deps = get_deps(context)
+    async def _authorize(self) -> bool:
+        return True
 
-    try:
+    async def _process(self) -> None:
+        assert self._update.callback_query is not None
+        msgs = get_messages()
+
         location = None
-        if location_id:
-            location = deps.location_repo.get(location_id)
-            courts = deps.location_repo.get_courts(location_id)
+        if self._location_id:
+            location = self._deps.location_repo.get(self._location_id)
+            courts = self._deps.location_repo.get_courts(self._location_id)
         else:
-            courts = deps.court_repo.get_all()
+            courts = self._deps.court_repo.get_all()
 
-        week_end = start_of_week + timedelta(days=6)
+        week_end = self._start_of_week + timedelta(days=6)
 
         if not courts:
             text = msgs.schedule_weekly_no_courts(location_name=location.name if location else None)
@@ -36,11 +47,11 @@ async def _handle_schedule_weekly_show_courts(
                 [InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')],
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+            await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
             return
 
         text = msgs.schedule_weekly_select_court(
-            start=start_of_week.strftime('%d.%m'),
+            start=self._start_of_week.strftime('%d.%m'),
             end=week_end.strftime('%d.%m.%Y'),
             location_name=location.name if location else None,
             maps_link=location.maps_link if location else None,
@@ -48,17 +59,20 @@ async def _handle_schedule_weekly_show_courts(
 
         keyboard = []
         for court in courts:
-            callback_data = f'court_week_{court.id}_{start_of_week.year}_{start_of_week.month}_{start_of_week.day}'
-            keyboard.append([InlineKeyboardButton(f'🎾 {court.name}', callback_data=callback_data)])
+            court_callback = f'court_week_{court.id}_{self._start_of_week.year}_{self._start_of_week.month}_{self._start_of_week.day}'
+            keyboard.append([InlineKeyboardButton(f'🎾 {court.name}', callback_data=court_callback)])
 
         if location:
             keyboard.append([InlineKeyboardButton(msgs.btn_select_other_location, callback_data='schedule_weekly')])
         keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        await update.callback_query.edit_message_text(
+        await self._update.callback_query.edit_message_text(
             text, reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True
         )
-    except Exception:
+
+    async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to show court selection for weekly')
-        await update.callback_query.edit_message_text(msgs.generic_error)
+        msgs = get_messages()
+        assert self._update.callback_query is not None
+        await self._update.callback_query.edit_message_text(msgs.generic_error)

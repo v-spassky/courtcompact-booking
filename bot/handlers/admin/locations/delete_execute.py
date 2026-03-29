@@ -3,51 +3,63 @@ import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
-from bot.deps import get_deps
+from bot.deps import Deps
 from bot.handlers.auth import _is_admin, _log_user_action
+from bot.handlers.base import Handler
 from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
 
-async def _handle_admin_delete_location_execute(update: Update, context: ContextTypes.DEFAULT_TYPE, data: str) -> None:
-    if not update.callback_query or not update.effective_user:
-        return
+class AdminDeleteLocationExecute(Handler):
+    def __init__(self, update: Update, context: ContextTypes.DEFAULT_TYPE, deps: Deps, callback_data: str) -> None:
+        super().__init__(update, context, deps)
+        self._callback_data = callback_data
 
-    msgs = get_messages()
-    deps = get_deps(context)
+    async def _authorize(self) -> bool:
+        assert self._update.callback_query is not None
+        assert self._update.effective_user is not None
+        msgs = get_messages()
+        if not _is_admin(self._update.effective_user.id):
+            await self._update.callback_query.edit_message_text(msgs.admin_no_access)
+            return False
+        return True
 
-    if not _is_admin(update.effective_user.id):
-        await update.callback_query.edit_message_text(msgs.admin_no_access)
-        return
+    async def _process(self) -> None:
+        assert self._update.callback_query is not None
+        assert self._update.effective_user is not None
+        msgs = get_messages()
 
-    location_id_short = data.replace('admin_confirm_delete_location_', '')
+        location_id_short = self._callback_data.replace('admin_confirm_delete_location_', '')
 
-    locations = deps.location_repo.get_all()
-    location = None
-    for loc in locations:
-        if str(loc.id).startswith(location_id_short):
-            location = loc
-            break
+        locations = self._deps.location_repo.get_all()
+        location = None
+        for loc in locations:
+            if str(loc.id).startswith(location_id_short):
+                location = loc
+                break
 
-    if not location:
-        keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_locations')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.callback_query.edit_message_text(msgs.admin_location_not_found, reply_markup=reply_markup)
-        return
+        if not location:
+            keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_locations')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await self._update.callback_query.edit_message_text(
+                msgs.admin_location_not_found, reply_markup=reply_markup
+            )
+            return
 
-    try:
         location_name = location.name
-        deps.location_repo.delete(location.id)
-        _log_user_action(update.effective_user, f'deleted location: {location_name}')
+        self._deps.location_repo.delete(location.id)
+        _log_user_action(self._update.effective_user, f'deleted location: {location_name}')
 
         text = msgs.admin_location_deleted(name=location_name)
         keyboard = [[InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
 
-    except Exception:
+    async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to delete location')
+        msgs = get_messages()
+        assert self._update.callback_query is not None
         keyboard = [[InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.callback_query.edit_message_text(msgs.admin_location_delete_error, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(msgs.admin_location_delete_error, reply_markup=reply_markup)

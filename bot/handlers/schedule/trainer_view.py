@@ -5,23 +5,28 @@ from typing import Any
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
-from bot.deps import get_deps
+from bot.deps import Deps
+from bot.handlers.base import Handler
 from config.settings import now_kiev
 from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
 
-async def _handle_view_trainer_schedule(update: Update, context: ContextTypes.DEFAULT_TYPE, data: str) -> None:
-    if not update.callback_query:
-        return
+class ViewTrainerSchedule(Handler):
+    def __init__(self, update: Update, context: ContextTypes.DEFAULT_TYPE, deps: Deps, callback_data: str) -> None:
+        super().__init__(update, context, deps)
+        self._callback_data = callback_data
 
-    msgs = get_messages()
-    deps = get_deps(context)
-    trainer_id_short = data.split('_')[2]
+    async def _authorize(self) -> bool:
+        return True
 
-    try:
-        trainers = deps.trainer_repo.get_all()
+    async def _process(self) -> None:
+        assert self._update.callback_query is not None
+        msgs = get_messages()
+        trainer_id_short = self._callback_data.split('_')[2]
+
+        trainers = self._deps.trainer_repo.get_all()
         trainer = None
         for t in trainers:
             if str(t.id).startswith(trainer_id_short):
@@ -31,18 +36,18 @@ async def _handle_view_trainer_schedule(update: Update, context: ContextTypes.DE
         if not trainer:
             keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await update.callback_query.edit_message_text(msgs.generic_error, reply_markup=reply_markup)
+            await self._update.callback_query.edit_message_text(msgs.generic_error, reply_markup=reply_markup)
             return
 
         today = now_kiev()
         all_bookings = []
         for i in range(14):
             day = today + timedelta(days=i)
-            time_slots = deps.schedule_service.get_all_time_slots_for_date(day)
+            time_slots = self._deps.schedule_service.get_all_time_slots_for_date(day)
 
             for slot in time_slots:
                 if slot.booking_id:
-                    booking = deps.booking_repo.get(slot.booking_id)
+                    booking = self._deps.booking_repo.get(slot.booking_id)
                     if booking and str(booking.trainer_id) == str(trainer.id):
                         all_bookings.append(booking)
 
@@ -63,7 +68,7 @@ async def _handle_view_trainer_schedule(update: Update, context: ContextTypes.DE
             for date_key in sorted(bookings_by_date.keys()):
                 text += f'📆 {date_key.strftime("%d.%m.%Y (%a)")}\n'
                 for booking in sorted(bookings_by_date[date_key], key=lambda b: b.start_time):
-                    court = deps.court_repo.get(booking.court_id)
+                    court = self._deps.court_repo.get(booking.court_id)
                     court_name = court.name if court else msgs.unknown_court
                     time_range = f'{booking.start_time.strftime("%H:%M")}-{booking.end_time.strftime("%H:%M")}'
                     text += f'   • {time_range} - {court_name}\n'
@@ -75,7 +80,10 @@ async def _handle_view_trainer_schedule(update: Update, context: ContextTypes.DE
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        await update.callback_query.edit_message_text(text, reply_markup=reply_markup)
-    except Exception:
+        await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+
+    async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to generate trainer schedule')
-        await update.callback_query.edit_message_text(msgs.trainer_schedule_error)
+        msgs = get_messages()
+        assert self._update.callback_query is not None
+        await self._update.callback_query.edit_message_text(msgs.trainer_schedule_error)
