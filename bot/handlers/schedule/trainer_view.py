@@ -51,7 +51,7 @@ class ViewTrainerSchedule(Handler):
                     if booking and booking.trainer and str(booking.trainer.id) == str(trainer.id):
                         all_bookings.append(booking)
 
-        text = msgs.trainer_schedule_header(name=trainer.name, description=trainer.description)
+        text = msgs.trainer_schedule_header(name=trainer.user.name, description=trainer.description)
 
         if not all_bookings:
             text += msgs.trainer_schedule_no_upcoming

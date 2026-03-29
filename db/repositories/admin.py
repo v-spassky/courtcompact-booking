@@ -5,10 +5,10 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload, sessionmaker
 
-from db.models import Trainer, User
+from db.models import Admin, User
 
 
-class TrainerRepository:
+class AdminRepository:
     def __init__(self, factory: sessionmaker[Session]) -> None:
         self._factory = factory
 
@@ -24,32 +24,26 @@ class TrainerRepository:
         finally:
             session.close()
 
-    def save(self, trainer: Trainer) -> None:
+    def save(self, admin: Admin) -> None:
         with self._session() as session:
-            session.merge(trainer)
+            session.merge(admin)
 
-    def get(self, trainer_id: UUID) -> Trainer | None:
+    def get_by_telegram_id(self, telegram_user_id: int) -> Admin | None:
         with self._session() as session:
             return session.execute(
-                select(Trainer).where(Trainer.id == trainer_id).options(selectinload(Trainer.user))
-            ).scalar_one_or_none()
-
-    def get_by_telegram_id(self, telegram_user_id: int) -> Trainer | None:
-        with self._session() as session:
-            return session.execute(
-                select(Trainer)
-                .join(User, Trainer.user_id == User.id)
+                select(Admin)
+                .join(User, Admin.user_id == User.id)
                 .where(User.telegram_user_id == telegram_user_id)
-                .options(selectinload(Trainer.user))
+                .options(selectinload(Admin.user))
             ).scalar_one_or_none()
 
-    def get_all(self) -> list[Trainer]:
+    def get_all(self) -> list[Admin]:
         with self._session() as session:
-            return list(session.execute(select(Trainer).options(selectinload(Trainer.user))).scalars().all())
+            return list(session.execute(select(Admin).options(selectinload(Admin.user))).scalars().all())
 
-    def delete(self, trainer_id: UUID) -> bool:
+    def delete(self, admin_id: UUID) -> bool:
         with self._session() as session:
-            row = session.get(Trainer, trainer_id)
+            row = session.get(Admin, admin_id)
             if row:
                 session.delete(row)
                 return True

@@ -20,7 +20,7 @@ class AdminDeleteStudentConfirm(Handler):
         assert self._update.callback_query is not None
         assert self._update.effective_user is not None
         msgs = get_messages()
-        if not _is_admin(self._update.effective_user.id):
+        if not _is_admin(self._update.effective_user.id, self._deps):
             await self._update.callback_query.edit_message_text(msgs.admin_no_access)
             return False
         return True
@@ -43,7 +43,8 @@ class AdminDeleteStudentConfirm(Handler):
             await self._update.callback_query.edit_message_text(msgs.admin_student_not_found, reply_markup=reply_markup)
             return
 
-        text = msgs.admin_student_confirm_delete(name=student.name)
+        student_name = student.user.name if student.user else student.phone
+        text = msgs.admin_student_confirm_delete(name=student_name)
 
         keyboard = [
             [

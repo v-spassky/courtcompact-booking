@@ -21,7 +21,7 @@ class AdminEditStudentStart(Handler):
         assert self._update.callback_query is not None
         assert self._update.effective_user is not None
         msgs = get_messages()
-        if not _is_admin(self._update.effective_user.id):
+        if not _is_admin(self._update.effective_user.id, self._deps):
             await self._update.callback_query.edit_message_text(msgs.admin_no_access)
             return False
         return True
@@ -49,8 +49,9 @@ class AdminEditStudentStart(Handler):
         self._context.user_data['admin_student_id'] = str(student.id)
         self._context.user_data['admin_state'] = 'awaiting_edit_student_name'
 
-        status = msgs.student_status_authorized if student.telegram_user_id else msgs.student_status_unauthorized
-        text = msgs.admin_student_edit_step1(name=student.name, phone=student.phone, status=status)
+        status = msgs.student_status_authorized if student.user_id else msgs.student_status_unauthorized
+        student_name = student.user.name if student.user else msgs.unknown_entity
+        text = msgs.admin_student_edit_step1(name=student_name, phone=student.phone, status=status)
 
         keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')]]
         reply_markup = InlineKeyboardMarkup(keyboard)

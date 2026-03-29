@@ -83,10 +83,10 @@ class BookingService:
         # Check if user has permission to cancel
         is_authorized = False
 
-        if booking.student and booking.student.telegram_user_id == user_id:
+        if booking.student and booking.student.user and booking.student.user.telegram_user_id == user_id:
             is_authorized = True
 
-        if not is_authorized and booking.trainer and booking.trainer.telegram_user_id == user_id:
+        if not is_authorized and booking.trainer and booking.trainer.user.telegram_user_id == user_id:
             is_authorized = True
 
         if not is_authorized:

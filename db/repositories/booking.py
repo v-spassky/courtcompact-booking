@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload, sessionmaker
 from sqlalchemy.orm.interfaces import LoaderOption
 
-from db.models import Booking
+from db.models import Booking, Student, Trainer
 
 
 class BookingRepository:
@@ -27,7 +27,11 @@ class BookingRepository:
             session.close()
 
     def _booking_options(self) -> list[LoaderOption]:
-        return [selectinload(Booking.court), selectinload(Booking.student), selectinload(Booking.trainer)]
+        return [
+            selectinload(Booking.court),
+            selectinload(Booking.student).selectinload(Student.user),
+            selectinload(Booking.trainer).selectinload(Trainer.user),
+        ]
 
     def save(self, booking: Booking) -> None:
         with self._session() as session:

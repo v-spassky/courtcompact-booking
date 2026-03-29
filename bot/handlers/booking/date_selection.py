@@ -47,7 +47,7 @@ class BookingDateSelection(Handler):
             for trainer in trainers:
                 if str(trainer.id).startswith(trainer_id_short):
                     trainer_id = trainer.id
-                    trainer_name = trainer.name
+                    trainer_name = trainer.user.name
                     break
 
         court_obj = self._deps.court_repo.get(court_id) if court_id else None

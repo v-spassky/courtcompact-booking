@@ -40,7 +40,8 @@ class AdminEditStudentPhoneInput(TextInputHandler):
             existing = self._deps.student_repo.get_by_phone(new_phone)
             if existing and str(existing.id) != student_id:
                 _clear_admin_state(self._context)
-                text = msgs.admin_student_phone_taken(name=existing.name)
+                existing_name = existing.user.name if existing.user else msgs.unknown_entity
+                text = msgs.admin_student_phone_taken(name=existing_name)
                 keyboard = [[InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 await self._update.message.reply_text(text, reply_markup=reply_markup)
@@ -48,14 +49,18 @@ class AdminEditStudentPhoneInput(TextInputHandler):
 
         _clear_admin_state(self._context)
 
-        student.name = new_name
+        if student.user and new_name:
+            student.user.name = new_name
+            self._deps.user_repo.save(student.user)
+
         student.phone = new_phone
         self._deps.student_repo.save(student)
 
+        display_name = student.user.name if student.user else new_phone
         if self._update.effective_user:
-            _log_user_action(self._update.effective_user, f'edited student: {student.name}')
+            _log_user_action(self._update.effective_user, f'edited student: {display_name}')
 
-        text = msgs.admin_student_updated(name=student.name)
+        text = msgs.admin_student_updated(name=display_name)
 
         keyboard = [
             [InlineKeyboardButton(msgs.btn_edit_another, callback_data='admin_edit_student')],

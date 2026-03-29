@@ -39,8 +39,8 @@ class BookingCancellation(Handler):
         student = booking.student
         trainer = booking.trainer
 
-        is_student_cancelling = student and student.telegram_user_id == self._user_id
-        is_trainer_cancelling = trainer and trainer.telegram_user_id == self._user_id
+        is_student_cancelling = student and student.user and student.user.telegram_user_id == self._user_id
+        is_trainer_cancelling = trainer and trainer.user.telegram_user_id == self._user_id
 
         success = self._deps.booking_service.cancel_booking(booking_id, self._user_id)
 
@@ -60,7 +60,7 @@ class BookingCancellation(Handler):
             try:
                 notify_keyboard = [[InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')]]
                 notify_markup = InlineKeyboardMarkup(notify_keyboard)
-                if is_student_cancelling and trainer and trainer.telegram_user_id != self._user_id:
+                if is_student_cancelling and trainer and trainer.user.telegram_user_id != self._user_id:
                     student_name = (
                         self._update.callback_query.from_user.full_name
                         if self._update.callback_query.from_user
@@ -68,18 +68,18 @@ class BookingCancellation(Handler):
                     )
                     notify_text += msgs.booking_cancelled_by_student(student_name=student_name)
                     await self._context.bot.send_message(
-                        chat_id=trainer.telegram_user_id, text=notify_text, reply_markup=notify_markup
+                        chat_id=trainer.user.telegram_user_id, text=notify_text, reply_markup=notify_markup
                     )
                 elif (
                     is_trainer_cancelling
                     and student
-                    and student.telegram_user_id
-                    and student.telegram_user_id != self._user_id
+                    and student.user
+                    and student.user.telegram_user_id != self._user_id
                 ):
-                    trainer_name = trainer.name if trainer else msgs.fallback_trainer_name
+                    trainer_name = trainer.user.name if trainer else msgs.fallback_trainer_name
                     notify_text += msgs.booking_cancelled_by_trainer(trainer_name=trainer_name)
                     await self._context.bot.send_message(
-                        chat_id=student.telegram_user_id, text=notify_text, reply_markup=notify_markup
+                        chat_id=student.user.telegram_user_id, text=notify_text, reply_markup=notify_markup
                     )
             except Exception as e:
                 logger.warning(f'Failed to send cancellation notification: {e}')

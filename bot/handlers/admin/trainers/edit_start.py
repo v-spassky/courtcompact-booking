@@ -21,7 +21,7 @@ class AdminEditTrainerStart(Handler):
         assert self._update.callback_query is not None
         assert self._update.effective_user is not None
         msgs = get_messages()
-        if not _is_admin(self._update.effective_user.id):
+        if not _is_admin(self._update.effective_user.id, self._deps):
             await self._update.callback_query.edit_message_text(msgs.admin_no_access)
             return False
         return True
@@ -51,8 +51,8 @@ class AdminEditTrainerStart(Handler):
         self._context.user_data['admin_state'] = 'awaiting_edit_trainer_name'
 
         text = msgs.admin_trainer_edit_step1(
-            name=trainer.name,
-            telegram_id=trainer.telegram_user_id,
+            name=trainer.user.name,
+            telegram_id=trainer.user.telegram_user_id,
             description=trainer.description,
         )
 

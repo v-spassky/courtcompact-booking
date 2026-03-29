@@ -5,7 +5,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from bot.handlers.admin._utils import _clear_admin_state
 from bot.handlers.auth import _log_user_action
 from bot.handlers.base import TextInputHandler
-from db.models import Trainer
+from db.models import Trainer, User
 from localization import get_messages
 
 logger = logging.getLogger(__name__)
@@ -26,11 +26,15 @@ class AdminTrainerDescriptionInput(TextInputHandler):
 
         description = None if self._text.strip() == '-' else self._text.strip()
 
-        trainer = Trainer(
-            telegram_user_id=telegram_id,
-            name=trainer_name,
-            description=description,
-        )
+        user = self._deps.user_repo.get_by_telegram_id(telegram_id)
+        if user is None:
+            user = User(telegram_user_id=telegram_id, name=trainer_name)
+            self._deps.user_repo.save(user)
+        else:
+            user.name = trainer_name
+            self._deps.user_repo.save(user)
+
+        trainer = Trainer(user_id=user.id, description=description)
         self._deps.trainer_repo.save(trainer)
 
         if self._update.effective_user:

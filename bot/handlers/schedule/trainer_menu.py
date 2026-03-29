@@ -28,7 +28,7 @@ class TrainerScheduleMenu(Handler):
 
         keyboard = []
         for trainer in trainers:
-            button_text = f'👨‍🏫 {trainer.name}'
+            button_text = f'👨‍🏫 {trainer.user.name}'
             keyboard.append([InlineKeyboardButton(button_text, callback_data=f'view_trainer_{str(trainer.id)[:8]}')])
 
         keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])

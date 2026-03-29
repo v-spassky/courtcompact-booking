@@ -38,7 +38,7 @@ class AdminEditTrainerTelegramIdInput(TextInputHandler):
                 telegram_id = int(self._text.strip())
                 existing = self._deps.trainer_repo.get_by_telegram_id(telegram_id)
                 if existing and str(existing.id) != trainer_id:
-                    text = msgs.admin_trainer_id_taken(name=existing.name)
+                    text = msgs.admin_trainer_id_taken(name=existing.user.name)
                     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     await self._update.message.reply_text(text, reply_markup=reply_markup)
@@ -51,7 +51,7 @@ class AdminEditTrainerTelegramIdInput(TextInputHandler):
                 await self._update.message.reply_text(text, reply_markup=reply_markup)
                 return
         else:
-            self._context.user_data['admin_trainer_telegram_id'] = trainer.telegram_user_id
+            self._context.user_data['admin_trainer_telegram_id'] = trainer.user.telegram_user_id
 
         self._context.user_data['admin_state'] = 'awaiting_edit_trainer_description'
 

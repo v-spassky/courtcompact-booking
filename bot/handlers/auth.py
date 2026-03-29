@@ -15,7 +15,7 @@ from telegram import (
 from telegram.ext import ContextTypes
 
 from bot.deps import Deps, get_deps
-from config.settings import now_kiev, settings
+from config.settings import now_kiev
 from db.models import Student
 from localization import get_messages
 
@@ -41,8 +41,8 @@ def _log_user_action(user: User, action: str) -> None:
     logger.info(f'User {user_display} {action}')
 
 
-def _is_admin(user_id: int) -> bool:
-    return user_id in settings.admin_ids
+def _is_admin(user_id: int, deps: Deps) -> bool:
+    return deps.admin_repo.get_by_telegram_id(user_id) is not None
 
 
 def _is_trainer(user_id: int, deps: Deps) -> bool:
@@ -56,11 +56,7 @@ def _is_authorized_student(user_id: int, deps: Deps) -> Student | None:
 
 
 def _is_authorized(user_id: int, deps: Deps) -> bool:
-    if _is_admin(user_id):
-        return True
-    if _is_trainer(user_id, deps):
-        return True
-    if _is_authorized_student(user_id, deps):
+    if deps.user_repo.get_by_telegram_id(user_id) is not None:
         return True
     return False
 
@@ -141,7 +137,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         [InlineKeyboardButton(msgs.btn_cancel_booking, callback_data='cancel_booking')],
     ]
 
-    if _is_admin(user_id):
+    if _is_admin(user_id, deps):
         keyboard.append([InlineKeyboardButton(msgs.btn_admin_panel, callback_data='admin_menu')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -183,11 +179,26 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     student = deps.student_repo.get_by_phone(phone)
 
     if student:
-        student.telegram_user_id = user_id
-        deps.student_repo.save(student)
-        _log_user_action(update.effective_user, f'authorized as student: {student.name}')
+        # Create or update User record for this student
+        db_user = deps.user_repo.get_by_telegram_id(user_id)
+        if db_user is None:
+            from db.models import User as DbUser
 
-        await update.message.reply_text(msgs.auth_success(student.name), reply_markup=ReplyKeyboardRemove())
+            db_user = DbUser(
+                telegram_user_id=user_id,
+                name=update.effective_user.full_name or update.effective_user.username or str(user_id),
+            )
+            deps.user_repo.save(db_user)
+
+        # Link student to user if not yet linked
+        if student.user_id is None:
+            student.user_id = db_user.id
+            deps.student_repo.save(student)
+
+        student_name = db_user.name
+        _log_user_action(update.effective_user, f'authorized as student: {student_name}')
+
+        await update.message.reply_text(msgs.auth_success(student_name), reply_markup=ReplyKeyboardRemove())
 
         keyboard = [
             [InlineKeyboardButton(msgs.btn_schedule_by_date, callback_data='select_date_schedule')],
@@ -198,7 +209,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             [InlineKeyboardButton(msgs.btn_cancel_booking, callback_data='cancel_booking')],
         ]
 
-        if _is_admin(user_id):
+        if _is_admin(user_id, deps):
             keyboard.append([InlineKeyboardButton(msgs.btn_admin_panel, callback_data='admin_menu')])
 
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -212,6 +223,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, edit_message: bool = False) -> None:
     msgs = get_messages()
+    deps = get_deps(context)
     keyboard = [
         [InlineKeyboardButton(msgs.btn_schedule_by_date, callback_data='select_date_schedule')],
         [InlineKeyboardButton(msgs.btn_schedule_weekly, callback_data='schedule_weekly')],
@@ -221,7 +233,7 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, edi
         [InlineKeyboardButton(msgs.btn_cancel_booking, callback_data='cancel_booking')],
     ]
 
-    if update.effective_user and _is_admin(update.effective_user.id):
+    if update.effective_user and _is_admin(update.effective_user.id, deps):
         keyboard.append([InlineKeyboardButton(msgs.btn_admin_panel, callback_data='admin_menu')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -263,7 +275,7 @@ async def handle_unknown_message(update: Update, context: ContextTypes.DEFAULT_T
     assert context.user_data is not None
     admin_state = context.user_data.get('admin_state')
 
-    if admin_state and _is_admin(user_id):
+    if admin_state and _is_admin(user_id, deps):
         if admin_state == 'awaiting_location_name':
             await AdminLocationNameInput(update, context, deps, message_text).handle()
             return

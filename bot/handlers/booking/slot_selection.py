@@ -85,7 +85,7 @@ class BookingSlotSelection(Handler):
                     f'created booking: {court_name} on {booking.start_time.strftime("%d.%m.%Y %H:%M")}',
                 )
 
-            trainer_name = booking.trainer.name if booking.trainer else None
+            trainer_name = booking.trainer.user.name if booking.trainer else None
             booked_trainer = booking.trainer
 
             text = msgs.booking_confirmed(
@@ -100,7 +100,7 @@ class BookingSlotSelection(Handler):
             reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
 
-            if booked_trainer and not is_trainer_booking and booked_trainer.telegram_user_id != self._user_id:
+            if booked_trainer and not is_trainer_booking and booked_trainer.user.telegram_user_id != self._user_id:
                 try:
                     student_name = (
                         self._update.callback_query.from_user.full_name
@@ -116,7 +116,7 @@ class BookingSlotSelection(Handler):
                     notify_keyboard = [[InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')]]
                     notify_markup = InlineKeyboardMarkup(notify_keyboard)
                     await self._context.bot.send_message(
-                        chat_id=booked_trainer.telegram_user_id, text=notify_text, reply_markup=notify_markup
+                        chat_id=booked_trainer.user.telegram_user_id, text=notify_text, reply_markup=notify_markup
                     )
                 except Exception as e:
                     logger.warning(f'Failed to notify trainer: {e}')

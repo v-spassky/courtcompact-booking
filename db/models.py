@@ -27,22 +27,38 @@ class Court(Base):
     location: Mapped['Location | None'] = relationship(lazy='raise')
 
 
+class User(Base):
+    __tablename__ = 'users'
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    telegram_user_id: Mapped[int] = mapped_column(Integer, unique=True)
+    name: Mapped[str] = mapped_column(String(255))
+
+
+class Admin(Base):
+    __tablename__ = 'admins'
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey('users.id'))
+    user: Mapped['User'] = relationship(lazy='raise')
+
+
 class Trainer(Base):
     __tablename__ = 'trainers'
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
-    telegram_user_id: Mapped[int] = mapped_column(Integer)
-    name: Mapped[str] = mapped_column(String(255))
+    user_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey('users.id'))
     description: Mapped[str | None] = mapped_column(Text)
+    user: Mapped['User'] = relationship(lazy='raise')
 
 
 class Student(Base):
     __tablename__ = 'students'
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
-    telegram_user_id: Mapped[int | None] = mapped_column(Integer)
-    name: Mapped[str] = mapped_column(String(255))
+    user_id: Mapped[UUID | None] = mapped_column(Uuid, ForeignKey('users.id'))
     phone: Mapped[str] = mapped_column(String(50))
+    user: Mapped['User | None'] = relationship(lazy='raise')
 
 
 class Booking(Base):

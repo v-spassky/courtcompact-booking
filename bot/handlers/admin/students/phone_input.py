@@ -48,15 +48,11 @@ class AdminStudentPhoneInput(TextInputHandler):
 
         _clear_admin_state(self._context)
 
-        student = Student(
-            name=student_name,
-            phone=self._text,
-            telegram_user_id=None,
-        )
+        student = Student(user_id=None, phone=self._text)
         self._deps.student_repo.save(student)
 
         if self._update.effective_user:
-            _log_user_action(self._update.effective_user, f'created student: {student_name}')
+            _log_user_action(self._update.effective_user, f'created student with phone: {self._text}')
 
         text = msgs.admin_student_created(name=student_name)
         text += msgs.admin_student_phone_line(phone=self._text)

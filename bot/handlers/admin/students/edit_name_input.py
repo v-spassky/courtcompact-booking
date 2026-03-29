@@ -31,10 +31,11 @@ class AdminEditStudentNameInput(TextInputHandler):
             await self._update.message.reply_text(msgs.admin_student_not_found, reply_markup=reply_markup)
             return
 
+        current_name = student.user.name if student.user else ''
         if self._text and self._text != '-':
             self._context.user_data['admin_student_name'] = self._text
         else:
-            self._context.user_data['admin_student_name'] = student.name
+            self._context.user_data['admin_student_name'] = current_name
 
         self._context.user_data['admin_state'] = 'awaiting_edit_student_phone'
 

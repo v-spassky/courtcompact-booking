@@ -44,7 +44,7 @@ class MyBookings(Handler):
             text += f'📅 {booking.start_time.strftime("%d/%m/%Y %H:%M")} - {booking.end_time.strftime("%H:%M")}\n'
 
             if booking.trainer:
-                text += msgs.booking_detail_trainer(name=booking.trainer.name)
+                text += msgs.booking_detail_trainer(name=booking.trainer.user.name)
 
             text += f'🆔 ID: {str(booking.id)[:8]}\n\n'
 

@@ -10,7 +10,6 @@ class Settings(BaseSettings):
     db_url: str
     log_level: str = 'INFO'
     timezone: tzinfo
-    admin_ids: list[int]
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
 
@@ -37,11 +36,6 @@ class Settings(BaseSettings):
         else:
             hours, minutes = int(tz_str), 0
         return timezone(timedelta(hours=sign * hours, minutes=sign * minutes))
-
-    # @field_validator('admin_ids', mode='before')
-    # @classmethod
-    # def _parse_admin_ids(cls, raw_value: str) -> list[int]:
-    #     return [int(telegram_user_id.strip()) for telegram_user_id in raw_value.split(',') if telegram_user_id.strip()]
 
 
 settings = Settings()  # type: ignore[call-arg]

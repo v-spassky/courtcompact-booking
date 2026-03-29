@@ -15,7 +15,7 @@ class AdminDeleteTrainerList(Handler):
         assert self._update.callback_query is not None
         assert self._update.effective_user is not None
         msgs = get_messages()
-        if not _is_admin(self._update.effective_user.id):
+        if not _is_admin(self._update.effective_user.id, self._deps):
             await self._update.callback_query.edit_message_text(msgs.admin_no_access)
             return False
         return True
@@ -39,7 +39,11 @@ class AdminDeleteTrainerList(Handler):
         for trainer in trainers:
             trainer_id_short = str(trainer.id)[:8]
             keyboard.append(
-                [InlineKeyboardButton(f'👨‍🏫 {trainer.name}', callback_data=f'admin_delete_trainer_{trainer_id_short}')]
+                [
+                    InlineKeyboardButton(
+                        f'👨‍🏫 {trainer.user.name}', callback_data=f'admin_delete_trainer_{trainer_id_short}'
+                    )
+                ]
             )
         keyboard.append([InlineKeyboardButton(msgs.btn_back, callback_data='admin_trainers')])
         reply_markup = InlineKeyboardMarkup(keyboard)

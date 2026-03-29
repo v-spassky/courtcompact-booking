@@ -33,7 +33,7 @@ class AdminTrainerTelegramIdInput(TextInputHandler):
 
         existing = self._deps.trainer_repo.get_by_telegram_id(telegram_id)
         if existing:
-            text = msgs.admin_trainer_id_exists(telegram_id=telegram_id, name=existing.name)
+            text = msgs.admin_trainer_id_exists(telegram_id=telegram_id, name=existing.user.name)
             keyboard = [
                 [InlineKeyboardButton(msgs.btn_retry, callback_data='admin_create_trainer')],
                 [InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')],

@@ -68,10 +68,10 @@ class CourtScheduleForDay(Handler):
                     if slot.booking_id:
                         booking = self._deps.booking_repo.get(slot.booking_id)
                         if booking:
-                            if booking.student:
-                                booking_info += f' ({booking.student.name})'
+                            if booking.student and booking.student.user:
+                                booking_info += f' ({booking.student.user.name})'
                             if booking.trainer:
-                                booking_info += f' 👨‍🏫 {booking.trainer.name}'
+                                booking_info += f' 👨‍🏫 {booking.trainer.user.name}'
                     text += f'❌ {booking_info}\n'
 
             if not has_slots:

@@ -44,7 +44,7 @@ class BookingCalendarNavigation(Handler):
             for trainer in trainers:
                 if str(trainer.id).startswith(trainer_id_short):
                     trainer_id = trainer.id
-                    trainer_name = trainer.name
+                    trainer_name = trainer.user.name
                     break
 
         if not court_id:

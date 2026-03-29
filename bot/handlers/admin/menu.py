@@ -15,7 +15,7 @@ class AdminMenu(Handler):
         assert self._update.callback_query is not None
         assert self._update.effective_user is not None
         msgs = get_messages()
-        if not _is_admin(self._update.effective_user.id):
+        if not _is_admin(self._update.effective_user.id, self._deps):
             await self._update.callback_query.edit_message_text(msgs.admin_no_access)
             return False
         return True
@@ -45,7 +45,7 @@ class AdminCourtsMenu(Handler):
         assert self._update.callback_query is not None
         assert self._update.effective_user is not None
         msgs = get_messages()
-        if not _is_admin(self._update.effective_user.id):
+        if not _is_admin(self._update.effective_user.id, self._deps):
             await self._update.callback_query.edit_message_text(msgs.admin_no_access)
             return False
         return True
@@ -75,7 +75,7 @@ class AdminTrainersMenu(Handler):
         assert self._update.callback_query is not None
         assert self._update.effective_user is not None
         msgs = get_messages()
-        if not _is_admin(self._update.effective_user.id):
+        if not _is_admin(self._update.effective_user.id, self._deps):
             await self._update.callback_query.edit_message_text(msgs.admin_no_access)
             return False
         return True
@@ -105,7 +105,7 @@ class AdminLocationsMenu(Handler):
         assert self._update.callback_query is not None
         assert self._update.effective_user is not None
         msgs = get_messages()
-        if not _is_admin(self._update.effective_user.id):
+        if not _is_admin(self._update.effective_user.id, self._deps):
             await self._update.callback_query.edit_message_text(msgs.admin_no_access)
             return False
         return True
@@ -135,7 +135,7 @@ class AdminStudentsMenu(Handler):
         assert self._update.callback_query is not None
         assert self._update.effective_user is not None
         msgs = get_messages()
-        if not _is_admin(self._update.effective_user.id):
+        if not _is_admin(self._update.effective_user.id, self._deps):
             await self._update.callback_query.edit_message_text(msgs.admin_no_access)
             return False
         return True
@@ -151,7 +151,7 @@ class AdminStudentsMenu(Handler):
         students = self._deps.student_repo.get_all()
         text = msgs.admin_students_menu(
             total=len(students),
-            authorized=sum(1 for s in students if s.telegram_user_id),
+            authorized=sum(1 for s in students if s.user_id),
         )
 
         keyboard = [

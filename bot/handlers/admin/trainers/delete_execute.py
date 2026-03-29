@@ -20,7 +20,7 @@ class AdminDeleteTrainerExecute(Handler):
         assert self._update.callback_query is not None
         assert self._update.effective_user is not None
         msgs = get_messages()
-        if not _is_admin(self._update.effective_user.id):
+        if not _is_admin(self._update.effective_user.id, self._deps):
             await self._update.callback_query.edit_message_text(msgs.admin_no_access)
             return False
         return True
@@ -45,7 +45,7 @@ class AdminDeleteTrainerExecute(Handler):
             await self._update.callback_query.edit_message_text(msgs.admin_trainer_not_found, reply_markup=reply_markup)
             return
 
-        trainer_name = trainer.name
+        trainer_name = trainer.user.name
         self._deps.trainer_repo.delete(trainer.id)
         _log_user_action(self._update.effective_user, f'deleted trainer: {trainer_name}')
 

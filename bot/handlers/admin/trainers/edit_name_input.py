@@ -42,13 +42,13 @@ class AdminEditTrainerNameInput(TextInputHandler):
                 return
             self._context.user_data['admin_trainer_name'] = self._text.strip()
         else:
-            self._context.user_data['admin_trainer_name'] = trainer.name
+            self._context.user_data['admin_trainer_name'] = trainer.user.name
 
         self._context.user_data['admin_state'] = 'awaiting_edit_trainer_telegram_id'
 
         text = msgs.admin_trainer_edit_step2(
             new_name=self._context.user_data['admin_trainer_name'],
-            telegram_id=trainer.telegram_user_id,
+            telegram_id=trainer.user.telegram_user_id,
         )
 
         keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]

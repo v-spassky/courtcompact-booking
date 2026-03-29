@@ -37,7 +37,7 @@ class CourtSelectionForBooking(Handler):
             now = now_kiev()
             calendar_markup = _create_booking_calendar(now.year, now.month, court_id, user_trainer.id, self._deps)
 
-            text = msgs.booking_select_date(court_name=court_name, trainer_name=user_trainer.name)
+            text = msgs.booking_select_date(court_name=court_name, trainer_name=user_trainer.user.name)
 
             await self._update.callback_query.edit_message_text(text, reply_markup=calendar_markup)
             return
@@ -50,7 +50,7 @@ class CourtSelectionForBooking(Handler):
         )
 
         for trainer in trainers:
-            button_text = f'👨‍🏫 {trainer.name}'
+            button_text = f'👨‍🏫 {trainer.user.name}'
             keyboard.append(
                 [
                     InlineKeyboardButton(
