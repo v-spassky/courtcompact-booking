@@ -7,7 +7,7 @@ from bot.deps import get_deps
 from bot.handlers.admin._utils import _clear_admin_state
 from bot.handlers.auth import _log_user_action
 from db.models import Location
-from localization import get_messages
+from localization.base import Messages
 
 logger = logging.getLogger(__name__)
 
@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 async def _save_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     assert update.message is not None
     assert context.user_data is not None
-    msgs = get_messages()
     deps = get_deps(context)
+    msgs = Messages.get_for_language((update.effective_user.language_code or '') if update.effective_user else '')
     location_name = context.user_data.get('admin_location_name', 'Unknown')
     maps_link = context.user_data.get('admin_location_maps_link')
     _clear_admin_state(context)

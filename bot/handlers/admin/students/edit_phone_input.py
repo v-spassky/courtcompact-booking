@@ -5,7 +5,6 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from bot.handlers.admin._utils import _clear_admin_state
 from bot.handlers.auth import _log_user_action
 from bot.handlers.base import TextInputHandler
-from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +16,6 @@ class AdminEditStudentPhoneInput(TextInputHandler):
     async def _process(self) -> None:
         assert self._update.message is not None
         assert self._context.user_data is not None
-        msgs = get_messages()
         student_id = self._context.user_data.get('admin_student_id')
         new_name = self._context.user_data.get('admin_student_name')
         if not student_id or not new_name:
@@ -27,9 +25,9 @@ class AdminEditStudentPhoneInput(TextInputHandler):
         if not student:
             _clear_admin_state(self._context)
             await self._update.message.reply_text(
-                msgs.admin_student_not_found,
+                self._messages.admin_student_not_found,
                 reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]],
+                    [[InlineKeyboardButton(self._messages.btn_back, callback_data='admin_students')]],
                 ),
             )
             return
@@ -39,9 +37,11 @@ class AdminEditStudentPhoneInput(TextInputHandler):
             if existing and existing.id != student.id:
                 _clear_admin_state(self._context)
                 await self._update.message.reply_text(
-                    msgs.admin_student_phone_taken(name=existing.user.name if existing.user else msgs.unknown_entity),
+                    self._messages.admin_student_phone_taken(
+                        name=existing.user.name if existing.user else self._messages.unknown_entity,
+                    ),
                     reply_markup=InlineKeyboardMarkup(
-                        [[InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')]],
+                        [[InlineKeyboardButton(self._messages.btn_back_to_students, callback_data='admin_students')]],
                     ),
                 )
                 return
@@ -55,22 +55,21 @@ class AdminEditStudentPhoneInput(TextInputHandler):
         if self._update.effective_user:
             _log_user_action(self._update.effective_user, f'edited student: {display_name}')
         await self._update.message.reply_text(
-            msgs.admin_student_updated(name=display_name),
+            self._messages.admin_student_updated(name=display_name),
             reply_markup=InlineKeyboardMarkup(
                 [
-                    [InlineKeyboardButton(msgs.btn_edit_another, callback_data='admin_edit_student')],
-                    [InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')],
+                    [InlineKeyboardButton(self._messages.btn_edit_another, callback_data='admin_edit_student')],
+                    [InlineKeyboardButton(self._messages.btn_back_to_students, callback_data='admin_students')],
                 ],
             ),
         )
 
     async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to edit student')
-        msgs = get_messages()
         assert self._update.message is not None
         await self._update.message.reply_text(
-            msgs.admin_student_update_error,
+            self._messages.admin_student_update_error,
             reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')]],
+                [[InlineKeyboardButton(self._messages.btn_back_to_students, callback_data='admin_students')]],
             ),
         )

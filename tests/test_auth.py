@@ -5,7 +5,7 @@ from telegram.ext import ContextTypes
 
 from bot.deps import Deps
 from bot.router import handle_callback_query
-from localization import get_messages
+from localization.base import Messages
 
 
 async def test_unauthorized_user_sees_auth_prompt(deps: Deps) -> None:
@@ -30,6 +30,6 @@ async def test_unauthorized_user_sees_auth_prompt(deps: Deps) -> None:
 
     await handle_callback_query(update, context)
 
-    msgs = get_messages()
+    msgs = Messages.get_for_language('')
     msg.reply_text.assert_called_once()
     assert msg.reply_text.call_args.args[0] == msgs.auth_request

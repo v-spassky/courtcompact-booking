@@ -5,6 +5,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from bot.deps import Deps
+from localization.base import Messages
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +15,9 @@ class Handler(ABC):
         self._update = update
         self._context = context
         self._deps = deps
+        # TODO: add default language
+        language_code = (self._update.effective_user.language_code or '') if self._update.effective_user else ''
+        self._messages = Messages.get_for_language(language_code)
 
     async def handle(self) -> None:
         try:

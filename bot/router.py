@@ -57,7 +57,7 @@ from bot.handlers.schedule.trainer_view import ViewTrainerSchedule
 from bot.handlers.schedule.weekly import ScheduleWeekly
 from bot.handlers.schedule.weekly_courts import ScheduleWeeklyShowCourts
 from config.settings import now_kiev
-from localization import get_messages
+from localization.base import Messages
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +75,7 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
     if callback_data != 'ignore' and not _is_authorized(update.effective_user.id, deps):
         await _show_authorization_request(update, context)
         return
-    msgs = get_messages()
+    msgs = Messages.get_for_language(update.effective_user.language_code or '')
     if callback_data == 'main_menu':
         await show_main_menu(update, context, edit_message=True)
     elif callback_data == 'ignore':

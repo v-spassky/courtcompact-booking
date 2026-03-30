@@ -6,7 +6,6 @@ from telegram.ext import ContextTypes
 from bot.deps import Deps
 from bot.handlers.auth import _log_user_action
 from bot.handlers.base import Handler
-from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
@@ -29,18 +28,17 @@ class BookingCancellation(Handler):
 
     async def _process(self) -> None:
         assert self._update.callback_query is not None
-        msgs = get_messages()
         booking_id = int(self._callback_data.split('_')[2])
         booking = self._deps.booking_repo.get(booking_id)
         if not booking:
             await self._update.callback_query.edit_message_text(
-                msgs.booking_not_found,
+                self._messages.booking_not_found,
                 reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+                    [[InlineKeyboardButton(self._messages.btn_back_to_main_menu, callback_data='main_menu')]],
                 ),
             )
             return
-        court_name = booking.court.name if booking.court else msgs.unknown_court
+        court_name = booking.court.name if booking.court else self._messages.unknown_court
         student = booking.student
         trainer = booking.trainer
         is_student_cancelling = student and student.user and student.user.telegram_user_id == self._user_id
@@ -49,12 +47,12 @@ class BookingCancellation(Handler):
         if success:
             _log_user_action(self._update.callback_query.from_user, f'cancelled booking: {booking_id}')
             await self._update.callback_query.edit_message_text(
-                msgs.booking_cancelled,
+                self._messages.booking_cancelled,
                 reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+                    [[InlineKeyboardButton(self._messages.btn_back_to_main_menu, callback_data='main_menu')]],
                 ),
             )
-            notify_text = msgs.booking_cancelled_notification(
+            notify_text = self._messages.booking_cancelled_notification(
                 court_name=court_name,
                 date=booking.start_time.strftime('%d.%m.%Y'),
                 time=f'{booking.start_time.strftime("%H:%M")} - {booking.end_time.strftime("%H:%M")}',
@@ -64,14 +62,14 @@ class BookingCancellation(Handler):
                     student_name = (
                         self._update.callback_query.from_user.full_name
                         if self._update.callback_query.from_user
-                        else msgs.fallback_student_name
+                        else self._messages.fallback_student_name
                     )
-                    notify_text += msgs.booking_cancelled_by_student(student_name=student_name)
+                    notify_text += self._messages.booking_cancelled_by_student(student_name=student_name)
                     await self._context.bot.send_message(
                         chat_id=trainer.user.telegram_user_id,
                         text=notify_text,
                         reply_markup=InlineKeyboardMarkup(
-                            [[InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')]],
+                            [[InlineKeyboardButton(self._messages.btn_main_menu, callback_data='main_menu')]],
                         ),
                     )
                 elif (
@@ -80,32 +78,31 @@ class BookingCancellation(Handler):
                     and student.user
                     and student.user.telegram_user_id != self._user_id
                 ):
-                    trainer_name = trainer.user.name if trainer else msgs.fallback_trainer_name
-                    notify_text += msgs.booking_cancelled_by_trainer(trainer_name=trainer_name)
+                    trainer_name = trainer.user.name if trainer else self._messages.fallback_trainer_name
+                    notify_text += self._messages.booking_cancelled_by_trainer(trainer_name=trainer_name)
                     await self._context.bot.send_message(
                         chat_id=student.user.telegram_user_id,
                         text=notify_text,
                         reply_markup=InlineKeyboardMarkup(
-                            [[InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')]],
+                            [[InlineKeyboardButton(self._messages.btn_main_menu, callback_data='main_menu')]],
                         ),
                     )
             except Exception as e:
                 logger.warning(f'Failed to send cancellation notification: {e}')
         else:
             await self._update.callback_query.edit_message_text(
-                msgs.cancel_booking_failed,
+                self._messages.cancel_booking_failed,
                 reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+                    [[InlineKeyboardButton(self._messages.btn_back_to_main_menu, callback_data='main_menu')]],
                 ),
             )
 
     async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to cancel booking')
-        msgs = get_messages()
         assert self._update.callback_query is not None
         await self._update.callback_query.edit_message_text(
-            msgs.cancel_booking_error,
+            self._messages.cancel_booking_error,
             reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+                [[InlineKeyboardButton(self._messages.btn_back_to_main_menu, callback_data='main_menu')]],
             ),
         )

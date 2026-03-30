@@ -7,7 +7,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot.deps import Deps
 from config.settings import now_kiev
-from localization import get_messages
+from localization.base import Messages
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ def _create_booking_calendar(
     trainer_id: int | None,
     deps: Deps,
 ) -> InlineKeyboardMarkup:
-    msgs = get_messages()
+    msgs = Messages.get_for_language('')
     keyboard = []
     trainer_id_str = str(trainer_id) if trainer_id is not None else 'none'
     month_name = cal.month_name[month]

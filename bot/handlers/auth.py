@@ -17,7 +17,7 @@ from telegram.ext import ContextTypes
 from bot.deps import Deps, get_deps
 from config.settings import now_kiev
 from db.models import Student
-from localization import get_messages
+from localization.base import Messages
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ def _get_student_for_user(user_id: int, deps: Deps) -> Student | None:
 
 
 def _create_calendar(year: int, month: int) -> InlineKeyboardMarkup:
-    msgs = get_messages()
+    msgs = Messages.get_for_language('')
     keyboard = []
     month_name = cal.month_name[month]
     keyboard.append([InlineKeyboardButton(f'{month_name} {year}', callback_data='ignore')])
@@ -109,7 +109,7 @@ def _create_calendar(year: int, month: int) -> InlineKeyboardMarkup:
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message or not update.effective_user:
         return
-    msgs = get_messages()
+    msgs = Messages.get_for_language(update.effective_user.language_code or '')
     deps = get_deps(context)
     _log_user_action(update.effective_user, 'used /start command')
     user_id = update.effective_user.id
@@ -130,7 +130,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
 
 async def _show_authorization_request(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    msgs = get_messages()
+    msgs = Messages.get_for_language((update.effective_user.language_code or '') if update.effective_user else '')
     keyboard = [[KeyboardButton(msgs.btn_share_phone, request_contact=True)]]
     reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
     if update.message:
@@ -144,7 +144,7 @@ async def _show_authorization_request(update: Update, context: ContextTypes.DEFA
 async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message or not update.message.contact or not update.effective_user:
         return
-    msgs = get_messages()
+    msgs = Messages.get_for_language(update.effective_user.language_code or '')
     deps = get_deps(context)
     contact = update.message.contact
     user_id = update.effective_user.id
@@ -194,7 +194,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 
 async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, edit_message: bool = False) -> None:
-    msgs = get_messages()
+    msgs = Messages.get_for_language((update.effective_user.language_code or '') if update.effective_user else '')
     deps = get_deps(context)
     keyboard = [
         [InlineKeyboardButton(msgs.btn_schedule_by_date, callback_data='select_date_schedule')],
@@ -237,7 +237,7 @@ async def handle_unknown_message(update: Update, context: ContextTypes.DEFAULT_T
 
     if not update.message or not update.effective_user:
         return
-    msgs = get_messages()
+    msgs = Messages.get_for_language(update.effective_user.language_code or '')
     deps = get_deps(context)
     user_id = update.effective_user.id
     message_text = (update.message.text or '').strip()

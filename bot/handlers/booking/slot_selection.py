@@ -7,7 +7,6 @@ from telegram.ext import ContextTypes
 from bot.deps import Deps
 from bot.handlers.auth import _get_student_for_user, _log_user_action
 from bot.handlers.base import Handler
-from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +29,6 @@ class BookingSlotSelection(Handler):
 
     async def _process(self) -> None:
         assert self._update.callback_query is not None
-        msgs = get_messages()
         parts = self._callback_data.split('_')
         court_id = int(parts[2])
         trainer_id_str = parts[3]
@@ -62,7 +60,7 @@ class BookingSlotSelection(Handler):
             trainer_id=trainer_id,
         )
         if booking:
-            court_name = booking.court.name if booking.court else msgs.unknown_court
+            court_name = booking.court.name if booking.court else self._messages.unknown_court
             if self._update.callback_query.from_user:
                 _log_user_action(
                     self._update.callback_query.from_user,
@@ -70,7 +68,7 @@ class BookingSlotSelection(Handler):
                 )
             trainer_name = booking.trainer.user.name if booking.trainer else None
             booked_trainer = booking.trainer
-            text = msgs.booking_confirmed(
+            text = self._messages.booking_confirmed(
                 court_name=court_name,
                 date=booking.start_time.strftime('%d.%m.%Y'),
                 time=f'{booking.start_time.strftime("%H:%M")} - {booking.end_time.strftime("%H:%M")}',
@@ -80,7 +78,7 @@ class BookingSlotSelection(Handler):
             await self._update.callback_query.edit_message_text(
                 text,
                 reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+                    [[InlineKeyboardButton(self._messages.btn_back_to_main_menu, callback_data='main_menu')]],
                 ),
             )
             if booked_trainer and not is_trainer_booking and booked_trainer.user.telegram_user_id != self._user_id:
@@ -88,9 +86,9 @@ class BookingSlotSelection(Handler):
                     student_name = (
                         self._update.callback_query.from_user.full_name
                         if self._update.callback_query.from_user
-                        else msgs.fallback_student_name
+                        else self._messages.fallback_student_name
                     )
-                    notify_text = msgs.booking_new_notification(
+                    notify_text = self._messages.booking_new_notification(
                         student_name=student_name,
                         court_name=court_name,
                         date=booking.start_time.strftime('%d.%m.%Y'),
@@ -100,26 +98,25 @@ class BookingSlotSelection(Handler):
                         chat_id=booked_trainer.user.telegram_user_id,
                         text=notify_text,
                         reply_markup=InlineKeyboardMarkup(
-                            [[InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')]],
+                            [[InlineKeyboardButton(self._messages.btn_main_menu, callback_data='main_menu')]],
                         ),
                     )
                 except Exception as e:
                     logger.warning(f'Failed to notify trainer: {e}')
         else:
             await self._update.callback_query.edit_message_text(
-                msgs.booking_slot_unavailable,
+                self._messages.booking_slot_unavailable,
                 reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+                    [[InlineKeyboardButton(self._messages.btn_back_to_main_menu, callback_data='main_menu')]],
                 ),
             )
 
     async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to create booking')
-        msgs = get_messages()
         assert self._update.callback_query is not None
         await self._update.callback_query.edit_message_text(
-            msgs.booking_generic_error,
+            self._messages.booking_generic_error,
             reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+                [[InlineKeyboardButton(self._messages.btn_back_to_main_menu, callback_data='main_menu')]],
             ),
         )

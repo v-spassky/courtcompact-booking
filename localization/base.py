@@ -2,6 +2,12 @@ from abc import ABC, abstractmethod
 
 
 class Messages(ABC):
+    @classmethod
+    def get_for_language(cls, language_code: str) -> 'Messages':
+        from localization.ru import RussianMessages
+
+        return RussianMessages()
+
     # -------------------------------------------------------------------------
     # Navigation buttons (reused everywhere)
     # -------------------------------------------------------------------------

@@ -5,7 +5,6 @@ from telegram.ext import ContextTypes
 
 from bot.deps import Deps
 from bot.handlers.base import Handler
-from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +25,6 @@ class BookCourt(Handler):
 
     async def _process(self) -> None:
         assert self._update.callback_query is not None
-        msgs = get_messages()
         location = None
         courts = []
         if self._callback_data and self._callback_data.startswith('book_location_'):
@@ -38,16 +36,16 @@ class BookCourt(Handler):
             courts = self._deps.court_repo.get_all()
         if not courts:
             await self._update.callback_query.edit_message_text(
-                msgs.book_no_courts(location_name=location.name if location else None),
+                self._messages.book_no_courts(location_name=location.name if location else None),
                 reply_markup=InlineKeyboardMarkup(
                     [
-                        [InlineKeyboardButton(msgs.btn_select_other_location, callback_data='book_court')],
-                        [InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')],
+                        [InlineKeyboardButton(self._messages.btn_select_other_location, callback_data='book_court')],
+                        [InlineKeyboardButton(self._messages.btn_back_to_main_menu, callback_data='main_menu')],
                     ],
                 ),
             )
             return
-        text = msgs.book_select_court(
+        text = self._messages.book_select_court(
             location_name=location.name if location else None,
             maps_link=location.maps_link if location else None,
         )
@@ -55,8 +53,10 @@ class BookCourt(Handler):
         for court in courts:
             keyboard.append([InlineKeyboardButton(f'🎾 {court.name}', callback_data=f'select_court_{court.id}')])
         if location:
-            keyboard.append([InlineKeyboardButton(msgs.btn_select_other_location, callback_data='book_court')])
-        keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
+            keyboard.append(
+                [InlineKeyboardButton(self._messages.btn_select_other_location, callback_data='book_court')],
+            )
+        keyboard.append([InlineKeyboardButton(self._messages.btn_back_to_main_menu, callback_data='main_menu')])
         await self._update.callback_query.edit_message_text(
             text,
             reply_markup=InlineKeyboardMarkup(keyboard),

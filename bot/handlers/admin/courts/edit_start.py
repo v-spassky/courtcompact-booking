@@ -7,7 +7,6 @@ from bot.deps import Deps
 from bot.handlers.admin._utils import _clear_admin_state
 from bot.handlers.auth import _is_admin
 from bot.handlers.base import Handler
-from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
@@ -20,22 +19,20 @@ class AdminEditCourtStart(Handler):
     async def _authorize(self) -> bool:
         assert self._update.callback_query is not None
         assert self._update.effective_user is not None
-        msgs = get_messages()
         if not _is_admin(self._update.effective_user.id, self._deps):
-            await self._update.callback_query.edit_message_text(msgs.admin_no_access)
+            await self._update.callback_query.edit_message_text(self._messages.admin_no_access)
             return False
         return True
 
     async def _process(self) -> None:
         assert self._update.callback_query is not None
-        msgs = get_messages()
         court_id = int(self._callback_data.replace('admin_edit_court_', ''))
         court = self._deps.court_repo.get(court_id)
         if not court:
             await self._update.callback_query.edit_message_text(
-                msgs.admin_court_not_found,
+                self._messages.admin_court_not_found,
                 reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')]],
+                    [[InlineKeyboardButton(self._messages.btn_back, callback_data='admin_courts')]],
                 ),
             )
             return
@@ -44,6 +41,8 @@ class AdminEditCourtStart(Handler):
         self._context.user_data['admin_court_id'] = str(court.id)
         self._context.user_data['admin_state'] = 'awaiting_edit_court_name'
         await self._update.callback_query.edit_message_text(
-            msgs.admin_court_edit_step1(name=court.name, description=court.description),
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_courts')]]),
+            self._messages.admin_court_edit_step1(name=court.name, description=court.description),
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(self._messages.btn_cancel, callback_data='admin_courts')]],
+            ),
         )

@@ -6,7 +6,6 @@ from telegram.ext import ContextTypes
 
 from bot.deps import Deps
 from bot.handlers.base import Handler
-from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +20,6 @@ class BookingDateSelection(Handler):
 
     async def _process(self) -> None:
         assert self._update.callback_query is not None
-        msgs = get_messages()
         parts = self._callback_data.split('_')
         court_id = int(parts[2])
         trainer_id_str = parts[3]
@@ -31,7 +29,7 @@ class BookingDateSelection(Handler):
         selected_date = datetime(year, month, day)
         trainer_id = int(trainer_id_str) if trainer_id_str != 'none' else None
         court_obj = self._deps.court_repo.get(court_id)
-        court_name = court_obj.name if court_obj else msgs.unknown_court
+        court_name = court_obj.name if court_obj else self._messages.unknown_court
         trainer_name = None
         if trainer_id is not None:
             trainer = self._deps.trainer_repo.get(trainer_id)
@@ -49,13 +47,13 @@ class BookingDateSelection(Handler):
                         trainer_busy_times.add((booking.start_time, booking.end_time))
         if not court_slots:
             await self._update.callback_query.edit_message_text(
-                msgs.booking_no_slots_for_date,
+                self._messages.booking_no_slots_for_date,
                 reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+                    [[InlineKeyboardButton(self._messages.btn_back_to_main_menu, callback_data='main_menu')]],
                 ),
             )
             return
-        text = msgs.booking_select_slot(
+        text = self._messages.booking_select_slot(
             court_name=court_name,
             date=selected_date.strftime('%d.%m.%Y'),
             trainer_name=trainer_name,
@@ -74,7 +72,7 @@ class BookingDateSelection(Handler):
                 time_code = slot.start_time.strftime('%H%M')
                 slot_callback = f'book_slot_{court_id}_{trainer_id_str}_{date_str}_{time_code}'
             else:
-                time_str = msgs.slot_occupied
+                time_str = self._messages.slot_occupied
                 slot_callback = 'ignore'
             buttons.append(InlineKeyboardButton(time_str, callback_data=slot_callback))
         keyboard = []
@@ -83,7 +81,7 @@ class BookingDateSelection(Handler):
             if i + 1 < len(buttons):
                 row.append(buttons[i + 1])
             keyboard.append(row)
-        keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
+        keyboard.append([InlineKeyboardButton(self._messages.btn_back_to_main_menu, callback_data='main_menu')])
         await self._update.callback_query.edit_message_text(
             text,
             reply_markup=InlineKeyboardMarkup(keyboard),
@@ -91,6 +89,5 @@ class BookingDateSelection(Handler):
 
     async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to show time slots')
-        msgs = get_messages()
         assert self._update.callback_query is not None
-        await self._update.callback_query.edit_message_text(msgs.generic_error)
+        await self._update.callback_query.edit_message_text(self._messages.generic_error)

@@ -8,7 +8,6 @@ from telegram.ext import ContextTypes
 from bot.deps import Deps
 from bot.handlers.base import Handler
 from config.settings import now_kiev
-from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
@@ -23,13 +22,12 @@ class ViewTrainerSchedule(Handler):
 
     async def _process(self) -> None:
         assert self._update.callback_query is not None
-        msgs = get_messages()
         trainer = self._deps.trainer_repo.get(int(self._callback_data.split('_')[2]))
         if not trainer:
             await self._update.callback_query.edit_message_text(
-                msgs.generic_error,
+                self._messages.generic_error,
                 reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+                    [[InlineKeyboardButton(self._messages.btn_back_to_main_menu, callback_data='main_menu')]],
                 ),
             )
             return
@@ -43,11 +41,11 @@ class ViewTrainerSchedule(Handler):
                     booking = self._deps.booking_repo.get(slot.booking_id)
                     if booking and booking.trainer and booking.trainer.id == trainer.id:
                         all_bookings.append(booking)
-        text = msgs.trainer_schedule_header(name=trainer.user.name, description=trainer.description)
+        text = self._messages.trainer_schedule_header(name=trainer.user.name, description=trainer.description)
         if not all_bookings:
-            text += msgs.trainer_schedule_no_upcoming
+            text += self._messages.trainer_schedule_no_upcoming
         else:
-            text += msgs.trainer_schedule_upcoming_title
+            text += self._messages.trainer_schedule_upcoming_title
             bookings_by_date: dict[date, list[Any]] = {}
             for booking in all_bookings:
                 date_key = booking.start_time.date()
@@ -57,7 +55,7 @@ class ViewTrainerSchedule(Handler):
             for date_key in sorted(bookings_by_date.keys()):
                 text += f'📆 {date_key.strftime("%d.%m.%Y (%a)")}\n'
                 for booking in sorted(bookings_by_date[date_key], key=lambda b: b.start_time):
-                    court_name = booking.court.name if booking.court else msgs.unknown_court
+                    court_name = booking.court.name if booking.court else self._messages.unknown_court
                     time_range = f'{booking.start_time.strftime("%H:%M")}-{booking.end_time.strftime("%H:%M")}'
                     text += f'   • {time_range} - {court_name}\n'
                 text += '\n'
@@ -65,14 +63,13 @@ class ViewTrainerSchedule(Handler):
             text,
             reply_markup=InlineKeyboardMarkup(
                 [
-                    [InlineKeyboardButton(msgs.btn_back_to_trainers, callback_data='trainer_schedule')],
-                    [InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')],
+                    [InlineKeyboardButton(self._messages.btn_back_to_trainers, callback_data='trainer_schedule')],
+                    [InlineKeyboardButton(self._messages.btn_back_to_main_menu, callback_data='main_menu')],
                 ],
             ),
         )
 
     async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to generate trainer schedule')
-        msgs = get_messages()
         assert self._update.callback_query is not None
-        await self._update.callback_query.edit_message_text(msgs.trainer_schedule_error)
+        await self._update.callback_query.edit_message_text(self._messages.trainer_schedule_error)

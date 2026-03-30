@@ -6,7 +6,6 @@ from telegram.ext import ContextTypes
 
 from bot.deps import Deps
 from bot.handlers.base import Handler
-from localization import get_messages
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +28,6 @@ class ScheduleWeeklyShowCourts(Handler):
 
     async def _process(self) -> None:
         assert self._update.callback_query is not None
-        msgs = get_messages()
         location = None
         if self._location_id:
             location = self._deps.location_repo.get(self._location_id)
@@ -39,16 +37,21 @@ class ScheduleWeeklyShowCourts(Handler):
         week_end = self._start_of_week + timedelta(days=6)
         if not courts:
             await self._update.callback_query.edit_message_text(
-                msgs.schedule_weekly_no_courts(location_name=location.name if location else None),
+                self._messages.schedule_weekly_no_courts(location_name=location.name if location else None),
                 reply_markup=InlineKeyboardMarkup(
                     [
-                        [InlineKeyboardButton(msgs.btn_select_other_location, callback_data='schedule_weekly')],
-                        [InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')],
+                        [
+                            InlineKeyboardButton(
+                                self._messages.btn_select_other_location,
+                                callback_data='schedule_weekly',
+                            ),
+                        ],
+                        [InlineKeyboardButton(self._messages.btn_back_to_main_menu, callback_data='main_menu')],
                     ],
                 ),
             )
             return
-        text = msgs.schedule_weekly_select_court(
+        text = self._messages.schedule_weekly_select_court(
             start=self._start_of_week.strftime('%d.%m'),
             end=week_end.strftime('%d.%m.%Y'),
             location_name=location.name if location else None,
@@ -62,8 +65,10 @@ class ScheduleWeeklyShowCourts(Handler):
             )
             keyboard.append([InlineKeyboardButton(f'🎾 {court.name}', callback_data=court_callback)])
         if location:
-            keyboard.append([InlineKeyboardButton(msgs.btn_select_other_location, callback_data='schedule_weekly')])
-        keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
+            keyboard.append(
+                [InlineKeyboardButton(self._messages.btn_select_other_location, callback_data='schedule_weekly')],
+            )
+        keyboard.append([InlineKeyboardButton(self._messages.btn_back_to_main_menu, callback_data='main_menu')])
         await self._update.callback_query.edit_message_text(
             text,
             reply_markup=InlineKeyboardMarkup(keyboard),
@@ -73,6 +78,5 @@ class ScheduleWeeklyShowCourts(Handler):
 
     async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to show court selection for weekly')
-        msgs = get_messages()
         assert self._update.callback_query is not None
-        await self._update.callback_query.edit_message_text(msgs.generic_error)
+        await self._update.callback_query.edit_message_text(self._messages.generic_error)
