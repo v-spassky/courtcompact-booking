@@ -31,6 +31,24 @@ uv run alembic upgrade head
 uv run python main.py
 ```
 
+## Docker
+
+Build and run with Docker:
+
+```
+docker build -t courtcompact-booking .
+```
+
+```
+docker run --env-file .env -v $(pwd)/.data:/app/.data courtcompact-booking
+```
+
+Note: run DB migrations before starting the bot (or against the same DB the container will use):
+
+```
+uv run alembic upgrade head
+```
+
 ## CI checks
 
 Install pre-commit hooks:
