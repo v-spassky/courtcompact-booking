@@ -31,20 +31,25 @@ class AdminDeleteStudentConfirm(Handler):
         student_id = int(self._callback_data.replace('admin_delete_student_', ''))
         student = self._deps.student_repo.get(student_id)
         if not student:
-            keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await self._update.callback_query.edit_message_text(msgs.admin_student_not_found, reply_markup=reply_markup)
+            await self._update.callback_query.edit_message_text(
+                msgs.admin_student_not_found,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]],
+                ),
+            )
             return
         student_name = student.user.name if student.user else student.phone
-        text = msgs.admin_student_confirm_delete(name=student_name)
-        keyboard = [
-            [
-                InlineKeyboardButton(
-                    msgs.btn_confirm_delete,
-                    callback_data=f'admin_confirm_delete_student_{student.id}',
-                )
-            ],
-            [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')],
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(
+            msgs.admin_student_confirm_delete(name=student_name),
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            msgs.btn_confirm_delete,
+                            callback_data=f'admin_confirm_delete_student_{student.id}',
+                        ),
+                    ],
+                    [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')],
+                ],
+            ),
+        )

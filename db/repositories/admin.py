@@ -35,7 +35,7 @@ class AdminRepository:
                 select(Admin)
                 .join(User, Admin.user_id == User.id)
                 .where(User.telegram_user_id == telegram_user_id)
-                .options(selectinload(Admin.user))
+                .options(selectinload(Admin.user)),
             ).scalar_one_or_none()
 
     def get_all(self) -> list[Admin]:

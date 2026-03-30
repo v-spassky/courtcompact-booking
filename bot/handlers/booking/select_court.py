@@ -37,13 +37,15 @@ class BookCourt(Handler):
         else:
             courts = self._deps.court_repo.get_all()
         if not courts:
-            text = msgs.book_no_courts(location_name=location.name if location else None)
-            keyboard = [
-                [InlineKeyboardButton(msgs.btn_select_other_location, callback_data='book_court')],
-                [InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')],
-            ]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+            await self._update.callback_query.edit_message_text(
+                msgs.book_no_courts(location_name=location.name if location else None),
+                reply_markup=InlineKeyboardMarkup(
+                    [
+                        [InlineKeyboardButton(msgs.btn_select_other_location, callback_data='book_court')],
+                        [InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')],
+                    ],
+                ),
+            )
             return
         text = msgs.book_select_court(
             location_name=location.name if location else None,
@@ -55,7 +57,9 @@ class BookCourt(Handler):
         if location:
             keyboard.append([InlineKeyboardButton(msgs.btn_select_other_location, callback_data='book_court')])
         keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
-        reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.callback_query.edit_message_text(
-            text, reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True
+            text,
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode='HTML',
+            disable_web_page_preview=True,
         )

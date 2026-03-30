@@ -17,13 +17,15 @@ class AdminCourtNameInput(TextInputHandler):
         assert self._context.user_data is not None
         msgs = get_messages()
         if len(self._text) < 1 or len(self._text) > 100:
-            text = msgs.admin_court_name_too_long
-            keyboard = [
-                [InlineKeyboardButton(msgs.btn_retry, callback_data='admin_create_court')],
-                [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_courts')],
-            ]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await self._update.message.reply_text(text, reply_markup=reply_markup)
+            await self._update.message.reply_text(
+                msgs.admin_court_name_too_long,
+                reply_markup=InlineKeyboardMarkup(
+                    [
+                        [InlineKeyboardButton(msgs.btn_retry, callback_data='admin_create_court')],
+                        [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_courts')],
+                    ],
+                ),
+            )
             self._context.user_data.pop('admin_state', None)
             return
         self._context.user_data['admin_court_name'] = self._text
@@ -34,7 +36,7 @@ class AdminCourtNameInput(TextInputHandler):
             location = self._deps.location_repo.get(int(location_id))
             if location:
                 location_name = location.name
-        text = msgs.admin_court_create_step3(location_name=location_name, court_name=self._text)
-        keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_courts')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.message.reply_text(text, reply_markup=reply_markup)
+        await self._update.message.reply_text(
+            msgs.admin_court_create_step3(location_name=location_name, court_name=self._text),
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_courts')]]),
+        )

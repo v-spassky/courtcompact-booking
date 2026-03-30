@@ -24,9 +24,12 @@ class AdminEditStudentNameInput(TextInputHandler):
         student = self._deps.student_repo.get(int(student_id))
         if not student:
             _clear_admin_state(self._context)
-            keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await self._update.message.reply_text(msgs.admin_student_not_found, reply_markup=reply_markup)
+            await self._update.message.reply_text(
+                msgs.admin_student_not_found,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]],
+                ),
+            )
             return
         current_name = student.user.name if student.user else ''
         if self._text and self._text != '-':
@@ -34,9 +37,9 @@ class AdminEditStudentNameInput(TextInputHandler):
         else:
             self._context.user_data['admin_student_name'] = current_name
         self._context.user_data['admin_state'] = 'awaiting_edit_student_phone'
-        text = msgs.admin_student_edit_step2(
-            new_name=self._context.user_data['admin_student_name'], phone=student.phone
+        await self._update.message.reply_text(
+            msgs.admin_student_edit_step2(new_name=self._context.user_data['admin_student_name'], phone=student.phone),
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')]],
+            ),
         )
-        keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.message.reply_text(text, reply_markup=reply_markup)

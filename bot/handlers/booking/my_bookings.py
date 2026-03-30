@@ -20,16 +20,22 @@ class MyBookings(Handler):
         user_id = self._update.effective_user.id
         bookings = self._deps.schedule_service.get_user_bookings(user_id)
         if not bookings:
-            keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await self._update.callback_query.edit_message_text(msgs.my_bookings_empty, reply_markup=reply_markup)
+            await self._update.callback_query.edit_message_text(
+                msgs.my_bookings_empty,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+                ),
+            )
             return
         now = now_kiev()
         future_bookings = [b for b in bookings if b.start_time > now]
         if not future_bookings:
-            keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await self._update.callback_query.edit_message_text(msgs.my_bookings_no_upcoming, reply_markup=reply_markup)
+            await self._update.callback_query.edit_message_text(
+                msgs.my_bookings_no_upcoming,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+                ),
+            )
             return
         text = msgs.my_bookings_title
         for booking in sorted(future_bookings, key=lambda x: x.start_time):
@@ -39,14 +45,20 @@ class MyBookings(Handler):
             if booking.trainer:
                 text += msgs.booking_detail_trainer(name=booking.trainer.user.name)
             text += f'🆔 ID: {booking.id}\n\n'
-        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(
+            text,
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+            ),
+        )
 
     async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to get user bookings')
         msgs = get_messages()
         assert self._update.callback_query is not None
-        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(msgs.my_bookings_error, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(
+            msgs.my_bookings_error,
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+            ),
+        )

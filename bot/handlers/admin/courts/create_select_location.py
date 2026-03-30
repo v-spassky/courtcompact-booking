@@ -26,15 +26,16 @@ class AdminCreateCourtSelectLocation(Handler):
         _clear_admin_state(self._context)
         locations = self._deps.location_repo.get_all()
         if not locations:
-            text = msgs.admin_court_no_locations
-            keyboard = [
-                [InlineKeyboardButton(msgs.btn_create_location, callback_data='admin_create_location')],
-                [InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')],
-            ]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+            await self._update.callback_query.edit_message_text(
+                msgs.admin_court_no_locations,
+                reply_markup=InlineKeyboardMarkup(
+                    [
+                        [InlineKeyboardButton(msgs.btn_create_location, callback_data='admin_create_location')],
+                        [InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')],
+                    ],
+                ),
+            )
             return
-        text = msgs.admin_court_select_location
         keyboard = []
         for location in locations:
             button_text = f'📍 {location.name}'
@@ -42,5 +43,7 @@ class AdminCreateCourtSelectLocation(Handler):
                 button_text += ' 🗺️'
             keyboard.append([InlineKeyboardButton(button_text, callback_data=f'admin_court_location_{location.id}')])
         keyboard.append([InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_courts')])
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(
+            msgs.admin_court_select_location,
+            reply_markup=InlineKeyboardMarkup(keyboard),
+        )

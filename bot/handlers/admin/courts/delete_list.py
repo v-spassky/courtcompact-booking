@@ -26,15 +26,18 @@ class AdminDeleteCourtList(Handler):
         _clear_admin_state(self._context)
         courts = self._deps.court_repo.get_all()
         if not courts:
-            keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await self._update.callback_query.edit_message_text(msgs.admin_court_no_courts, reply_markup=reply_markup)
+            await self._update.callback_query.edit_message_text(
+                msgs.admin_court_no_courts,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')]],
+                ),
+            )
             return
         keyboard = []
         for court in courts:
             keyboard.append([InlineKeyboardButton(f'🎾 {court.name}', callback_data=f'admin_delete_court_{court.id}')])
         keyboard.append([InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')])
-        reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.callback_query.edit_message_text(
-            msgs.admin_court_select_to_delete, reply_markup=reply_markup
+            msgs.admin_court_select_to_delete,
+            reply_markup=InlineKeyboardMarkup(keyboard),
         )

@@ -126,8 +126,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     ]
     if _is_admin(user_id, deps):
         keyboard.append([InlineKeyboardButton(msgs.btn_admin_panel, callback_data='admin_menu')])
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text(msgs.welcome_start, reply_markup=reply_markup)
+    await update.message.reply_text(msgs.welcome_start, reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 async def _show_authorization_request(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -186,8 +185,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         ]
         if _is_admin(user_id, deps):
             keyboard.append([InlineKeyboardButton(msgs.btn_admin_panel, callback_data='admin_menu')])
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(msgs.welcome_after_auth, reply_markup=reply_markup)
+        await update.message.reply_text(msgs.welcome_after_auth, reply_markup=InlineKeyboardMarkup(keyboard))
     else:
         await update.message.reply_text(
             msgs.auth_phone_not_found,
@@ -208,11 +206,13 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, edi
     ]
     if update.effective_user and _is_admin(update.effective_user.id, deps):
         keyboard.append([InlineKeyboardButton(msgs.btn_admin_panel, callback_data='admin_menu')])
-    reply_markup = InlineKeyboardMarkup(keyboard)
     if edit_message and update.callback_query:
-        await update.callback_query.edit_message_text(msgs.welcome_after_auth, reply_markup=reply_markup)
+        await update.callback_query.edit_message_text(
+            msgs.welcome_after_auth,
+            reply_markup=InlineKeyboardMarkup(keyboard),
+        )
     elif update.message:
-        await update.message.reply_text(msgs.welcome_after_auth, reply_markup=reply_markup)
+        await update.message.reply_text(msgs.welcome_after_auth, reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 async def handle_unknown_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -298,6 +298,9 @@ async def handle_unknown_message(update: Update, context: ContextTypes.DEFAULT_T
         elif admin_state == 'awaiting_edit_student_phone':
             await AdminEditStudentPhoneInput(update, context, deps, message_text).handle()
             return
-    keyboard = [[InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text(msgs.unknown_command, reply_markup=reply_markup)
+    await update.message.reply_text(
+        msgs.unknown_command,
+        reply_markup=InlineKeyboardMarkup(
+            [[InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')]],
+        ),
+    )

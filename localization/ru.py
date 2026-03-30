@@ -127,7 +127,12 @@ class RussianMessages(Messages):
         return 'Занят'
 
     def booking_confirmed(
-        self, court_name: str, date: str, time: str, trainer_name: str | None, booking_id: str
+        self,
+        court_name: str,
+        date: str,
+        time: str,
+        trainer_name: str | None,
+        booking_id: str,
     ) -> str:
         text = f'✅ Бронирование подтверждено!\n\n🎾 Корт: {court_name}\n📅 Дата: {date}\n🕐 Время: {time}\n'
         if trainer_name:
@@ -136,7 +141,10 @@ class RussianMessages(Messages):
         return text
 
     def booking_new_notification(self, student_name: str, court_name: str, date: str, time: str) -> str:
-        return f'📬 Новое бронирование!\n\n👤 Студент: {student_name}\n🎾 Корт: {court_name}\n📅 Дата: {date}\n🕐 Время: {time}\n'
+        return (
+            f'📬 Новое бронирование!\n\n👤 Студент: {student_name}\n🎾 Корт: {court_name}\n📅 Дата: {date}\n'
+            f'🕐 Время: {time}\n'
+        )
 
     @property
     def booking_failed(self) -> str:
@@ -275,7 +283,11 @@ class RussianMessages(Messages):
         return text + '.'
 
     def schedule_weekly_select_court(
-        self, start: str, end: str, location_name: str | None, maps_link: str | None
+        self,
+        start: str,
+        end: str,
+        location_name: str | None,
+        maps_link: str | None,
     ) -> str:
         text = f'📊 Недельное расписание ({start} - {end})\n'
         if location_name and maps_link:
@@ -286,7 +298,12 @@ class RussianMessages(Messages):
         return text
 
     def schedule_weekly_court(
-        self, court_name: str, start: str, end: str, location_name: str | None, maps_link: str | None
+        self,
+        court_name: str,
+        start: str,
+        end: str,
+        location_name: str | None,
+        maps_link: str | None,
     ) -> str:
         loc = ''
         if location_name and maps_link:

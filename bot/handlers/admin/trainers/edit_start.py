@@ -32,19 +32,24 @@ class AdminEditTrainerStart(Handler):
         trainer_id = int(self._callback_data.replace('admin_edit_trainer_', ''))
         trainer = self._deps.trainer_repo.get(trainer_id)
         if not trainer:
-            keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_trainers')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await self._update.callback_query.edit_message_text(msgs.admin_trainer_not_found, reply_markup=reply_markup)
+            await self._update.callback_query.edit_message_text(
+                msgs.admin_trainer_not_found,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_trainers')]],
+                ),
+            )
             return
         _clear_admin_state(self._context)
         assert self._context.user_data is not None
         self._context.user_data['admin_trainer_id'] = str(trainer.id)
         self._context.user_data['admin_state'] = 'awaiting_edit_trainer_name'
-        text = msgs.admin_trainer_edit_step1(
-            name=trainer.user.name,
-            telegram_id=trainer.user.telegram_user_id,
-            description=trainer.description,
+        await self._update.callback_query.edit_message_text(
+            msgs.admin_trainer_edit_step1(
+                name=trainer.user.name,
+                telegram_id=trainer.user.telegram_user_id,
+                description=trainer.description,
+            ),
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]],
+            ),
         )
-        keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)

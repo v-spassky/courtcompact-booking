@@ -32,9 +32,12 @@ class AdminEditStudentStart(Handler):
         student_id = int(self._callback_data.replace('admin_edit_student_', ''))
         student = self._deps.student_repo.get(student_id)
         if not student:
-            keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await self._update.callback_query.edit_message_text(msgs.admin_student_not_found, reply_markup=reply_markup)
+            await self._update.callback_query.edit_message_text(
+                msgs.admin_student_not_found,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]],
+                ),
+            )
             return
         _clear_admin_state(self._context)
         assert self._context.user_data is not None
@@ -42,7 +45,9 @@ class AdminEditStudentStart(Handler):
         self._context.user_data['admin_state'] = 'awaiting_edit_student_name'
         status = msgs.student_status_authorized if student.user_id else msgs.student_status_unauthorized
         student_name = student.user.name if student.user else msgs.unknown_entity
-        text = msgs.admin_student_edit_step1(name=student_name, phone=student.phone, status=status)
-        keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(
+            msgs.admin_student_edit_step1(name=student_name, phone=student.phone, status=status),
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')]],
+            ),
+        )

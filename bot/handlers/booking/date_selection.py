@@ -48,10 +48,11 @@ class BookingDateSelection(Handler):
                     if booking and booking.trainer_id == trainer_id:
                         trainer_busy_times.add((booking.start_time, booking.end_time))
         if not court_slots:
-            keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(
-                msgs.booking_no_slots_for_date, reply_markup=reply_markup
+                msgs.booking_no_slots_for_date,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+                ),
             )
             return
         text = msgs.booking_select_slot(
@@ -83,8 +84,10 @@ class BookingDateSelection(Handler):
                 row.append(buttons[i + 1])
             keyboard.append(row)
         keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(
+            text,
+            reply_markup=InlineKeyboardMarkup(keyboard),
+        )
 
     async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to show time slots')

@@ -32,7 +32,7 @@ class StudentRepository:
     def get(self, student_id: int) -> Student | None:
         with self._session() as session:
             return session.execute(
-                select(Student).where(Student.id == student_id).options(selectinload(Student.user))
+                select(Student).where(Student.id == student_id).options(selectinload(Student.user)),
             ).scalar_one_or_none()
 
     def get_by_telegram_id(self, telegram_user_id: int) -> Student | None:
@@ -41,7 +41,7 @@ class StudentRepository:
                 select(Student)
                 .join(User, Student.user_id == User.id)
                 .where(User.telegram_user_id == telegram_user_id)
-                .options(selectinload(Student.user))
+                .options(selectinload(Student.user)),
             ).scalar_one_or_none()
 
     def get_by_phone(self, phone: str) -> Student | None:

@@ -41,7 +41,11 @@ def _check_date_availability(date: DateType, court_id: int, trainer_id: int | No
 
 
 def _create_booking_calendar(
-    year: int, month: int, court_id: int, trainer_id: int | None, deps: Deps
+    year: int,
+    month: int,
+    court_id: int,
+    trainer_id: int | None,
+    deps: Deps,
 ) -> InlineKeyboardMarkup:
     msgs = get_messages()
     keyboard = []
@@ -73,7 +77,7 @@ def _create_booking_calendar(
     prev_year = year if month > 1 else year - 1
     if datetime(prev_year, prev_month, 1).date() >= datetime(today.year, today.month, 1).date():
         nav_row.append(
-            InlineKeyboardButton('◀️', callback_data=f'book_cal_{court_id}_{trainer_id_str}_{prev_year}_{prev_month}')
+            InlineKeyboardButton('◀️', callback_data=f'book_cal_{court_id}_{trainer_id_str}_{prev_year}_{prev_month}'),
         )
     else:
         nav_row.append(InlineKeyboardButton(' ', callback_data='ignore'))
@@ -81,7 +85,7 @@ def _create_booking_calendar(
     next_month = month + 1 if month < 12 else 1
     next_year = year if month < 12 else year + 1
     nav_row.append(
-        InlineKeyboardButton('▶️', callback_data=f'book_cal_{court_id}_{trainer_id_str}_{next_year}_{next_month}')
+        InlineKeyboardButton('▶️', callback_data=f'book_cal_{court_id}_{trainer_id_str}_{next_year}_{next_month}'),
     )
     keyboard.append(nav_row)
     return InlineKeyboardMarkup(keyboard)

@@ -72,10 +72,13 @@ class CourtScheduleForDay(Handler):
                     text += f'❌ {booking_info}\n'
             if not has_slots:
                 text += msgs.schedule_no_slots_for_day
-        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.callback_query.edit_message_text(
-            text, reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True
+            text,
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+            ),
+            parse_mode='HTML',
+            disable_web_page_preview=True,
         )
 
     async def _on_error(self, error: Exception) -> None:

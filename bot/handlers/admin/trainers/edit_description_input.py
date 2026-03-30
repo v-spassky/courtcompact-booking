@@ -42,18 +42,23 @@ class AdminEditTrainerDescriptionInput(TextInputHandler):
         self._deps.trainer_repo.save(trainer)
         if self._update.effective_user:
             _log_user_action(self._update.effective_user, f'edited trainer: {trainer.user.name}')
-        text = msgs.admin_trainer_updated(name=trainer.user.name)
-        keyboard = [
-            [InlineKeyboardButton(msgs.btn_edit_another, callback_data='admin_edit_trainer')],
-            [InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')],
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.message.reply_text(text, reply_markup=reply_markup)
+        await self._update.message.reply_text(
+            msgs.admin_trainer_updated(name=trainer.user.name),
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [InlineKeyboardButton(msgs.btn_edit_another, callback_data='admin_edit_trainer')],
+                    [InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')],
+                ],
+            ),
+        )
 
     async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to edit trainer')
         msgs = get_messages()
         assert self._update.message is not None
-        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.message.reply_text(msgs.admin_trainer_update_error, reply_markup=reply_markup)
+        await self._update.message.reply_text(
+            msgs.admin_trainer_update_error,
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')]],
+            ),
+        )

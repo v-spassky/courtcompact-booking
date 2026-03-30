@@ -14,7 +14,12 @@ logger = logging.getLogger(__name__)
 
 class BookingSlotSelection(Handler):
     def __init__(
-        self, update: Update, context: ContextTypes.DEFAULT_TYPE, deps: Deps, callback_data: str, user_id: int
+        self,
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE,
+        deps: Deps,
+        callback_data: str,
+        user_id: int,
     ) -> None:
         super().__init__(update, context, deps)
         self._callback_data = callback_data
@@ -72,9 +77,12 @@ class BookingSlotSelection(Handler):
                 trainer_name=trainer_name,
                 booking_id=str(booking.id),
             )
-            keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+            await self._update.callback_query.edit_message_text(
+                text,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+                ),
+            )
             if booked_trainer and not is_trainer_booking and booked_trainer.user.telegram_user_id != self._user_id:
                 try:
                     student_name = (
@@ -88,24 +96,30 @@ class BookingSlotSelection(Handler):
                         date=booking.start_time.strftime('%d.%m.%Y'),
                         time=f'{booking.start_time.strftime("%H:%M")} - {booking.end_time.strftime("%H:%M")}',
                     )
-                    notify_keyboard = [[InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')]]
-                    notify_markup = InlineKeyboardMarkup(notify_keyboard)
                     await self._context.bot.send_message(
-                        chat_id=booked_trainer.user.telegram_user_id, text=notify_text, reply_markup=notify_markup
+                        chat_id=booked_trainer.user.telegram_user_id,
+                        text=notify_text,
+                        reply_markup=InlineKeyboardMarkup(
+                            [[InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')]],
+                        ),
                     )
                 except Exception as e:
                     logger.warning(f'Failed to notify trainer: {e}')
         else:
-            keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(
-                msgs.booking_slot_unavailable, reply_markup=reply_markup
+                msgs.booking_slot_unavailable,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+                ),
             )
 
     async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to create booking')
         msgs = get_messages()
         assert self._update.callback_query is not None
-        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(msgs.booking_generic_error, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(
+            msgs.booking_generic_error,
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+            ),
+        )

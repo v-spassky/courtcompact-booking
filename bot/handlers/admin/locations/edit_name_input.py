@@ -27,17 +27,23 @@ class AdminEditLocationNameInput(TextInputHandler):
             return
         if self._text.strip() != '-':
             if len(self._text) < 1 or len(self._text) > 100:
-                text = msgs.admin_location_name_too_long_edit
-                keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_locations')]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                await self._update.message.reply_text(text, reply_markup=reply_markup)
+                await self._update.message.reply_text(
+                    msgs.admin_location_name_too_long_edit,
+                    reply_markup=InlineKeyboardMarkup(
+                        [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_locations')]],
+                    ),
+                )
                 return
             self._context.user_data['admin_location_name'] = self._text.strip()
         else:
             self._context.user_data['admin_location_name'] = location.name
         self._context.user_data['admin_state'] = 'awaiting_edit_location_maps_link'
-        new_name = self._context.user_data['admin_location_name']
-        text = msgs.admin_location_edit_step2(new_name=new_name, maps_link=location.maps_link)
-        keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_locations')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.message.reply_text(text, reply_markup=reply_markup)
+        await self._update.message.reply_text(
+            msgs.admin_location_edit_step2(
+                new_name=self._context.user_data['admin_location_name'],
+                maps_link=location.maps_link,
+            ),
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_locations')]],
+            ),
+        )

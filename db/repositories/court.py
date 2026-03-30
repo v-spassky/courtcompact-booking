@@ -32,7 +32,7 @@ class CourtRepository:
     def get(self, court_id: int) -> Court | None:
         with self._session() as session:
             return session.execute(
-                select(Court).where(Court.id == court_id).options(selectinload(Court.location))
+                select(Court).where(Court.id == court_id).options(selectinload(Court.location)),
             ).scalar_one_or_none()
 
     def get_all(self) -> list[Court]:

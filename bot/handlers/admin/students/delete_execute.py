@@ -32,23 +32,32 @@ class AdminDeleteStudentExecute(Handler):
         student_id = int(self._callback_data.replace('admin_confirm_delete_student_', ''))
         student = self._deps.student_repo.get(student_id)
         if not student:
-            keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await self._update.callback_query.edit_message_text(msgs.admin_student_not_found, reply_markup=reply_markup)
+            await self._update.callback_query.edit_message_text(
+                msgs.admin_student_not_found,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]],
+                ),
+            )
             return
         self._deps.student_repo.delete(student.id)
         _log_user_action(
-            self._update.effective_user, f'deleted student: {student.user.name if student.user else student.phone}'
+            self._update.effective_user,
+            f'deleted student: {student.user.name if student.user else student.phone}',
         )
-        text = msgs.admin_student_deleted(name=student.user.name if student.user else student.phone)
-        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(
+            msgs.admin_student_deleted(name=student.user.name if student.user else student.phone),
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')]],
+            ),
+        )
 
     async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to delete student')
         msgs = get_messages()
         assert self._update.callback_query is not None
-        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(msgs.admin_student_delete_error, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(
+            msgs.admin_student_delete_error,
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')]],
+            ),
+        )

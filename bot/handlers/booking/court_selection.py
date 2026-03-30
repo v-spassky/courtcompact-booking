@@ -14,7 +14,12 @@ logger = logging.getLogger(__name__)
 
 class CourtSelectionForBooking(Handler):
     def __init__(
-        self, update: Update, context: ContextTypes.DEFAULT_TYPE, deps: Deps, callback_data: str, user_id: int
+        self,
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE,
+        deps: Deps,
+        callback_data: str,
+        user_id: int,
     ) -> None:
         super().__init__(update, context, deps)
         self._callback_data = callback_data
@@ -42,12 +47,12 @@ class CourtSelectionForBooking(Handler):
         for trainer in trainers:
             button_text = f'👨‍🏫 {trainer.user.name}'
             keyboard.append(
-                [InlineKeyboardButton(button_text, callback_data=f'select_trainer_{trainer.id}_{court_id}')]
+                [InlineKeyboardButton(button_text, callback_data=f'select_trainer_{trainer.id}_{court_id}')],
             )
         keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
-        reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.callback_query.edit_message_text(
-            msgs.booking_select_trainer(court_name=court_name), reply_markup=reply_markup
+            msgs.booking_select_trainer(court_name=court_name),
+            reply_markup=InlineKeyboardMarkup(keyboard),
         )
 
     async def _on_error(self, error: Exception) -> None:

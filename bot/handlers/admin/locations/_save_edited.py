@@ -36,16 +36,22 @@ async def _save_edited_location(update: Update, context: ContextTypes.DEFAULT_TY
         text = msgs.admin_location_updated(name=location.name)
         if new_maps_link:
             text += f'\n🗺️ <a href="{new_maps_link}">Google Maps</a>'
-        keyboard = [
-            [InlineKeyboardButton(msgs.btn_edit_another, callback_data='admin_edit_location')],
-            [InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')],
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(
-            text, reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True
+            text,
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [InlineKeyboardButton(msgs.btn_edit_another, callback_data='admin_edit_location')],
+                    [InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')],
+                ],
+            ),
+            parse_mode='HTML',
+            disable_web_page_preview=True,
         )
     except Exception:
         logger.exception('Failed to edit location')
-        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(msgs.admin_location_update_error, reply_markup=reply_markup)
+        await update.message.reply_text(
+            msgs.admin_location_update_error,
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')]],
+            ),
+        )

@@ -39,18 +39,24 @@ class AdminCourtDescriptionInput(TextInputHandler):
                 text += msgs.admin_court_location_line(name=location.name)
         if court_description:
             text += msgs.admin_court_description_line(desc=court_description)
-        keyboard = [
-            [InlineKeyboardButton(msgs.btn_create_another, callback_data='admin_create_court')],
-            [InlineKeyboardButton(msgs.btn_back_to_courts, callback_data='admin_courts')],
-            [InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')],
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.message.reply_text(text, reply_markup=reply_markup)
+        await self._update.message.reply_text(
+            text,
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [InlineKeyboardButton(msgs.btn_create_another, callback_data='admin_create_court')],
+                    [InlineKeyboardButton(msgs.btn_back_to_courts, callback_data='admin_courts')],
+                    [InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')],
+                ],
+            ),
+        )
 
     async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to create court')
         msgs = get_messages()
         assert self._update.message is not None
-        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_courts, callback_data='admin_courts')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.message.reply_text(msgs.admin_court_create_error, reply_markup=reply_markup)
+        await self._update.message.reply_text(
+            msgs.admin_court_create_error,
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_back_to_courts, callback_data='admin_courts')]],
+            ),
+        )

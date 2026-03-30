@@ -31,17 +31,23 @@ async def _save_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         text = msgs.admin_location_created(name=location_name)
         if maps_link:
             text += f'\n🗺️ <a href="{maps_link}">Google Maps</a>'
-        keyboard = [
-            [InlineKeyboardButton(msgs.btn_create_another, callback_data='admin_create_location')],
-            [InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')],
-            [InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')],
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(
-            text, reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True
+            text,
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [InlineKeyboardButton(msgs.btn_create_another, callback_data='admin_create_location')],
+                    [InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')],
+                    [InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')],
+                ],
+            ),
+            parse_mode='HTML',
+            disable_web_page_preview=True,
         )
     except Exception:
         logger.exception('Failed to create location')
-        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(msgs.admin_location_create_error, reply_markup=reply_markup)
+        await update.message.reply_text(
+            msgs.admin_location_create_error,
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')]],
+            ),
+        )

@@ -39,18 +39,23 @@ class AdminEditCourtDescriptionInput(TextInputHandler):
         self._deps.court_repo.save(court)
         if self._update.effective_user:
             _log_user_action(self._update.effective_user, f'edited court: {court.name}')
-        text = msgs.admin_court_updated(name=court.name)
-        keyboard = [
-            [InlineKeyboardButton(msgs.btn_edit_another, callback_data='admin_edit_court')],
-            [InlineKeyboardButton(msgs.btn_back_to_courts, callback_data='admin_courts')],
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.message.reply_text(text, reply_markup=reply_markup)
+        await self._update.message.reply_text(
+            msgs.admin_court_updated(name=court.name),
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [InlineKeyboardButton(msgs.btn_edit_another, callback_data='admin_edit_court')],
+                    [InlineKeyboardButton(msgs.btn_back_to_courts, callback_data='admin_courts')],
+                ],
+            ),
+        )
 
     async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to edit court')
         msgs = get_messages()
         assert self._update.message is not None
-        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_courts, callback_data='admin_courts')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.message.reply_text(msgs.admin_court_update_error, reply_markup=reply_markup)
+        await self._update.message.reply_text(
+            msgs.admin_court_update_error,
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_back_to_courts, callback_data='admin_courts')]],
+            ),
+        )

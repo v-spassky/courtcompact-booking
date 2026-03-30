@@ -31,14 +31,24 @@ class AdminDeleteCourtConfirm(Handler):
         court_id = int(self._callback_data.replace('admin_delete_court_', ''))
         court = self._deps.court_repo.get(court_id)
         if not court:
-            keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await self._update.callback_query.edit_message_text(msgs.admin_court_not_found, reply_markup=reply_markup)
+            await self._update.callback_query.edit_message_text(
+                msgs.admin_court_not_found,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')]],
+                ),
+            )
             return
-        text = msgs.admin_court_confirm_delete(name=court.name)
-        keyboard = [
-            [InlineKeyboardButton(msgs.btn_confirm_delete, callback_data=f'admin_confirm_delete_court_{court.id}')],
-            [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_courts')],
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(
+            msgs.admin_court_confirm_delete(name=court.name),
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            msgs.btn_confirm_delete,
+                            callback_data=f'admin_confirm_delete_court_{court.id}',
+                        ),
+                    ],
+                    [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_courts')],
+                ],
+            ),
+        )

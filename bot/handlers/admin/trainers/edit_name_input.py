@@ -27,19 +27,23 @@ class AdminEditTrainerNameInput(TextInputHandler):
             return
         if self._text.strip() != '-':
             if len(self._text) < 1 or len(self._text) > 100:
-                text = msgs.admin_trainer_name_too_long_edit
-                keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                await self._update.message.reply_text(text, reply_markup=reply_markup)
+                await self._update.message.reply_text(
+                    msgs.admin_trainer_name_too_long_edit,
+                    reply_markup=InlineKeyboardMarkup(
+                        [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]],
+                    ),
+                )
                 return
             self._context.user_data['admin_trainer_name'] = self._text.strip()
         else:
             self._context.user_data['admin_trainer_name'] = trainer.user.name
         self._context.user_data['admin_state'] = 'awaiting_edit_trainer_telegram_id'
-        text = msgs.admin_trainer_edit_step2(
-            new_name=self._context.user_data['admin_trainer_name'],
-            telegram_id=trainer.user.telegram_user_id,
+        await self._update.message.reply_text(
+            msgs.admin_trainer_edit_step2(
+                new_name=self._context.user_data['admin_trainer_name'],
+                telegram_id=trainer.user.telegram_user_id,
+            ),
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]],
+            ),
         )
-        keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.message.reply_text(text, reply_markup=reply_markup)

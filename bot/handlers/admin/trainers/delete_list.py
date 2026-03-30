@@ -26,19 +26,20 @@ class AdminDeleteTrainerList(Handler):
         _clear_admin_state(self._context)
         trainers = self._deps.trainer_repo.get_all()
         if not trainers:
-            keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_trainers')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(
-                msgs.admin_trainer_no_trainers, reply_markup=reply_markup
+                msgs.admin_trainer_no_trainers,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_trainers')]],
+                ),
             )
             return
         keyboard = []
         for trainer in trainers:
             keyboard.append(
-                [InlineKeyboardButton(f'👨‍🏫 {trainer.user.name}', callback_data=f'admin_delete_trainer_{trainer.id}')]
+                [InlineKeyboardButton(f'👨‍🏫 {trainer.user.name}', callback_data=f'admin_delete_trainer_{trainer.id}')],
             )
         keyboard.append([InlineKeyboardButton(msgs.btn_back, callback_data='admin_trainers')])
-        reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.callback_query.edit_message_text(
-            msgs.admin_trainer_select_to_delete, reply_markup=reply_markup
+            msgs.admin_trainer_select_to_delete,
+            reply_markup=InlineKeyboardMarkup(keyboard),
         )

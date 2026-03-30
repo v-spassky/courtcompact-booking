@@ -32,23 +32,29 @@ class AdminDeleteLocationExecute(Handler):
         location_id = int(self._callback_data.replace('admin_confirm_delete_location_', ''))
         location = self._deps.location_repo.get(location_id)
         if not location:
-            keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_locations')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(
-                msgs.admin_location_not_found, reply_markup=reply_markup
+                msgs.admin_location_not_found,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_locations')]],
+                ),
             )
             return
         self._deps.location_repo.delete(location.id)
         _log_user_action(self._update.effective_user, f'deleted location: {location.name}')
-        text = msgs.admin_location_deleted(name=location.name)
-        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(
+            msgs.admin_location_deleted(name=location.name),
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')]],
+            ),
+        )
 
     async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to delete location')
         msgs = get_messages()
         assert self._update.callback_query is not None
-        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(msgs.admin_location_delete_error, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(
+            msgs.admin_location_delete_error,
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_back_to_locations, callback_data='admin_locations')]],
+            ),
+        )

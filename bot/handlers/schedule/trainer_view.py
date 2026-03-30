@@ -26,9 +26,12 @@ class ViewTrainerSchedule(Handler):
         msgs = get_messages()
         trainer = self._deps.trainer_repo.get(int(self._callback_data.split('_')[2]))
         if not trainer:
-            keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await self._update.callback_query.edit_message_text(msgs.generic_error, reply_markup=reply_markup)
+            await self._update.callback_query.edit_message_text(
+                msgs.generic_error,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+                ),
+            )
             return
         today = now_kiev()
         all_bookings = []
@@ -58,12 +61,15 @@ class ViewTrainerSchedule(Handler):
                     time_range = f'{booking.start_time.strftime("%H:%M")}-{booking.end_time.strftime("%H:%M")}'
                     text += f'   • {time_range} - {court_name}\n'
                 text += '\n'
-        keyboard = [
-            [InlineKeyboardButton(msgs.btn_back_to_trainers, callback_data='trainer_schedule')],
-            [InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')],
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(
+            text,
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [InlineKeyboardButton(msgs.btn_back_to_trainers, callback_data='trainer_schedule')],
+                    [InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')],
+                ],
+            ),
+        )
 
     async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to generate trainer schedule')

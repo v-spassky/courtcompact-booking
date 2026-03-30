@@ -38,18 +38,24 @@ class AdminTrainerDescriptionInput(TextInputHandler):
         text += f'\n🆔 Telegram ID: {telegram_id}\n'
         if description:
             text += msgs.admin_trainer_description_line(desc=description)
-        keyboard = [
-            [InlineKeyboardButton(msgs.btn_create_another, callback_data='admin_create_trainer')],
-            [InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')],
-            [InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')],
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.message.reply_text(text, reply_markup=reply_markup)
+        await self._update.message.reply_text(
+            text,
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [InlineKeyboardButton(msgs.btn_create_another, callback_data='admin_create_trainer')],
+                    [InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')],
+                    [InlineKeyboardButton(msgs.btn_main_menu, callback_data='main_menu')],
+                ],
+            ),
+        )
 
     async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to create trainer')
         msgs = get_messages()
         assert self._update.message is not None
-        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.message.reply_text(msgs.admin_trainer_create_error, reply_markup=reply_markup)
+        await self._update.message.reply_text(
+            msgs.admin_trainer_create_error,
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')]],
+            ),
+        )

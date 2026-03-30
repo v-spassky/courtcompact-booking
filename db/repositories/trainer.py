@@ -32,7 +32,7 @@ class TrainerRepository:
     def get(self, trainer_id: int) -> Trainer | None:
         with self._session() as session:
             return session.execute(
-                select(Trainer).where(Trainer.id == trainer_id).options(selectinload(Trainer.user))
+                select(Trainer).where(Trainer.id == trainer_id).options(selectinload(Trainer.user)),
             ).scalar_one_or_none()
 
     def get_by_telegram_id(self, telegram_user_id: int) -> Trainer | None:
@@ -41,7 +41,7 @@ class TrainerRepository:
                 select(Trainer)
                 .join(User, Trainer.user_id == User.id)
                 .where(User.telegram_user_id == telegram_user_id)
-                .options(selectinload(Trainer.user))
+                .options(selectinload(Trainer.user)),
             ).scalar_one_or_none()
 
     def get_all(self) -> list[Trainer]:

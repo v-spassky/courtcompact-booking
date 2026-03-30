@@ -116,7 +116,12 @@ class Messages(ABC):
 
     @abstractmethod
     def booking_confirmed(
-        self, court_name: str, date: str, time: str, trainer_name: str | None, booking_id: str
+        self,
+        court_name: str,
+        date: str,
+        time: str,
+        trainer_name: str | None,
+        booking_id: str,
     ) -> str: ...
 
     @abstractmethod
@@ -214,7 +219,11 @@ class Messages(ABC):
 
     @abstractmethod
     def schedule_court_day(
-        self, court_name: str, date: str, location_name: str | None, maps_link: str | None
+        self,
+        court_name: str,
+        date: str,
+        location_name: str | None,
+        maps_link: str | None,
     ) -> str: ...
 
     @property
@@ -240,17 +249,31 @@ class Messages(ABC):
 
     @abstractmethod
     def schedule_weekly_select_court(
-        self, start: str, end: str, location_name: str | None, maps_link: str | None
+        self,
+        start: str,
+        end: str,
+        location_name: str | None,
+        maps_link: str | None,
     ) -> str: ...
 
     @abstractmethod
     def schedule_weekly_court(
-        self, court_name: str, start: str, end: str, location_name: str | None, maps_link: str | None
+        self,
+        court_name: str,
+        start: str,
+        end: str,
+        location_name: str | None,
+        maps_link: str | None,
     ) -> str: ...
 
     @abstractmethod
     def schedule_weekly_day_row(
-        self, day_name: str, date: str, available: int, total: int, trainer_count: int
+        self,
+        day_name: str,
+        date: str,
+        available: int,
+        total: int,
+        trainer_count: int,
     ) -> str: ...
 
     @property

@@ -26,19 +26,20 @@ class AdminDeleteLocationList(Handler):
         _clear_admin_state(self._context)
         locations = self._deps.location_repo.get_all()
         if not locations:
-            keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_locations')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(
-                msgs.admin_location_no_locations, reply_markup=reply_markup
+                msgs.admin_location_no_locations,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_locations')]],
+                ),
             )
             return
         keyboard = []
         for location in locations:
             keyboard.append(
-                [InlineKeyboardButton(f'📍 {location.name}', callback_data=f'admin_delete_location_{location.id}')]
+                [InlineKeyboardButton(f'📍 {location.name}', callback_data=f'admin_delete_location_{location.id}')],
             )
         keyboard.append([InlineKeyboardButton(msgs.btn_back, callback_data='admin_locations')])
-        reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.callback_query.edit_message_text(
-            msgs.admin_location_select_to_delete, reply_markup=reply_markup
+            msgs.admin_location_select_to_delete,
+            reply_markup=InlineKeyboardMarkup(keyboard),
         )

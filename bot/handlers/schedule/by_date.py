@@ -38,9 +38,11 @@ class ScheduleForDate(Handler):
             loc_callback = f'schedule_location_{location.id}_{self._date.year}_{self._date.month}_{self._date.day}'
             keyboard.append([InlineKeyboardButton(f'📍 {location.name}', callback_data=loc_callback)])
         keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
-        reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.callback_query.edit_message_text(
-            text, reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True
+            text,
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode='HTML',
+            disable_web_page_preview=True,
         )
 
     async def _on_error(self, error: Exception) -> None:

@@ -32,17 +32,18 @@ class AdminCreateCourtStart(Handler):
         location_id = int(self._callback_data.replace('admin_court_location_', ''))
         location = self._deps.location_repo.get(location_id)
         if not location:
-            keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(
-                msgs.admin_location_not_found, reply_markup=reply_markup
+                msgs.admin_location_not_found,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')]],
+                ),
             )
             return
         _clear_admin_state(self._context)
         assert self._context.user_data is not None
         self._context.user_data['admin_court_location_id'] = str(location.id)
         self._context.user_data['admin_state'] = 'awaiting_court_name'
-        text = msgs.admin_court_create_step2(location_name=location.name)
-        keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_courts')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(
+            msgs.admin_court_create_step2(location_name=location.name),
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_courts')]]),
+        )

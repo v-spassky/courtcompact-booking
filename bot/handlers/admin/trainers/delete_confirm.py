@@ -31,19 +31,24 @@ class AdminDeleteTrainerConfirm(Handler):
         trainer_id = int(self._callback_data.replace('admin_delete_trainer_', ''))
         trainer = self._deps.trainer_repo.get(trainer_id)
         if not trainer:
-            keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_trainers')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await self._update.callback_query.edit_message_text(msgs.admin_trainer_not_found, reply_markup=reply_markup)
+            await self._update.callback_query.edit_message_text(
+                msgs.admin_trainer_not_found,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_trainers')]],
+                ),
+            )
             return
-        text = msgs.admin_trainer_confirm_delete(name=trainer.user.name)
-        keyboard = [
-            [
-                InlineKeyboardButton(
-                    msgs.btn_confirm_delete,
-                    callback_data=f'admin_confirm_delete_trainer_{trainer.id}',
-                )
-            ],
-            [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')],
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(
+            msgs.admin_trainer_confirm_delete(name=trainer.user.name),
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            msgs.btn_confirm_delete,
+                            callback_data=f'admin_confirm_delete_trainer_{trainer.id}',
+                        ),
+                    ],
+                    [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')],
+                ],
+            ),
+        )

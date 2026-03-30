@@ -31,7 +31,9 @@ class BookCourtSelectLocation(Handler):
             button_text = f'📍 {location.name}'
             keyboard.append([InlineKeyboardButton(button_text, callback_data=f'book_location_{location.id}')])
         keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
-        reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.callback_query.edit_message_text(
-            text, reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True
+            text,
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode='HTML',
+            disable_web_page_preview=True,
         )

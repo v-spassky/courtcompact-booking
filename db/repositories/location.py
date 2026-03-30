@@ -49,8 +49,8 @@ class LocationRepository:
         with self._session() as session:
             return list(
                 session.execute(
-                    select(Court).where(Court.location_id == location_id).options(selectinload(Court.location))
+                    select(Court).where(Court.location_id == location_id).options(selectinload(Court.location)),
                 )
                 .scalars()
-                .all()
+                .all(),
             )

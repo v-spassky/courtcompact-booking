@@ -26,20 +26,24 @@ class AdminEditStudentPhoneInput(TextInputHandler):
         student = self._deps.student_repo.get(int(student_id))
         if not student:
             _clear_admin_state(self._context)
-            keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await self._update.message.reply_text(msgs.admin_student_not_found, reply_markup=reply_markup)
+            await self._update.message.reply_text(
+                msgs.admin_student_not_found,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]],
+                ),
+            )
             return
         new_phone = self._text if self._text and self._text != '-' else student.phone
         if new_phone != student.phone:
             existing = self._deps.student_repo.get_by_phone(new_phone)
             if existing and existing.id != student.id:
                 _clear_admin_state(self._context)
-                existing_name = existing.user.name if existing.user else msgs.unknown_entity
-                text = msgs.admin_student_phone_taken(name=existing_name)
-                keyboard = [[InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                await self._update.message.reply_text(text, reply_markup=reply_markup)
+                await self._update.message.reply_text(
+                    msgs.admin_student_phone_taken(name=existing.user.name if existing.user else msgs.unknown_entity),
+                    reply_markup=InlineKeyboardMarkup(
+                        [[InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')]],
+                    ),
+                )
                 return
         _clear_admin_state(self._context)
         if student.user and new_name:
@@ -50,18 +54,23 @@ class AdminEditStudentPhoneInput(TextInputHandler):
         display_name = student.user.name if student.user else new_phone
         if self._update.effective_user:
             _log_user_action(self._update.effective_user, f'edited student: {display_name}')
-        text = msgs.admin_student_updated(name=display_name)
-        keyboard = [
-            [InlineKeyboardButton(msgs.btn_edit_another, callback_data='admin_edit_student')],
-            [InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')],
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.message.reply_text(text, reply_markup=reply_markup)
+        await self._update.message.reply_text(
+            msgs.admin_student_updated(name=display_name),
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [InlineKeyboardButton(msgs.btn_edit_another, callback_data='admin_edit_student')],
+                    [InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')],
+                ],
+            ),
+        )
 
     async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to edit student')
         msgs = get_messages()
         assert self._update.message is not None
-        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.message.reply_text(msgs.admin_student_update_error, reply_markup=reply_markup)
+        await self._update.message.reply_text(
+            msgs.admin_student_update_error,
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_back_to_students, callback_data='admin_students')]],
+            ),
+        )

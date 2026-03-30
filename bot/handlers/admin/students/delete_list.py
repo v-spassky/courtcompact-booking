@@ -24,10 +24,11 @@ class AdminDeleteStudentList(Handler):
         msgs = get_messages()
         students = self._deps.student_repo.get_all()
         if not students:
-            keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(
-                msgs.admin_student_no_students, reply_markup=reply_markup
+                msgs.admin_student_no_students,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]],
+                ),
             )
             return
         keyboard = []
@@ -37,7 +38,7 @@ class AdminDeleteStudentList(Handler):
             button_text = f'{status} {student_name}'
             keyboard.append([InlineKeyboardButton(button_text, callback_data=f'admin_delete_student_{student.id}')])
         keyboard.append([InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')])
-        reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.callback_query.edit_message_text(
-            msgs.admin_student_select_to_delete, reply_markup=reply_markup
+            msgs.admin_student_select_to_delete,
+            reply_markup=InlineKeyboardMarkup(keyboard),
         )

@@ -14,7 +14,12 @@ logger = logging.getLogger(__name__)
 
 class TrainerSelectionForBooking(Handler):
     def __init__(
-        self, update: Update, context: ContextTypes.DEFAULT_TYPE, deps: Deps, callback_data: str, user_id: int
+        self,
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE,
+        deps: Deps,
+        callback_data: str,
+        user_id: int,
     ) -> None:
         super().__init__(update, context, deps)
         self._callback_data = callback_data
@@ -48,6 +53,9 @@ class TrainerSelectionForBooking(Handler):
         logger.exception('Failed to show booking calendar')
         msgs = get_messages()
         assert self._update.callback_query is not None
-        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(msgs.generic_error, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(
+            msgs.generic_error,
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]],
+            ),
+        )

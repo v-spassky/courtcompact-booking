@@ -26,7 +26,9 @@ class AdminCreateTrainerStart(Handler):
         _clear_admin_state(self._context)
         assert self._context.user_data is not None
         self._context.user_data['admin_state'] = 'awaiting_trainer_name'
-        text = msgs.admin_trainer_create_step1()
-        keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(
+            msgs.admin_trainer_create_step1(),
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]],
+            ),
+        )

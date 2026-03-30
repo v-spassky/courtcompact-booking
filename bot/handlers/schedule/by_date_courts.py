@@ -37,18 +37,20 @@ class ScheduleForDateShowCourts(Handler):
         else:
             courts = self._deps.court_repo.get_all()
         if not courts:
-            text = msgs.schedule_no_courts(location_name=location.name if location else None)
-            keyboard = [
-                [
-                    InlineKeyboardButton(
-                        msgs.btn_select_other_location,
-                        callback_data=f'date_{self._date.year}_{self._date.month}_{self._date.day}',
-                    )
-                ],
-                [InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')],
-            ]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+            await self._update.callback_query.edit_message_text(
+                msgs.schedule_no_courts(location_name=location.name if location else None),
+                reply_markup=InlineKeyboardMarkup(
+                    [
+                        [
+                            InlineKeyboardButton(
+                                msgs.btn_select_other_location,
+                                callback_data=f'date_{self._date.year}_{self._date.month}_{self._date.day}',
+                            ),
+                        ],
+                        [InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')],
+                    ],
+                ),
+            )
             return
         text = msgs.schedule_select_court(
             date=self._date.strftime('%d.%m.%Y'),
@@ -65,13 +67,15 @@ class ScheduleForDateShowCourts(Handler):
                     InlineKeyboardButton(
                         msgs.btn_select_other_location,
                         callback_data=f'date_{self._date.year}_{self._date.month}_{self._date.day}',
-                    )
-                ]
+                    ),
+                ],
             )
         keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
-        reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.callback_query.edit_message_text(
-            text, reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True
+            text,
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode='HTML',
+            disable_web_page_preview=True,
         )
 
     async def _on_error(self, error: Exception) -> None:
