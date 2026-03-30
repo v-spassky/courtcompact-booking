@@ -1,7 +1,6 @@
 from collections.abc import Generator
 from contextlib import contextmanager
 from datetime import datetime
-from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload, sessionmaker
@@ -35,15 +34,17 @@ class BookingRepository:
 
     def save(self, booking: Booking) -> None:
         with self._session() as session:
-            session.merge(booking)
+            merged = session.merge(booking)
+            session.flush()
+            booking.id = merged.id
 
-    def get(self, booking_id: UUID) -> Booking | None:
+    def get(self, booking_id: int) -> Booking | None:
         with self._session() as session:
             return session.execute(
                 select(Booking).where(Booking.id == booking_id).options(*self._booking_options())
             ).scalar_one_or_none()
 
-    def get_by_student(self, student_id: UUID) -> list[Booking]:
+    def get_by_student(self, student_id: int) -> list[Booking]:
         with self._session() as session:
             return list(
                 session.execute(
@@ -53,7 +54,7 @@ class BookingRepository:
                 .all()
             )
 
-    def get_by_trainer(self, trainer_id: UUID) -> list[Booking]:
+    def get_by_trainer(self, trainer_id: int) -> list[Booking]:
         with self._session() as session:
             return list(
                 session.execute(
@@ -75,7 +76,7 @@ class BookingRepository:
                 .all()
             )
 
-    def delete(self, booking_id: UUID) -> bool:
+    def delete(self, booking_id: int) -> bool:
         with self._session() as session:
             row = session.get(Booking, booking_id)
             if row:

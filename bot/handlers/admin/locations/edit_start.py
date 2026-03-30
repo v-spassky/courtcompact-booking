@@ -29,13 +29,8 @@ class AdminEditLocationStart(Handler):
     async def _process(self) -> None:
         assert self._update.callback_query is not None
         msgs = get_messages()
-        location_id_short = self._callback_data.replace('admin_edit_location_', '')
-        locations = self._deps.location_repo.get_all()
-        location = None
-        for loc in locations:
-            if str(loc.id).startswith(location_id_short):
-                location = loc
-                break
+        location_id = int(self._callback_data.replace('admin_edit_location_', ''))
+        location = self._deps.location_repo.get(location_id)
         if not location:
             keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_locations')]]
             reply_markup = InlineKeyboardMarkup(keyboard)

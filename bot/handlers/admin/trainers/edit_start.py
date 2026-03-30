@@ -29,13 +29,8 @@ class AdminEditTrainerStart(Handler):
     async def _process(self) -> None:
         assert self._update.callback_query is not None
         msgs = get_messages()
-        trainer_id_short = self._callback_data.replace('admin_edit_trainer_', '')
-        trainers = self._deps.trainer_repo.get_all()
-        trainer = None
-        for t in trainers:
-            if str(t.id).startswith(trainer_id_short):
-                trainer = t
-                break
+        trainer_id = int(self._callback_data.replace('admin_edit_trainer_', ''))
+        trainer = self._deps.trainer_repo.get(trainer_id)
         if not trainer:
             keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_trainers')]]
             reply_markup = InlineKeyboardMarkup(keyboard)

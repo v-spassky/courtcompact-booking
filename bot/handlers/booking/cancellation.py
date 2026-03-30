@@ -1,5 +1,4 @@
 import logging
-from uuid import UUID
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
@@ -26,7 +25,7 @@ class BookingCancellation(Handler):
     async def _process(self) -> None:
         assert self._update.callback_query is not None
         msgs = get_messages()
-        booking_id = UUID(self._callback_data.split('_')[2])
+        booking_id = int(self._callback_data.split('_')[2])
         booking = self._deps.booking_repo.get(booking_id)
         if not booking:
             keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]

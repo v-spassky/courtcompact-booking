@@ -1,5 +1,4 @@
 import logging
-from uuid import UUID
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
@@ -27,7 +26,7 @@ class CourtSelectionForBooking(Handler):
     async def _process(self) -> None:
         assert self._update.callback_query is not None
         msgs = get_messages()
-        court_id = UUID(self._callback_data.split('_')[2])
+        court_id = int(self._callback_data.split('_')[2])
         court = self._deps.court_repo.get(court_id)
         court_name = court.name if court else msgs.unknown_court
         user_trainer = self._deps.trainer_repo.get_by_telegram_id(self._user_id)
@@ -39,17 +38,11 @@ class CourtSelectionForBooking(Handler):
             return
         trainers = self._deps.trainer_repo.get_all()
         keyboard = []
-        keyboard.append(
-            [InlineKeyboardButton(msgs.btn_no_trainer, callback_data=f'select_trainer_none_{str(court_id)[:8]}')]
-        )
+        keyboard.append([InlineKeyboardButton(msgs.btn_no_trainer, callback_data=f'select_trainer_none_{court_id}')])
         for trainer in trainers:
             button_text = f'👨‍🏫 {trainer.user.name}'
             keyboard.append(
-                [
-                    InlineKeyboardButton(
-                        button_text, callback_data=f'select_trainer_{str(trainer.id)[:8]}_{str(court_id)[:8]}'
-                    )
-                ]
+                [InlineKeyboardButton(button_text, callback_data=f'select_trainer_{trainer.id}_{court_id}')]
             )
         keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
         reply_markup = InlineKeyboardMarkup(keyboard)

@@ -38,7 +38,7 @@ class MyBookings(Handler):
             text += f'📅 {booking.start_time.strftime("%d/%m/%Y %H:%M")} - {booking.end_time.strftime("%H:%M")}\n'
             if booking.trainer:
                 text += msgs.booking_detail_trainer(name=booking.trainer.user.name)
-            text += f'🆔 ID: {str(booking.id)[:8]}\n\n'
+            text += f'🆔 ID: {booking.id}\n\n'
         keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)

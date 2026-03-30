@@ -1,5 +1,4 @@
 import logging
-from uuid import UUID
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -22,7 +21,7 @@ class AdminEditLocationNameInput(TextInputHandler):
         if not location_id:
             _clear_admin_state(self._context)
             return
-        location = self._deps.location_repo.get(UUID(location_id))
+        location = self._deps.location_repo.get(int(location_id))
         if not location:
             _clear_admin_state(self._context)
             return

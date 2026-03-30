@@ -29,13 +29,8 @@ class AdminEditStudentStart(Handler):
     async def _process(self) -> None:
         assert self._update.callback_query is not None
         msgs = get_messages()
-        student_id_short = self._callback_data.replace('admin_edit_student_', '')
-        students = self._deps.student_repo.get_all()
-        student = None
-        for s in students:
-            if str(s.id).startswith(student_id_short):
-                student = s
-                break
+        student_id = int(self._callback_data.replace('admin_edit_student_', ''))
+        student = self._deps.student_repo.get(student_id)
         if not student:
             keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]]
             reply_markup = InlineKeyboardMarkup(keyboard)

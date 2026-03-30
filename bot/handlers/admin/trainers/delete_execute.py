@@ -29,30 +29,32 @@ class AdminDeleteTrainerExecute(Handler):
         assert self._update.callback_query is not None
         assert self._update.effective_user is not None
         msgs = get_messages()
-        trainer_id_short = self._callback_data.replace('admin_confirm_delete_trainer_', '')
-        trainers = self._deps.trainer_repo.get_all()
-        trainer = None
-        for t in trainers:
-            if str(t.id).startswith(trainer_id_short):
-                trainer = t
-                break
+        trainer_id = int(self._callback_data.replace('admin_confirm_delete_trainer_', ''))
+        trainer = self._deps.trainer_repo.get(trainer_id)
         if not trainer:
-            keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_trainers')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await self._update.callback_query.edit_message_text(msgs.admin_trainer_not_found, reply_markup=reply_markup)
+            await self._update.callback_query.edit_message_text(
+                msgs.admin_trainer_not_found,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_trainers')]],
+                ),
+            )
             return
-        trainer_name = trainer.user.name
         self._deps.trainer_repo.delete(trainer.id)
-        _log_user_action(self._update.effective_user, f'deleted trainer: {trainer_name}')
-        text = msgs.admin_trainer_deleted(name=trainer_name)
-        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+        _log_user_action(self._update.effective_user, f'deleted trainer: {trainer.user.name}')
+        await self._update.callback_query.edit_message_text(
+            msgs.admin_trainer_deleted(name=trainer.user.name),
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')]],
+            ),
+        )
 
     async def _on_error(self, error: Exception) -> None:
         logger.exception('Failed to delete trainer')
         msgs = get_messages()
         assert self._update.callback_query is not None
-        keyboard = [[InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await self._update.callback_query.edit_message_text(msgs.admin_trainer_delete_error, reply_markup=reply_markup)
+        await self._update.callback_query.edit_message_text(
+            msgs.admin_trainer_delete_error,
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(msgs.btn_back_to_trainers_list, callback_data='admin_trainers')]],
+            ),
+        )

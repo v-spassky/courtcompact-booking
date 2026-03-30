@@ -28,13 +28,8 @@ class AdminDeleteStudentConfirm(Handler):
     async def _process(self) -> None:
         assert self._update.callback_query is not None
         msgs = get_messages()
-        student_id_short = self._callback_data.replace('admin_delete_student_', '')
-        students = self._deps.student_repo.get_all()
-        student = None
-        for s in students:
-            if str(s.id).startswith(student_id_short):
-                student = s
-                break
+        student_id = int(self._callback_data.replace('admin_delete_student_', ''))
+        student = self._deps.student_repo.get(student_id)
         if not student:
             keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -46,7 +41,7 @@ class AdminDeleteStudentConfirm(Handler):
             [
                 InlineKeyboardButton(
                     msgs.btn_confirm_delete,
-                    callback_data=f'admin_confirm_delete_student_{student_id_short}',
+                    callback_data=f'admin_confirm_delete_student_{student.id}',
                 )
             ],
             [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_students')],

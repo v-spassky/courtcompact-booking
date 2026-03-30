@@ -32,11 +32,10 @@ class AdminEditStudentList(Handler):
             return
         keyboard = []
         for student in students:
-            student_id_short = str(student.id)[:8]
             status = '✅' if student.user_id else '⏳'
             student_name = student.user.name if student.user else student.phone
             button_text = f'{status} {student_name}'
-            keyboard.append([InlineKeyboardButton(button_text, callback_data=f'admin_edit_student_{student_id_short}')])
+            keyboard.append([InlineKeyboardButton(button_text, callback_data=f'admin_edit_student_{student.id}')])
         keyboard.append([InlineKeyboardButton(msgs.btn_back, callback_data='admin_students')])
         reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.callback_query.edit_message_text(

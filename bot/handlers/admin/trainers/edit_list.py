@@ -34,13 +34,8 @@ class AdminEditTrainerList(Handler):
             return
         keyboard = []
         for trainer in trainers:
-            trainer_id_short = str(trainer.id)[:8]
             keyboard.append(
-                [
-                    InlineKeyboardButton(
-                        f'👨‍🏫 {trainer.user.name}', callback_data=f'admin_edit_trainer_{trainer_id_short}'
-                    )
-                ]
+                [InlineKeyboardButton(f'👨‍🏫 {trainer.user.name}', callback_data=f'admin_edit_trainer_{trainer.id}')]
             )
         keyboard.append([InlineKeyboardButton(msgs.btn_back, callback_data='admin_trainers')])
         reply_markup = InlineKeyboardMarkup(keyboard)

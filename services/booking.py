@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime
-from uuid import UUID
 
 from db.models import Booking
 from db.repositories.booking import BookingRepository
@@ -26,37 +25,29 @@ class BookingService:
 
     def create_booking(
         self,
-        court_id: UUID,
+        court_id: int,
         start_time: datetime,
         end_time: datetime,
-        student_id: UUID | None = None,
-        trainer_id: UUID | None = None,
+        student_id: int | None = None,
+        trainer_id: int | None = None,
     ) -> Booking | None:
-        # Validate student exists if provided
         if student_id:
             student = self.students.get(student_id)
             if not student:
                 logger.warning(f'Student {student_id} not found')
                 return None
-
-        # Validate court exists
         court = self.courts.get(court_id)
         if not court:
             logger.warning(f'Court {court_id} not found')
             return None
-
-        # Validate trainer if provided
         if trainer_id:
             trainer = self.trainers.get(trainer_id)
             if not trainer:
                 logger.warning(f'Trainer {trainer_id} not found')
                 return None
-
-        # Check for conflicts
         if not self._is_time_slot_available(court_id, start_time, end_time):
             logger.warning(f'Time slot not available for court {court_id}')
             return None
-
         booking = Booking(
             student_id=student_id,
             court_id=court_id,
@@ -64,7 +55,6 @@ class BookingService:
             start_time=start_time,
             end_time=end_time,
         )
-
         try:
             self.bookings.save(booking)
             saved = self.bookings.get(booking.id)
@@ -74,12 +64,11 @@ class BookingService:
             logger.error(f'Failed to create booking: {e}')
             return None
 
-    def cancel_booking(self, booking_id: UUID, user_id: int) -> bool:
+    def cancel_booking(self, booking_id: int, user_id: int) -> bool:
         booking = self.bookings.get(booking_id)
         if not booking:
             logger.warning(f'Booking {booking_id} not found')
             return False
-        # Check if user has permission to cancel
         is_authorized = False
         if booking.student and booking.student.user and booking.student.user.telegram_user_id == user_id:
             is_authorized = True
@@ -97,7 +86,7 @@ class BookingService:
             logger.error(f'Failed to delete booking {booking_id}: {e}')
             return False
 
-    def _is_time_slot_available(self, court_id: UUID, start_time: datetime, end_time: datetime) -> bool:
+    def _is_time_slot_available(self, court_id: int, start_time: datetime, end_time: datetime) -> bool:
         bookings = self.bookings.get_in_range(start_time, end_time)
         court_bookings = [b for b in bookings if b.court_id == court_id]
         for booking in court_bookings:

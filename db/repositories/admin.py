@@ -1,6 +1,5 @@
 from collections.abc import Generator
 from contextlib import contextmanager
-from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload, sessionmaker
@@ -26,7 +25,9 @@ class AdminRepository:
 
     def save(self, admin: Admin) -> None:
         with self._session() as session:
-            session.merge(admin)
+            merged = session.merge(admin)
+            session.flush()
+            admin.id = merged.id
 
     def get_by_telegram_id(self, telegram_user_id: int) -> Admin | None:
         with self._session() as session:
@@ -41,7 +42,7 @@ class AdminRepository:
         with self._session() as session:
             return list(session.execute(select(Admin).options(selectinload(Admin.user))).scalars().all())
 
-    def delete(self, admin_id: UUID) -> bool:
+    def delete(self, admin_id: int) -> bool:
         with self._session() as session:
             row = session.get(Admin, admin_id)
             if row:

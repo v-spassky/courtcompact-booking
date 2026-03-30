@@ -26,7 +26,7 @@ class TrainerScheduleMenu(Handler):
         keyboard = []
         for trainer in trainers:
             button_text = f'👨‍🏫 {trainer.user.name}'
-            keyboard.append([InlineKeyboardButton(button_text, callback_data=f'view_trainer_{str(trainer.id)[:8]}')])
+            keyboard.append([InlineKeyboardButton(button_text, callback_data=f'view_trainer_{trainer.id}')])
         keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
         reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.callback_query.edit_message_text(msgs.trainer_schedule_select, reply_markup=reply_markup)

@@ -1,6 +1,5 @@
 from collections.abc import Generator
 from contextlib import contextmanager
-from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
@@ -26,9 +25,11 @@ class UserRepository:
 
     def save(self, user: User) -> None:
         with self._session() as session:
-            session.merge(user)
+            merged = session.merge(user)
+            session.flush()
+            user.id = merged.id
 
-    def get(self, user_id: UUID) -> User | None:
+    def get(self, user_id: int) -> User | None:
         with self._session() as session:
             return session.get(User, user_id)
 
@@ -40,7 +41,7 @@ class UserRepository:
         with self._session() as session:
             return list(session.execute(select(User)).scalars().all())
 
-    def delete(self, user_id: UUID) -> bool:
+    def delete(self, user_id: int) -> bool:
         with self._session() as session:
             row = session.get(User, user_id)
             if row:

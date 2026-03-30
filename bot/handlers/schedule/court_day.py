@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime
-from uuid import UUID
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
@@ -15,7 +14,12 @@ logger = logging.getLogger(__name__)
 
 class CourtScheduleForDay(Handler):
     def __init__(
-        self, update: Update, context: ContextTypes.DEFAULT_TYPE, deps: Deps, court_id: UUID, date: datetime
+        self,
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE,
+        deps: Deps,
+        court_id: int,
+        date: datetime,
     ) -> None:
         super().__init__(update, context, deps)
         self._court_id = court_id

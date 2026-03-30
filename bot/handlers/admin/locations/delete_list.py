@@ -34,13 +34,8 @@ class AdminDeleteLocationList(Handler):
             return
         keyboard = []
         for location in locations:
-            location_id_short = str(location.id)[:8]
             keyboard.append(
-                [
-                    InlineKeyboardButton(
-                        f'📍 {location.name}', callback_data=f'admin_delete_location_{location_id_short}'
-                    )
-                ]
+                [InlineKeyboardButton(f'📍 {location.name}', callback_data=f'admin_delete_location_{location.id}')]
             )
         keyboard.append([InlineKeyboardButton(msgs.btn_back, callback_data='admin_locations')])
         reply_markup = InlineKeyboardMarkup(keyboard)

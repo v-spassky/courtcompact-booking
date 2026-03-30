@@ -28,13 +28,8 @@ class AdminDeleteTrainerConfirm(Handler):
     async def _process(self) -> None:
         assert self._update.callback_query is not None
         msgs = get_messages()
-        trainer_id_short = self._callback_data.replace('admin_delete_trainer_', '')
-        trainers = self._deps.trainer_repo.get_all()
-        trainer = None
-        for t in trainers:
-            if str(t.id).startswith(trainer_id_short):
-                trainer = t
-                break
+        trainer_id = int(self._callback_data.replace('admin_delete_trainer_', ''))
+        trainer = self._deps.trainer_repo.get(trainer_id)
         if not trainer:
             keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_trainers')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -45,7 +40,7 @@ class AdminDeleteTrainerConfirm(Handler):
             [
                 InlineKeyboardButton(
                     msgs.btn_confirm_delete,
-                    callback_data=f'admin_confirm_delete_trainer_{trainer_id_short}',
+                    callback_data=f'admin_confirm_delete_trainer_{trainer.id}',
                 )
             ],
             [InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')],

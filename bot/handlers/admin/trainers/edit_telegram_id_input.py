@@ -21,12 +21,7 @@ class AdminEditTrainerTelegramIdInput(TextInputHandler):
         if not trainer_id:
             _clear_admin_state(self._context)
             return
-        trainers = self._deps.trainer_repo.get_all()
-        trainer = None
-        for t in trainers:
-            if str(t.id) == trainer_id:
-                trainer = t
-                break
+        trainer = self._deps.trainer_repo.get(int(trainer_id))
         if not trainer:
             _clear_admin_state(self._context)
             return
@@ -34,7 +29,7 @@ class AdminEditTrainerTelegramIdInput(TextInputHandler):
             try:
                 telegram_id = int(self._text.strip())
                 existing = self._deps.trainer_repo.get_by_telegram_id(telegram_id)
-                if existing and str(existing.id) != trainer_id:
+                if existing and existing.id != trainer.id:
                     text = msgs.admin_trainer_id_taken(name=existing.user.name)
                     keyboard = [[InlineKeyboardButton(msgs.btn_cancel, callback_data='admin_trainers')]]
                     reply_markup = InlineKeyboardMarkup(keyboard)

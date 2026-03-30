@@ -1,5 +1,4 @@
 import logging
-from uuid import UUID
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
@@ -21,7 +20,7 @@ async def _save_edited_location(update: Update, context: ContextTypes.DEFAULT_TY
     if not location_id:
         _clear_admin_state(context)
         return
-    location = deps.location_repo.get(UUID(location_id))
+    location = deps.location_repo.get(int(location_id))
     if not location:
         _clear_admin_state(context)
         return

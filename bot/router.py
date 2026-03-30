@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime
-from uuid import UUID
 
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -98,25 +97,19 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
         await ScheduleForDate(update, context, deps, selected_date).handle()
     elif callback_data.startswith('schedule_location_'):
         parts = callback_data.split('_')
-        location_id_short = parts[2]
+        location_id = int(parts[2])
         year, month, day = int(parts[3]), int(parts[4]), int(parts[5])
         selected_date = datetime(year, month, day)
-        locations_list = deps.location_repo.get_all()
-        location_id = None
-        for loc in locations_list:
-            if str(loc.id).startswith(location_id_short):
-                location_id = loc.id
-                break
         await ScheduleForDateShowCourts(update, context, deps, selected_date, location_id).handle()
     elif callback_data.startswith('court_day_'):
         parts = callback_data.split('_')
-        court_id = UUID(parts[2])
+        court_id = int(parts[2])
         year, month, day = int(parts[3]), int(parts[4]), int(parts[5])
         selected_date = datetime(year, month, day)
         await CourtScheduleForDay(update, context, deps, court_id, selected_date).handle()
     elif callback_data.startswith('court_week_'):
         parts = callback_data.split('_')
-        court_id = UUID(parts[2])
+        court_id = int(parts[2])
         year, month, day = int(parts[3]), int(parts[4]), int(parts[5])
         start_of_week = datetime(year, month, day)
         await CourtScheduleForWeek(update, context, deps, court_id, start_of_week).handle()
@@ -124,15 +117,9 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
         await ScheduleWeekly(update, context, deps).handle()
     elif callback_data.startswith('weekly_location_'):
         parts = callback_data.split('_')
-        location_id_short = parts[2]
+        location_id = int(parts[2])
         year, month, day = int(parts[3]), int(parts[4]), int(parts[5])
         start_of_week = datetime(year, month, day)
-        locations_list = deps.location_repo.get_all()
-        location_id = None
-        for loc in locations_list:
-            if str(loc.id).startswith(location_id_short):
-                location_id = loc.id
-                break
         await ScheduleWeeklyShowCourts(update, context, deps, start_of_week, location_id).handle()
     elif callback_data == 'trainer_schedule':
         await TrainerScheduleMenu(update, context, deps).handle()

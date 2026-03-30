@@ -24,13 +24,7 @@ class ViewTrainerSchedule(Handler):
     async def _process(self) -> None:
         assert self._update.callback_query is not None
         msgs = get_messages()
-        trainer_id_short = self._callback_data.split('_')[2]
-        trainers = self._deps.trainer_repo.get_all()
-        trainer = None
-        for t in trainers:
-            if str(t.id).startswith(trainer_id_short):
-                trainer = t
-                break
+        trainer = self._deps.trainer_repo.get(int(self._callback_data.split('_')[2]))
         if not trainer:
             keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -44,7 +38,7 @@ class ViewTrainerSchedule(Handler):
             for slot in time_slots:
                 if slot.booking_id:
                     booking = self._deps.booking_repo.get(slot.booking_id)
-                    if booking and booking.trainer and str(booking.trainer.id) == str(trainer.id):
+                    if booking and booking.trainer and booking.trainer.id == trainer.id:
                         all_bookings.append(booking)
         text = msgs.trainer_schedule_header(name=trainer.user.name, description=trainer.description)
         if not all_bookings:

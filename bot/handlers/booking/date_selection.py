@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime
-from uuid import UUID
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
@@ -24,29 +23,20 @@ class BookingDateSelection(Handler):
         assert self._update.callback_query is not None
         msgs = get_messages()
         parts = self._callback_data.split('_')
-        court_id_short = parts[2]
-        trainer_id_short = parts[3]
+        court_id = int(parts[2])
+        trainer_id_str = parts[3]
         year = int(parts[4])
         month = int(parts[5])
         day = int(parts[6])
         selected_date = datetime(year, month, day)
-        courts = self._deps.court_repo.get_all()
-        court_id: UUID | None = None
-        for court in courts:
-            if str(court.id).startswith(court_id_short):
-                court_id = court.id
-                break
-        trainer_id = None
-        trainer_name = None
-        if trainer_id_short != 'none':
-            trainers = self._deps.trainer_repo.get_all()
-            for trainer in trainers:
-                if str(trainer.id).startswith(trainer_id_short):
-                    trainer_id = trainer.id
-                    trainer_name = trainer.user.name
-                    break
-        court_obj = self._deps.court_repo.get(court_id) if court_id else None
+        trainer_id = int(trainer_id_str) if trainer_id_str != 'none' else None
+        court_obj = self._deps.court_repo.get(court_id)
         court_name = court_obj.name if court_obj else msgs.unknown_court
+        trainer_name = None
+        if trainer_id is not None:
+            trainer = self._deps.trainer_repo.get(trainer_id)
+            if trainer:
+                trainer_name = trainer.user.name
         time_slots = self._deps.schedule_service.get_all_time_slots_for_date(selected_date)
         court_slots = [slot for slot in time_slots if slot.court_id == court_id]
         trainer_busy_times = set()
@@ -81,7 +71,7 @@ class BookingDateSelection(Handler):
                 time_str = f'{slot.start_time.strftime("%H:%M")}-{slot.end_time.strftime("%H:%M")}'
                 date_str = selected_date.strftime('%Y%m%d')
                 time_code = slot.start_time.strftime('%H%M')
-                slot_callback = f'book_slot_{court_id_short}_{trainer_id_short}_{date_str}_{time_code}'
+                slot_callback = f'book_slot_{court_id}_{trainer_id_str}_{date_str}_{time_code}'
             else:
                 time_str = msgs.slot_occupied
                 slot_callback = 'ignore'

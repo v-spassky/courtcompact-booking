@@ -29,13 +29,8 @@ class AdminEditCourtStart(Handler):
     async def _process(self) -> None:
         assert self._update.callback_query is not None
         msgs = get_messages()
-        court_id_short = self._callback_data.replace('admin_edit_court_', '')
-        courts = self._deps.court_repo.get_all()
-        court = None
-        for c in courts:
-            if str(c.id).startswith(court_id_short):
-                court = c
-                break
+        court_id = int(self._callback_data.replace('admin_edit_court_', ''))
+        court = self._deps.court_repo.get(court_id)
         if not court:
             keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')]]
             reply_markup = InlineKeyboardMarkup(keyboard)

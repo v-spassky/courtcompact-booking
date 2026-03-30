@@ -22,12 +22,7 @@ class AdminEditTrainerDescriptionInput(TextInputHandler):
         if not trainer_id:
             _clear_admin_state(self._context)
             return
-        trainers = self._deps.trainer_repo.get_all()
-        trainer = None
-        for t in trainers:
-            if str(t.id) == trainer_id:
-                trainer = t
-                break
+        trainer = self._deps.trainer_repo.get(int(trainer_id))
         if not trainer:
             _clear_admin_state(self._context)
             return

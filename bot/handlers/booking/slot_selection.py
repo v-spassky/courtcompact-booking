@@ -27,8 +27,8 @@ class BookingSlotSelection(Handler):
         assert self._update.callback_query is not None
         msgs = get_messages()
         parts = self._callback_data.split('_')
-        court_id_short = parts[2]
-        trainer_id_short = parts[3]
+        court_id = int(parts[2])
+        trainer_id_str = parts[3]
         date_str = parts[4]
         time_code = parts[5]
         year = int(date_str[0:4])
@@ -38,21 +38,10 @@ class BookingSlotSelection(Handler):
         minute = int(time_code[2:4]) if len(time_code) >= 4 else 0
         start_time = datetime(year, month, day, hour, minute, 0)
         end_time = start_time + timedelta(minutes=30)
-        courts = self._deps.court_repo.get_all()
-        court_id = None
-        for court in courts:
-            if str(court.id).startswith(court_id_short):
-                court_id = court.id
-                break
-        if not court_id:
-            raise ValueError(f'Court not found for ID starting with {court_id_short}')
-        trainer_id = None
-        if trainer_id_short and trainer_id_short != 'none':
-            trainers = self._deps.trainer_repo.get_all()
-            for trainer in trainers:
-                if str(trainer.id).startswith(trainer_id_short):
-                    trainer_id = trainer.id
-                    break
+        trainer_id = int(trainer_id_str) if trainer_id_str != 'none' else None
+        court = self._deps.court_repo.get(court_id)
+        if not court:
+            raise ValueError(f'Court not found with ID {court_id}')
         user_trainer = self._deps.trainer_repo.get_by_telegram_id(self._user_id)
         is_trainer_booking = user_trainer is not None and trainer_id == user_trainer.id
         student_id = None
@@ -81,7 +70,7 @@ class BookingSlotSelection(Handler):
                 date=booking.start_time.strftime('%d.%m.%Y'),
                 time=f'{booking.start_time.strftime("%H:%M")} - {booking.end_time.strftime("%H:%M")}',
                 trainer_name=trainer_name,
-                booking_id=str(booking.id)[:8],
+                booking_id=str(booking.id),
             )
             keyboard = [[InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')]]
             reply_markup = InlineKeyboardMarkup(keyboard)

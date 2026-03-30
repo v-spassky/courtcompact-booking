@@ -36,8 +36,7 @@ class ScheduleWeekly(Handler):
                 text += f'📍 {location.name}\n\n'
         keyboard = []
         for location in locations:
-            location_id_short = str(location.id)[:8]
-            loc_callback = f'weekly_location_{location_id_short}_{start_date.year}_{start_date.month}_{start_date.day}'
+            loc_callback = f'weekly_location_{location.id}_{start_date.year}_{start_date.month}_{start_date.day}'
             keyboard.append([InlineKeyboardButton(f'📍 {location.name}', callback_data=loc_callback)])
         keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
         reply_markup = InlineKeyboardMarkup(keyboard)

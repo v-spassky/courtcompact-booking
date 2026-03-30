@@ -28,9 +28,8 @@ class BookCourtSelectLocation(Handler):
                 text += f'📍 {location.name}\n\n'
         keyboard = []
         for location in locations:
-            location_id_short = str(location.id)[:8]
             button_text = f'📍 {location.name}'
-            keyboard.append([InlineKeyboardButton(button_text, callback_data=f'book_location_{location_id_short}')])
+            keyboard.append([InlineKeyboardButton(button_text, callback_data=f'book_location_{location.id}')])
         keyboard.append([InlineKeyboardButton(msgs.btn_back_to_main_menu, callback_data='main_menu')])
         reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.callback_query.edit_message_text(

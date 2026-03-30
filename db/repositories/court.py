@@ -1,6 +1,5 @@
 from collections.abc import Generator
 from contextlib import contextmanager
-from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload, sessionmaker
@@ -26,9 +25,11 @@ class CourtRepository:
 
     def save(self, court: Court) -> None:
         with self._session() as session:
-            session.merge(court)
+            merged = session.merge(court)
+            session.flush()
+            court.id = merged.id
 
-    def get(self, court_id: UUID) -> Court | None:
+    def get(self, court_id: int) -> Court | None:
         with self._session() as session:
             return session.execute(
                 select(Court).where(Court.id == court_id).options(selectinload(Court.location))
@@ -38,7 +39,7 @@ class CourtRepository:
         with self._session() as session:
             return list(session.execute(select(Court).options(selectinload(Court.location))).scalars().all())
 
-    def delete(self, court_id: UUID) -> bool:
+    def delete(self, court_id: int) -> bool:
         with self._session() as session:
             row = session.get(Court, court_id)
             if row:

@@ -29,22 +29,16 @@ class AdminDeleteCourtExecute(Handler):
         assert self._update.callback_query is not None
         assert self._update.effective_user is not None
         msgs = get_messages()
-        court_id_short = self._callback_data.replace('admin_confirm_delete_court_', '')
-        courts = self._deps.court_repo.get_all()
-        court = None
-        for c in courts:
-            if str(c.id).startswith(court_id_short):
-                court = c
-                break
+        court_id = int(self._callback_data.replace('admin_confirm_delete_court_', ''))
+        court = self._deps.court_repo.get(court_id)
         if not court:
             keyboard = [[InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await self._update.callback_query.edit_message_text(msgs.admin_court_not_found, reply_markup=reply_markup)
             return
-        court_name = court.name
         self._deps.court_repo.delete(court.id)
-        _log_user_action(self._update.effective_user, f'deleted court: {court_name}')
-        text = msgs.admin_court_deleted(name=court_name)
+        _log_user_action(self._update.effective_user, f'deleted court: {court.name}')
+        text = msgs.admin_court_deleted(name=court.name)
         keyboard = [[InlineKeyboardButton(msgs.btn_back_to_courts, callback_data='admin_courts')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.callback_query.edit_message_text(text, reply_markup=reply_markup)

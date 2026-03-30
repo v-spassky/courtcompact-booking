@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime
-from uuid import UUID
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
@@ -19,7 +18,7 @@ class ScheduleForDateShowCourts(Handler):
         context: ContextTypes.DEFAULT_TYPE,
         deps: Deps,
         date: datetime,
-        location_id: UUID | None,
+        location_id: int | None,
     ) -> None:
         super().__init__(update, context, deps)
         self._date = date

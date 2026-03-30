@@ -32,10 +32,7 @@ class AdminEditCourtList(Handler):
             return
         keyboard = []
         for court in courts:
-            court_id_short = str(court.id)[:8]
-            keyboard.append(
-                [InlineKeyboardButton(f'🎾 {court.name}', callback_data=f'admin_edit_court_{court_id_short}')]
-            )
+            keyboard.append([InlineKeyboardButton(f'🎾 {court.name}', callback_data=f'admin_edit_court_{court.id}')])
         keyboard.append([InlineKeyboardButton(msgs.btn_back, callback_data='admin_courts')])
         reply_markup = InlineKeyboardMarkup(keyboard)
         await self._update.callback_query.edit_message_text(msgs.admin_court_select_to_edit, reply_markup=reply_markup)

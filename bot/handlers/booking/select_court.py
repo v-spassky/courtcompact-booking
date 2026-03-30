@@ -30,12 +30,8 @@ class BookCourt(Handler):
         location = None
         courts = []
         if self._callback_data and self._callback_data.startswith('book_location_'):
-            location_id_short = self._callback_data.replace('book_location_', '')
-            locations = self._deps.location_repo.get_all()
-            for loc in locations:
-                if str(loc.id).startswith(location_id_short):
-                    location = loc
-                    break
+            location_id = int(self._callback_data.replace('book_location_', ''))
+            location = self._deps.location_repo.get(location_id)
             if location:
                 courts = self._deps.location_repo.get_courts(location.id)
         else:
