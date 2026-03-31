@@ -31,13 +31,7 @@ from bot.handlers.admin.trainers.delete_execute import AdminDeleteTrainerExecute
 from bot.handlers.admin.trainers.delete_list import AdminDeleteTrainerList
 from bot.handlers.admin.trainers.edit_list import AdminEditTrainerList
 from bot.handlers.admin.trainers.edit_start import AdminEditTrainerStart
-from bot.handlers.auth import (
-    _create_calendar,
-    _is_authorized,
-    _log_user_action,
-    _show_authorization_request,
-    show_main_menu,
-)
+from bot.handlers.auth import ShowAuthorizationRequest, ShowMainMenu, _create_calendar, _is_authorized, _log_user_action
 from bot.handlers.booking.calendar_nav import BookingCalendarNavigation
 from bot.handlers.booking.cancel_menu import CancelBookingMenu
 from bot.handlers.booking.cancellation import BookingCancellation
@@ -73,11 +67,11 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
     if callback_data != 'ignore':
         _log_user_action(update.effective_user, f'clicked button: {callback_data}')
     if callback_data != 'ignore' and not _is_authorized(update.effective_user.id, deps):
-        await _show_authorization_request(update, context)
+        await ShowAuthorizationRequest(update, context, deps).handle()
         return
     msgs = Messages.get_for_language(update.effective_user.language_code or '')
     if callback_data == 'main_menu':
-        await show_main_menu(update, context, edit_message=True)
+        await ShowMainMenu(update, context, deps, edit_message=True).handle()
     elif callback_data == 'ignore':
         await update.callback_query.answer()
         return
