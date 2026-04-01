@@ -6,6 +6,7 @@ from telegram.ext import ContextTypes
 
 from bot.deps import Deps
 from bot.handlers.base import Handler
+from bot.handlers.callback_args import CourtWeekArg
 
 logger = logging.getLogger(__name__)
 
@@ -59,10 +60,12 @@ class ScheduleWeeklyShowCourts(Handler):
         )
         keyboard = []
         for court in courts:
-            court_callback = (
-                f'court_week_{court.id}_{self._start_of_week.year}_{self._start_of_week.month}'
-                f'_{self._start_of_week.day}'
-            )
+            court_callback = CourtWeekArg(
+                court_id=court.id,
+                year=self._start_of_week.year,
+                month=self._start_of_week.month,
+                day=self._start_of_week.day,
+            ).to_callback_data()
             keyboard.append([InlineKeyboardButton(f'🎾 {court.name}', callback_data=court_callback)])
         if location:
             keyboard.append(

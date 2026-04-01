@@ -4,6 +4,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot.handlers.auth import _is_admin
 from bot.handlers.base import Handler
+from bot.handlers.callback_args import AdminDeleteStudentArg
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,14 @@ class AdminDeleteStudentList(Handler):
             status = '✅' if student.user_id else '⏳'
             student_name = student.user.name if student.user else student.phone
             button_text = f'{status} {student_name}'
-            keyboard.append([InlineKeyboardButton(button_text, callback_data=f'admin_delete_student_{student.id}')])
+            keyboard.append(
+                [
+                    InlineKeyboardButton(
+                        button_text,
+                        callback_data=AdminDeleteStudentArg(id=student.id).to_callback_data(),
+                    ),
+                ],
+            )
         keyboard.append([InlineKeyboardButton(self._messages.btn_back, callback_data='admin_students')])
         await self._update.callback_query.edit_message_text(
             self._messages.admin_student_select_to_delete,

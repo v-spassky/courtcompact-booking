@@ -6,6 +6,7 @@ from telegram.ext import ContextTypes
 
 from bot.deps import Deps
 from bot.handlers.base import Handler
+from bot.handlers.callback_args import CourtDayArg, ScheduleDateArg
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +43,11 @@ class ScheduleForDateShowCourts(Handler):
                         [
                             InlineKeyboardButton(
                                 self._messages.btn_select_other_location,
-                                callback_data=f'date_{self._date.year}_{self._date.month}_{self._date.day}',
+                                callback_data=ScheduleDateArg(
+                                    year=self._date.year,
+                                    month=self._date.month,
+                                    day=self._date.day,
+                                ).to_callback_data(),
                             ),
                         ],
                         [InlineKeyboardButton(self._messages.btn_back_to_main_menu, callback_data='main_menu')],
@@ -57,14 +62,23 @@ class ScheduleForDateShowCourts(Handler):
         )
         keyboard = []
         for court in courts:
-            court_callback = f'court_day_{court.id}_{self._date.year}_{self._date.month}_{self._date.day}'
+            court_callback = CourtDayArg(
+                court_id=court.id,
+                year=self._date.year,
+                month=self._date.month,
+                day=self._date.day,
+            ).to_callback_data()
             keyboard.append([InlineKeyboardButton(f'🎾 {court.name}', callback_data=court_callback)])
         if location:
             keyboard.append(
                 [
                     InlineKeyboardButton(
                         self._messages.btn_select_other_location,
-                        callback_data=f'date_{self._date.year}_{self._date.month}_{self._date.day}',
+                        callback_data=ScheduleDateArg(
+                            year=self._date.year,
+                            month=self._date.month,
+                            day=self._date.day,
+                        ).to_callback_data(),
                     ),
                 ],
             )

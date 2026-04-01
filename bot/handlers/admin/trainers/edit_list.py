@@ -5,6 +5,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from bot.handlers.admin._utils import _clear_admin_state
 from bot.handlers.auth import _is_admin
 from bot.handlers.base import Handler
+from bot.handlers.callback_args import AdminEditTrainerArg
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,12 @@ class AdminEditTrainerList(Handler):
         keyboard = []
         for trainer in trainers:
             keyboard.append(
-                [InlineKeyboardButton(f'👨‍🏫 {trainer.user.name}', callback_data=f'admin_edit_trainer_{trainer.id}')],
+                [
+                    InlineKeyboardButton(
+                        f'👨‍🏫 {trainer.user.name}',
+                        callback_data=AdminEditTrainerArg(id=trainer.id).to_callback_data(),
+                    ),
+                ],
             )
         keyboard.append([InlineKeyboardButton(self._messages.btn_back, callback_data='admin_trainers')])
         await self._update.callback_query.edit_message_text(

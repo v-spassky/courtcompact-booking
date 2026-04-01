@@ -3,6 +3,7 @@ import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot.handlers.base import Handler
+from bot.handlers.callback_args import CancelBookingArg
 from config.settings import now_kiev
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,14 @@ class CancelBookingMenu(Handler):
         for booking in sorted(future_bookings, key=lambda x: x.start_time):
             court_name = booking.court.name if booking.court else self._messages.unknown_entity
             button_text = f'{court_name} - {booking.start_time.strftime("%d/%m %H:%M")}'
-            keyboard.append([InlineKeyboardButton(button_text, callback_data=f'cancel_booking_{booking.id}')])
+            keyboard.append(
+                [
+                    InlineKeyboardButton(
+                        button_text,
+                        callback_data=CancelBookingArg(booking_id=booking.id).to_callback_data(),
+                    ),
+                ],
+            )
         keyboard.append([InlineKeyboardButton(self._messages.btn_back_to_main_menu, callback_data='main_menu')])
         await self._update.callback_query.edit_message_text(
             self._messages.cancel_booking_select,

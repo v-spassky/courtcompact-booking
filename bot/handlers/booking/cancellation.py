@@ -6,6 +6,7 @@ from telegram.ext import ContextTypes
 from bot.deps import Deps
 from bot.handlers.auth import _log_user_action
 from bot.handlers.base import Handler
+from bot.handlers.callback_args import CancelBookingArg
 
 logger = logging.getLogger(__name__)
 
@@ -16,11 +17,11 @@ class BookingCancellation(Handler):
         update: Update,
         context: ContextTypes.DEFAULT_TYPE,
         deps: Deps,
-        callback_data: str,
+        args: CancelBookingArg,
         user_id: int,
     ) -> None:
         super().__init__(update, context, deps)
-        self._callback_data = callback_data
+        self._args = args
         self._user_id = user_id
 
     async def _authorize(self) -> bool:
@@ -28,8 +29,7 @@ class BookingCancellation(Handler):
 
     async def _process(self) -> None:
         assert self._update.callback_query is not None
-        booking_id = int(self._callback_data.split('_')[2])
-        booking = self._deps.booking_repo.get(booking_id)
+        booking = self._deps.booking_repo.get(self._args.booking_id)
         if not booking:
             await self._update.callback_query.edit_message_text(
                 self._messages.booking_not_found,
@@ -43,9 +43,9 @@ class BookingCancellation(Handler):
         trainer = booking.trainer
         is_student_cancelling = student and student.user and student.user.telegram_user_id == self._user_id
         is_trainer_cancelling = trainer and trainer.user.telegram_user_id == self._user_id
-        success = self._deps.booking_service.cancel_booking(booking_id, self._user_id)
+        success = self._deps.booking_service.cancel_booking(self._args.booking_id, self._user_id)
         if success:
-            _log_user_action(self._update.callback_query.from_user, f'cancelled booking: {booking_id}')
+            _log_user_action(self._update.callback_query.from_user, f'cancelled booking: {self._args.booking_id}')
             await self._update.callback_query.edit_message_text(
                 self._messages.booking_cancelled,
                 reply_markup=InlineKeyboardMarkup(

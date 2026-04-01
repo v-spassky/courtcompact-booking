@@ -6,6 +6,7 @@ from telegram.ext import ContextTypes
 
 from bot.deps import Deps
 from bot.handlers.base import Handler
+from bot.handlers.callback_args import ScheduleLocationArg
 from bot.handlers.schedule.by_date_courts import ScheduleForDateShowCourts
 
 logger = logging.getLogger(__name__)
@@ -33,7 +34,12 @@ class ScheduleForDate(Handler):
                 text += f'📍 {location.name}\n\n'
         keyboard = []
         for location in locations:
-            loc_callback = f'schedule_location_{location.id}_{self._date.year}_{self._date.month}_{self._date.day}'
+            loc_callback = ScheduleLocationArg(
+                location_id=location.id,
+                year=self._date.year,
+                month=self._date.month,
+                day=self._date.day,
+            ).to_callback_data()
             keyboard.append([InlineKeyboardButton(f'📍 {location.name}', callback_data=loc_callback)])
         keyboard.append([InlineKeyboardButton(self._messages.btn_back_to_main_menu, callback_data='main_menu')])
         await self._update.callback_query.edit_message_text(

@@ -4,6 +4,7 @@ from datetime import timedelta
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot.handlers.base import Handler
+from bot.handlers.callback_args import WeeklyLocationArg
 from bot.handlers.schedule.weekly_courts import ScheduleWeeklyShowCourts
 from config.settings import now_kiev
 
@@ -34,7 +35,12 @@ class ScheduleWeekly(Handler):
                 text += f'📍 {location.name}\n\n'
         keyboard = []
         for location in locations:
-            loc_callback = f'weekly_location_{location.id}_{start_date.year}_{start_date.month}_{start_date.day}'
+            loc_callback = WeeklyLocationArg(
+                location_id=location.id,
+                year=start_date.year,
+                month=start_date.month,
+                day=start_date.day,
+            ).to_callback_data()
             keyboard.append([InlineKeyboardButton(f'📍 {location.name}', callback_data=loc_callback)])
         keyboard.append([InlineKeyboardButton(self._messages.btn_back_to_main_menu, callback_data='main_menu')])
         await self._update.callback_query.edit_message_text(

@@ -6,44 +6,44 @@ from telegram.ext import ContextTypes
 
 from bot.deps import Deps
 from bot.handlers.base import Handler
+from bot.handlers.callback_args import BookDateArg, BookSlotArg
 
 logger = logging.getLogger(__name__)
 
 
 class BookingDateSelection(Handler):
-    def __init__(self, update: Update, context: ContextTypes.DEFAULT_TYPE, deps: Deps, callback_data: str) -> None:
+    def __init__(
+        self,
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE,
+        deps: Deps,
+        args: BookDateArg,
+    ) -> None:
         super().__init__(update, context, deps)
-        self._callback_data = callback_data
+        self._args = args
 
     async def _authorize(self) -> bool:
         return True
 
     async def _process(self) -> None:
         assert self._update.callback_query is not None
-        parts = self._callback_data.split('_')
-        court_id = int(parts[2])
-        trainer_id_str = parts[3]
-        year = int(parts[4])
-        month = int(parts[5])
-        day = int(parts[6])
-        selected_date = datetime(year, month, day)
-        trainer_id = int(trainer_id_str) if trainer_id_str != 'none' else None
-        court_obj = self._deps.court_repo.get(court_id)
+        selected_date = datetime(self._args.year, self._args.month, self._args.day)
+        court_obj = self._deps.court_repo.get(self._args.court_id)
         court_name = court_obj.name if court_obj else self._messages.unknown_court
         trainer_name = None
-        if trainer_id is not None:
-            trainer = self._deps.trainer_repo.get(trainer_id)
+        if self._args.trainer_id is not None:
+            trainer = self._deps.trainer_repo.get(self._args.trainer_id)
             if trainer:
                 trainer_name = trainer.user.name
         time_slots = self._deps.schedule_service.get_all_time_slots_for_date(selected_date)
-        court_slots = [slot for slot in time_slots if slot.court_id == court_id]
+        court_slots = [slot for slot in time_slots if slot.court_id == self._args.court_id]
         trainer_busy_times = set()
-        if trainer_id:
+        if self._args.trainer_id:
             all_slots = self._deps.schedule_service.get_all_time_slots_for_date(selected_date)
             for other_slot in all_slots:
                 if not other_slot.is_available and other_slot.booking_id:
                     booking = self._deps.booking_repo.get(other_slot.booking_id)
-                    if booking and booking.trainer_id == trainer_id:
+                    if booking and booking.trainer_id == self._args.trainer_id:
                         trainer_busy_times.add((booking.start_time, booking.end_time))
         if not court_slots:
             await self._update.callback_query.edit_message_text(
@@ -61,16 +61,22 @@ class BookingDateSelection(Handler):
         buttons = []
         for slot in sorted(court_slots, key=lambda s: s.start_time):
             is_available = slot.is_available
-            if is_available and trainer_id:
+            if is_available and self._args.trainer_id:
                 for busy_start, busy_end in trainer_busy_times:
                     if slot.start_time < busy_end and slot.end_time > busy_start:
                         is_available = False
                         break
             if is_available:
                 time_str = f'{slot.start_time.strftime("%H:%M")}-{slot.end_time.strftime("%H:%M")}'
-                date_str = selected_date.strftime('%Y%m%d')
-                time_code = slot.start_time.strftime('%H%M')
-                slot_callback = f'book_slot_{court_id}_{trainer_id_str}_{date_str}_{time_code}'
+                slot_callback = BookSlotArg(
+                    court_id=self._args.court_id,
+                    trainer_id=self._args.trainer_id,
+                    year=self._args.year,
+                    month=self._args.month,
+                    day=self._args.day,
+                    hour=slot.start_time.hour,
+                    minute=slot.start_time.minute,
+                ).to_callback_data()
             else:
                 time_str = self._messages.slot_occupied
                 slot_callback = 'ignore'

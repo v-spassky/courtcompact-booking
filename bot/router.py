@@ -42,6 +42,35 @@ from bot.handlers.booking.select_court import BookCourt
 from bot.handlers.booking.select_location import BookCourtSelectLocation
 from bot.handlers.booking.slot_selection import BookingSlotSelection
 from bot.handlers.booking.trainer_selection import TrainerSelectionForBooking
+from bot.handlers.callback_args import (
+    AdminConfirmDeleteCourtArg,
+    AdminConfirmDeleteLocationArg,
+    AdminConfirmDeleteStudentArg,
+    AdminConfirmDeleteTrainerArg,
+    AdminCourtLocationArg,
+    AdminDeleteCourtArg,
+    AdminDeleteLocationArg,
+    AdminDeleteStudentArg,
+    AdminDeleteTrainerArg,
+    AdminEditCourtArg,
+    AdminEditLocationArg,
+    AdminEditStudentArg,
+    AdminEditTrainerArg,
+    BookCalArg,
+    BookDateArg,
+    BookLocationArg,
+    BookSlotArg,
+    CalendarNavArg,
+    CancelBookingArg,
+    CourtDayArg,
+    CourtWeekArg,
+    ScheduleDateArg,
+    ScheduleLocationArg,
+    SelectCourtArg,
+    SelectTrainerArg,
+    ViewTrainerArg,
+    WeeklyLocationArg,
+)
 from bot.handlers.schedule.by_date import ScheduleForDate
 from bot.handlers.schedule.by_date_courts import ScheduleForDateShowCourts
 from bot.handlers.schedule.court_day import CourtScheduleForDay
@@ -80,55 +109,70 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
         calendar_markup = _create_calendar(now.year, now.month)
         await update.callback_query.edit_message_text(msgs.schedule_select_date, reply_markup=calendar_markup)
     elif callback_data.startswith('cal_'):
-        parts = callback_data.split('_')
-        year, month = int(parts[1]), int(parts[2])
-        calendar_markup = _create_calendar(year, month)
+        cal_args = CalendarNavArg.from_callback_data(callback_data)
+        calendar_markup = _create_calendar(cal_args.year, cal_args.month)
         await update.callback_query.edit_message_text(msgs.schedule_select_date, reply_markup=calendar_markup)
     elif callback_data.startswith('date_'):
-        parts = callback_data.split('_')
-        year, month, day = int(parts[1]), int(parts[2]), int(parts[3])
-        selected_date = datetime(year, month, day)
-        await ScheduleForDate(update, context, deps, selected_date).handle()
+        date_args = ScheduleDateArg.from_callback_data(callback_data)
+        await ScheduleForDate(update, context, deps, datetime(date_args.year, date_args.month, date_args.day)).handle()
     elif callback_data.startswith('schedule_location_'):
-        parts = callback_data.split('_')
-        location_id = int(parts[2])
-        year, month, day = int(parts[3]), int(parts[4]), int(parts[5])
-        selected_date = datetime(year, month, day)
-        await ScheduleForDateShowCourts(update, context, deps, selected_date, location_id).handle()
+        sched_loc_args = ScheduleLocationArg.from_callback_data(callback_data)
+        await ScheduleForDateShowCourts(
+            update,
+            context,
+            deps,
+            datetime(sched_loc_args.year, sched_loc_args.month, sched_loc_args.day),
+            sched_loc_args.location_id,
+        ).handle()
     elif callback_data.startswith('court_day_'):
-        parts = callback_data.split('_')
-        court_id = int(parts[2])
-        year, month, day = int(parts[3]), int(parts[4]), int(parts[5])
-        selected_date = datetime(year, month, day)
-        await CourtScheduleForDay(update, context, deps, court_id, selected_date).handle()
+        court_day_args = CourtDayArg.from_callback_data(callback_data)
+        await CourtScheduleForDay(
+            update,
+            context,
+            deps,
+            court_day_args.court_id,
+            datetime(court_day_args.year, court_day_args.month, court_day_args.day),
+        ).handle()
     elif callback_data.startswith('court_week_'):
-        parts = callback_data.split('_')
-        court_id = int(parts[2])
-        year, month, day = int(parts[3]), int(parts[4]), int(parts[5])
-        start_of_week = datetime(year, month, day)
-        await CourtScheduleForWeek(update, context, deps, court_id, start_of_week).handle()
+        court_week_args = CourtWeekArg.from_callback_data(callback_data)
+        await CourtScheduleForWeek(
+            update,
+            context,
+            deps,
+            court_week_args.court_id,
+            datetime(court_week_args.year, court_week_args.month, court_week_args.day),
+        ).handle()
     elif callback_data == 'schedule_weekly':
         await ScheduleWeekly(update, context, deps).handle()
     elif callback_data.startswith('weekly_location_'):
-        parts = callback_data.split('_')
-        location_id = int(parts[2])
-        year, month, day = int(parts[3]), int(parts[4]), int(parts[5])
-        start_of_week = datetime(year, month, day)
-        await ScheduleWeeklyShowCourts(update, context, deps, start_of_week, location_id).handle()
+        weekly_loc_args = WeeklyLocationArg.from_callback_data(callback_data)
+        await ScheduleWeeklyShowCourts(
+            update,
+            context,
+            deps,
+            datetime(weekly_loc_args.year, weekly_loc_args.month, weekly_loc_args.day),
+            weekly_loc_args.location_id,
+        ).handle()
     elif callback_data == 'trainer_schedule':
         await TrainerScheduleMenu(update, context, deps).handle()
     elif callback_data.startswith('view_trainer_'):
-        await ViewTrainerSchedule(update, context, deps, callback_data).handle()
+        await ViewTrainerSchedule(update, context, deps, ViewTrainerArg.from_callback_data(callback_data)).handle()
     elif callback_data.startswith('book_cal_'):
-        await BookingCalendarNavigation(update, context, deps, callback_data).handle()
+        await BookingCalendarNavigation(update, context, deps, BookCalArg.from_callback_data(callback_data)).handle()
     elif callback_data.startswith('book_date_'):
-        await BookingDateSelection(update, context, deps, callback_data).handle()
+        await BookingDateSelection(update, context, deps, BookDateArg.from_callback_data(callback_data)).handle()
     elif callback_data.startswith('book_slot_'):
-        await BookingSlotSelection(update, context, deps, callback_data, update.effective_user.id).handle()
+        await BookingSlotSelection(
+            update,
+            context,
+            deps,
+            BookSlotArg.from_callback_data(callback_data),
+            update.effective_user.id,
+        ).handle()
     elif callback_data == 'book_court':
         await BookCourtSelectLocation(update, context, deps).handle()
     elif callback_data.startswith('book_location_'):
-        await BookCourt(update, context, deps, callback_data).handle()
+        await BookCourt(update, context, deps, BookLocationArg.from_callback_data(callback_data)).handle()
     elif callback_data == 'my_bookings':
         await MyBookings(update, context, deps).handle()
     elif callback_data == 'cancel_booking':
@@ -146,39 +190,84 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
     elif callback_data == 'admin_edit_location':
         await AdminEditLocationList(update, context, deps).handle()
     elif callback_data.startswith('admin_edit_location_'):
-        await AdminEditLocationStart(update, context, deps, callback_data).handle()
+        await AdminEditLocationStart(
+            update,
+            context,
+            deps,
+            AdminEditLocationArg.from_callback_data(callback_data),
+        ).handle()
     elif callback_data == 'admin_delete_location':
         await AdminDeleteLocationList(update, context, deps).handle()
     elif callback_data.startswith('admin_delete_location_'):
-        await AdminDeleteLocationConfirm(update, context, deps, callback_data).handle()
+        await AdminDeleteLocationConfirm(
+            update,
+            context,
+            deps,
+            AdminDeleteLocationArg.from_callback_data(callback_data),
+        ).handle()
     elif callback_data.startswith('admin_confirm_delete_location_'):
-        await AdminDeleteLocationExecute(update, context, deps, callback_data).handle()
+        await AdminDeleteLocationExecute(
+            update,
+            context,
+            deps,
+            AdminConfirmDeleteLocationArg.from_callback_data(callback_data),
+        ).handle()
     elif callback_data == 'admin_create_court':
         await AdminCreateCourtSelectLocation(update, context, deps).handle()
     elif callback_data.startswith('admin_court_location_'):
-        await AdminCreateCourtStart(update, context, deps, callback_data).handle()
+        await AdminCreateCourtStart(
+            update,
+            context,
+            deps,
+            AdminCourtLocationArg.from_callback_data(callback_data),
+        ).handle()
     elif callback_data == 'admin_edit_court':
         await AdminEditCourtList(update, context, deps).handle()
     elif callback_data.startswith('admin_edit_court_'):
-        await AdminEditCourtStart(update, context, deps, callback_data).handle()
+        await AdminEditCourtStart(update, context, deps, AdminEditCourtArg.from_callback_data(callback_data)).handle()
     elif callback_data == 'admin_delete_court':
         await AdminDeleteCourtList(update, context, deps).handle()
     elif callback_data.startswith('admin_delete_court_'):
-        await AdminDeleteCourtConfirm(update, context, deps, callback_data).handle()
+        await AdminDeleteCourtConfirm(
+            update,
+            context,
+            deps,
+            AdminDeleteCourtArg.from_callback_data(callback_data),
+        ).handle()
     elif callback_data.startswith('admin_confirm_delete_court_'):
-        await AdminDeleteCourtExecute(update, context, deps, callback_data).handle()
+        await AdminDeleteCourtExecute(
+            update,
+            context,
+            deps,
+            AdminConfirmDeleteCourtArg.from_callback_data(callback_data),
+        ).handle()
     elif callback_data == 'admin_create_trainer':
         await AdminCreateTrainerStart(update, context, deps).handle()
     elif callback_data == 'admin_edit_trainer':
         await AdminEditTrainerList(update, context, deps).handle()
     elif callback_data.startswith('admin_edit_trainer_'):
-        await AdminEditTrainerStart(update, context, deps, callback_data).handle()
+        await AdminEditTrainerStart(
+            update,
+            context,
+            deps,
+            AdminEditTrainerArg.from_callback_data(callback_data),
+        ).handle()
     elif callback_data == 'admin_delete_trainer':
         await AdminDeleteTrainerList(update, context, deps).handle()
     elif callback_data.startswith('admin_delete_trainer_'):
-        await AdminDeleteTrainerConfirm(update, context, deps, callback_data).handle()
+        await AdminDeleteTrainerConfirm(
+            update,
+            context,
+            deps,
+            AdminDeleteTrainerArg.from_callback_data(callback_data),
+        ).handle()
     elif callback_data.startswith('admin_confirm_delete_trainer_'):
-        await AdminDeleteTrainerExecute(update, context, deps, callback_data).handle()
+        await AdminDeleteTrainerExecute(
+            update,
+            context,
+            deps,
+            AdminConfirmDeleteTrainerArg.from_callback_data(callback_data),
+        ).handle()
     elif callback_data == 'admin_students':
         await AdminStudentsMenu(update, context, deps).handle()
     elif callback_data == 'admin_create_student':
@@ -186,16 +275,49 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
     elif callback_data == 'admin_edit_student':
         await AdminEditStudentList(update, context, deps).handle()
     elif callback_data.startswith('admin_edit_student_'):
-        await AdminEditStudentStart(update, context, deps, callback_data).handle()
+        await AdminEditStudentStart(
+            update,
+            context,
+            deps,
+            AdminEditStudentArg.from_callback_data(callback_data),
+        ).handle()
     elif callback_data == 'admin_delete_student':
         await AdminDeleteStudentList(update, context, deps).handle()
     elif callback_data.startswith('admin_delete_student_'):
-        await AdminDeleteStudentConfirm(update, context, deps, callback_data).handle()
+        await AdminDeleteStudentConfirm(
+            update,
+            context,
+            deps,
+            AdminDeleteStudentArg.from_callback_data(callback_data),
+        ).handle()
     elif callback_data.startswith('admin_confirm_delete_student_'):
-        await AdminDeleteStudentExecute(update, context, deps, callback_data).handle()
+        await AdminDeleteStudentExecute(
+            update,
+            context,
+            deps,
+            AdminConfirmDeleteStudentArg.from_callback_data(callback_data),
+        ).handle()
     elif callback_data.startswith('select_court_'):
-        await CourtSelectionForBooking(update, context, deps, callback_data, update.effective_user.id).handle()
+        await CourtSelectionForBooking(
+            update,
+            context,
+            deps,
+            SelectCourtArg.from_callback_data(callback_data),
+            update.effective_user.id,
+        ).handle()
     elif callback_data.startswith('select_trainer_'):
-        await TrainerSelectionForBooking(update, context, deps, callback_data, update.effective_user.id).handle()
+        await TrainerSelectionForBooking(
+            update,
+            context,
+            deps,
+            SelectTrainerArg.from_callback_data(callback_data),
+            update.effective_user.id,
+        ).handle()
     elif callback_data.startswith('cancel_booking_'):
-        await BookingCancellation(update, context, deps, callback_data, update.effective_user.id).handle()
+        await BookingCancellation(
+            update,
+            context,
+            deps,
+            CancelBookingArg.from_callback_data(callback_data),
+            update.effective_user.id,
+        ).handle()

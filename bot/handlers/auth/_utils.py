@@ -5,6 +5,7 @@ from datetime import datetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, User
 
 from bot.deps import Deps
+from bot.handlers.callback_args import CalendarNavArg, ScheduleDateArg
 from config.settings import now_kiev
 from db.models import Student
 from localization.base import Messages
@@ -62,7 +63,12 @@ def _create_calendar(year: int, month: int) -> InlineKeyboardMarkup:
             else:
                 date = datetime(year, month, day).date()
                 if date >= today:
-                    row.append(InlineKeyboardButton(str(day), callback_data=f'date_{year}_{month}_{day}'))
+                    row.append(
+                        InlineKeyboardButton(
+                            str(day),
+                            callback_data=ScheduleDateArg(year=year, month=month, day=day).to_callback_data(),
+                        ),
+                    )
                 else:
                     row.append(InlineKeyboardButton('·', callback_data='ignore'))
         keyboard.append(row)
@@ -70,12 +76,19 @@ def _create_calendar(year: int, month: int) -> InlineKeyboardMarkup:
     prev_month = month - 1 if month > 1 else 12
     prev_year = year if month > 1 else year - 1
     if datetime(prev_year, prev_month, 1).date() >= datetime(today.year, today.month, 1).date():
-        nav_row.append(InlineKeyboardButton('◀️', callback_data=f'cal_{prev_year}_{prev_month}'))
+        nav_row.append(
+            InlineKeyboardButton(
+                '◀️',
+                callback_data=CalendarNavArg(year=prev_year, month=prev_month).to_callback_data(),
+            ),
+        )
     else:
         nav_row.append(InlineKeyboardButton(' ', callback_data='ignore'))
     nav_row.append(InlineKeyboardButton(msgs.btn_menu, callback_data='main_menu'))
     next_month = month + 1 if month < 12 else 1
     next_year = year if month < 12 else year + 1
-    nav_row.append(InlineKeyboardButton('▶️', callback_data=f'cal_{next_year}_{next_month}'))
+    nav_row.append(
+        InlineKeyboardButton('▶️', callback_data=CalendarNavArg(year=next_year, month=next_month).to_callback_data()),
+    )
     keyboard.append(nav_row)
     return InlineKeyboardMarkup(keyboard)

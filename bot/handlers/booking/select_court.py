@@ -5,6 +5,7 @@ from telegram.ext import ContextTypes
 
 from bot.deps import Deps
 from bot.handlers.base import Handler
+from bot.handlers.callback_args import BookLocationArg, SelectCourtArg
 
 logger = logging.getLogger(__name__)
 
@@ -15,10 +16,10 @@ class BookCourt(Handler):
         update: Update,
         context: ContextTypes.DEFAULT_TYPE,
         deps: Deps,
-        callback_data: str | None = None,
+        args: BookLocationArg | None,
     ) -> None:
         super().__init__(update, context, deps)
-        self._callback_data = callback_data
+        self._args = args
 
     async def _authorize(self) -> bool:
         return True
@@ -27,9 +28,8 @@ class BookCourt(Handler):
         assert self._update.callback_query is not None
         location = None
         courts = []
-        if self._callback_data and self._callback_data.startswith('book_location_'):
-            location_id = int(self._callback_data.replace('book_location_', ''))
-            location = self._deps.location_repo.get(location_id)
+        if self._args is not None:
+            location = self._deps.location_repo.get(self._args.location_id)
             if location:
                 courts = self._deps.location_repo.get_courts(location.id)
         else:
@@ -51,7 +51,14 @@ class BookCourt(Handler):
         )
         keyboard = []
         for court in courts:
-            keyboard.append([InlineKeyboardButton(f'🎾 {court.name}', callback_data=f'select_court_{court.id}')])
+            keyboard.append(
+                [
+                    InlineKeyboardButton(
+                        f'🎾 {court.name}',
+                        callback_data=SelectCourtArg(court_id=court.id).to_callback_data(),
+                    ),
+                ],
+            )
         if location:
             keyboard.append(
                 [InlineKeyboardButton(self._messages.btn_select_other_location, callback_data='book_court')],

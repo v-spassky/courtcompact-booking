@@ -7,14 +7,21 @@ from bot.deps import Deps
 from bot.handlers.admin._utils import _clear_admin_state
 from bot.handlers.auth import _is_admin
 from bot.handlers.base import Handler
+from bot.handlers.callback_args import AdminEditLocationArg
 
 logger = logging.getLogger(__name__)
 
 
 class AdminEditLocationStart(Handler):
-    def __init__(self, update: Update, context: ContextTypes.DEFAULT_TYPE, deps: Deps, callback_data: str) -> None:
+    def __init__(
+        self,
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE,
+        deps: Deps,
+        args: AdminEditLocationArg,
+    ) -> None:
         super().__init__(update, context, deps)
-        self._callback_data = callback_data
+        self._args = args
 
     async def _authorize(self) -> bool:
         assert self._update.callback_query is not None
@@ -26,8 +33,7 @@ class AdminEditLocationStart(Handler):
 
     async def _process(self) -> None:
         assert self._update.callback_query is not None
-        location_id = int(self._callback_data.replace('admin_edit_location_', ''))
-        location = self._deps.location_repo.get(location_id)
+        location = self._deps.location_repo.get(self._args.id)
         if not location:
             await self._update.callback_query.edit_message_text(
                 self._messages.admin_location_not_found,

@@ -7,22 +7,29 @@ from telegram.ext import ContextTypes
 
 from bot.deps import Deps
 from bot.handlers.base import Handler
+from bot.handlers.callback_args import ViewTrainerArg
 from config.settings import now_kiev
 
 logger = logging.getLogger(__name__)
 
 
 class ViewTrainerSchedule(Handler):
-    def __init__(self, update: Update, context: ContextTypes.DEFAULT_TYPE, deps: Deps, callback_data: str) -> None:
+    def __init__(
+        self,
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE,
+        deps: Deps,
+        args: ViewTrainerArg,
+    ) -> None:
         super().__init__(update, context, deps)
-        self._callback_data = callback_data
+        self._args = args
 
     async def _authorize(self) -> bool:
         return True
 
     async def _process(self) -> None:
         assert self._update.callback_query is not None
-        trainer = self._deps.trainer_repo.get(int(self._callback_data.split('_')[2]))
+        trainer = self._deps.trainer_repo.get(self._args.trainer_id)
         if not trainer:
             await self._update.callback_query.edit_message_text(
                 self._messages.generic_error,

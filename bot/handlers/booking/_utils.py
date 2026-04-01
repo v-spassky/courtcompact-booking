@@ -6,6 +6,7 @@ from datetime import datetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot.deps import Deps
+from bot.handlers.callback_args import BookCalArg, BookDateArg
 from config.settings import now_kiev
 from localization.base import Messages
 
@@ -49,7 +50,6 @@ def _create_booking_calendar(
 ) -> InlineKeyboardMarkup:
     msgs = Messages.get_for_language('')
     keyboard = []
-    trainer_id_str = str(trainer_id) if trainer_id is not None else 'none'
     month_name = cal.month_name[month]
     keyboard.append([InlineKeyboardButton(f'{month_name} {year}', callback_data='ignore')])
     keyboard.append([InlineKeyboardButton(day, callback_data='ignore') for day in msgs.day_names])
@@ -67,7 +67,13 @@ def _create_booking_calendar(
                 else:
                     has_slots = _check_date_availability(date, court_id, trainer_id, deps)
                     if has_slots:
-                        callback_data = f'book_date_{court_id}_{trainer_id_str}_{year}_{month}_{day}'
+                        callback_data = BookDateArg(
+                            court_id=court_id,
+                            trainer_id=trainer_id,
+                            year=year,
+                            month=month,
+                            day=day,
+                        ).to_callback_data()
                         row.append(InlineKeyboardButton(str(day), callback_data=callback_data))
                     else:
                         row.append(InlineKeyboardButton('·', callback_data='ignore'))
@@ -77,7 +83,15 @@ def _create_booking_calendar(
     prev_year = year if month > 1 else year - 1
     if datetime(prev_year, prev_month, 1).date() >= datetime(today.year, today.month, 1).date():
         nav_row.append(
-            InlineKeyboardButton('◀️', callback_data=f'book_cal_{court_id}_{trainer_id_str}_{prev_year}_{prev_month}'),
+            InlineKeyboardButton(
+                '◀️',
+                callback_data=BookCalArg(
+                    court_id=court_id,
+                    trainer_id=trainer_id,
+                    year=prev_year,
+                    month=prev_month,
+                ).to_callback_data(),
+            ),
         )
     else:
         nav_row.append(InlineKeyboardButton(' ', callback_data='ignore'))
@@ -85,7 +99,15 @@ def _create_booking_calendar(
     next_month = month + 1 if month < 12 else 1
     next_year = year if month < 12 else year + 1
     nav_row.append(
-        InlineKeyboardButton('▶️', callback_data=f'book_cal_{court_id}_{trainer_id_str}_{next_year}_{next_month}'),
+        InlineKeyboardButton(
+            '▶️',
+            callback_data=BookCalArg(
+                court_id=court_id,
+                trainer_id=trainer_id,
+                year=next_year,
+                month=next_month,
+            ).to_callback_data(),
+        ),
     )
     keyboard.append(nav_row)
     return InlineKeyboardMarkup(keyboard)

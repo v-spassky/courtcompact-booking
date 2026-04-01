@@ -6,14 +6,21 @@ from telegram.ext import ContextTypes
 from bot.deps import Deps
 from bot.handlers.auth import _is_admin
 from bot.handlers.base import Handler
+from bot.handlers.callback_args import AdminConfirmDeleteStudentArg, AdminDeleteStudentArg
 
 logger = logging.getLogger(__name__)
 
 
 class AdminDeleteStudentConfirm(Handler):
-    def __init__(self, update: Update, context: ContextTypes.DEFAULT_TYPE, deps: Deps, callback_data: str) -> None:
+    def __init__(
+        self,
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE,
+        deps: Deps,
+        args: AdminDeleteStudentArg,
+    ) -> None:
         super().__init__(update, context, deps)
-        self._callback_data = callback_data
+        self._args = args
 
     async def _authorize(self) -> bool:
         assert self._update.callback_query is not None
@@ -25,8 +32,7 @@ class AdminDeleteStudentConfirm(Handler):
 
     async def _process(self) -> None:
         assert self._update.callback_query is not None
-        student_id = int(self._callback_data.replace('admin_delete_student_', ''))
-        student = self._deps.student_repo.get(student_id)
+        student = self._deps.student_repo.get(self._args.id)
         if not student:
             await self._update.callback_query.edit_message_text(
                 self._messages.admin_student_not_found,
@@ -43,7 +49,7 @@ class AdminDeleteStudentConfirm(Handler):
                     [
                         InlineKeyboardButton(
                             self._messages.btn_confirm_delete,
-                            callback_data=f'admin_confirm_delete_student_{student.id}',
+                            callback_data=AdminConfirmDeleteStudentArg(id=student.id).to_callback_data(),
                         ),
                     ],
                     [InlineKeyboardButton(self._messages.btn_cancel, callback_data='admin_students')],

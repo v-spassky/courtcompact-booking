@@ -7,6 +7,7 @@ from telegram.ext import ContextTypes
 from bot.deps import Deps
 from bot.handlers.auth import _get_student_for_user, _log_user_action
 from bot.handlers.base import Handler
+from bot.handlers.callback_args import BookSlotArg
 
 logger = logging.getLogger(__name__)
 
@@ -17,11 +18,11 @@ class BookingSlotSelection(Handler):
         update: Update,
         context: ContextTypes.DEFAULT_TYPE,
         deps: Deps,
-        callback_data: str,
+        args: BookSlotArg,
         user_id: int,
     ) -> None:
         super().__init__(update, context, deps)
-        self._callback_data = callback_data
+        self._args = args
         self._user_id = user_id
 
     async def _authorize(self) -> bool:
@@ -29,35 +30,24 @@ class BookingSlotSelection(Handler):
 
     async def _process(self) -> None:
         assert self._update.callback_query is not None
-        parts = self._callback_data.split('_')
-        court_id = int(parts[2])
-        trainer_id_str = parts[3]
-        date_str = parts[4]
-        time_code = parts[5]
-        year = int(date_str[0:4])
-        month = int(date_str[4:6])
-        day = int(date_str[6:8])
-        hour = int(time_code[0:2])
-        minute = int(time_code[2:4]) if len(time_code) >= 4 else 0
-        start_time = datetime(year, month, day, hour, minute, 0)
+        start_time = datetime(self._args.year, self._args.month, self._args.day, self._args.hour, self._args.minute, 0)
         end_time = start_time + timedelta(minutes=30)
-        trainer_id = int(trainer_id_str) if trainer_id_str != 'none' else None
-        court = self._deps.court_repo.get(court_id)
+        court = self._deps.court_repo.get(self._args.court_id)
         if not court:
-            raise ValueError(f'Court not found with ID {court_id}')
+            raise ValueError(f'Court not found with ID {self._args.court_id}')
         user_trainer = self._deps.trainer_repo.get_by_telegram_id(self._user_id)
-        is_trainer_booking = user_trainer is not None and trainer_id == user_trainer.id
+        is_trainer_booking = user_trainer is not None and self._args.trainer_id == user_trainer.id
         student_id = None
         if not is_trainer_booking:
             student = _get_student_for_user(self._user_id, self._deps)
             if student:
                 student_id = student.id
         booking = self._deps.booking_service.create_booking(
-            court_id=court_id,
+            court_id=self._args.court_id,
             start_time=start_time,
             end_time=end_time,
             student_id=student_id,
-            trainer_id=trainer_id,
+            trainer_id=self._args.trainer_id,
         )
         if booking:
             court_name = booking.court.name if booking.court else self._messages.unknown_court
