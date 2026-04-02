@@ -65,6 +65,14 @@ Arguments:
 - `--telegram-id` — Telegram user ID of the new admin (integer, required)
 - `--name` — display name for the user record (string, required)
 
+### `scripts/seed_data.py`
+
+Populates the database with sample data: 3 locations, 4 courts, 3 trainers, 4 students (2 authorized, 2 not), and 8 bookings spread over the next 5 days. Useful for local development and manual testing.
+
+```
+uv run python scripts/seed_data.py
+```
+
 ## CI checks
 
 Install pre-commit hooks:
