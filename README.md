@@ -49,6 +49,22 @@ Note: run DB migrations before starting the bot (or against the same DB the cont
 uv run alembic upgrade head
 ```
 
+## Scripts
+
+### `scripts/create_admin.py`
+
+Creates an admin user by Telegram ID. If the Telegram user doesn't exist in the database yet, a new user record is
+created. If the user already exists, it is reused. Exits without making changes if the user is already an admin.
+
+```
+uv run python scripts/create_admin.py --telegram-id <id> --name "<name>"
+```
+
+Arguments:
+
+- `--telegram-id` — Telegram user ID of the new admin (integer, required)
+- `--name` — display name for the user record (string, required)
+
 ## CI checks
 
 Install pre-commit hooks:
