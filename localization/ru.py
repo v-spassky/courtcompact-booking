@@ -147,6 +147,10 @@ class RussianMessages(Messages):
         )
 
     @property
+    def booking_new_notification_schedule_header(self) -> str:
+        return '\n📋 Расписание на день:\n\n'
+
+    @property
     def booking_failed(self) -> str:
         return '❌ Не удалось создать бронирование. Выбранный слот может быть недоступен.'
 

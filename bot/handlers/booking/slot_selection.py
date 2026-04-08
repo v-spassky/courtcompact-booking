@@ -84,6 +84,28 @@ class BookingSlotSelection(Handler):
                         date=booking.start_time.strftime('%d.%m.%Y'),
                         time=f'{booking.start_time.strftime("%H:%M")} - {booking.end_time.strftime("%H:%M")}',
                     )
+                    notify_text += self._messages.booking_new_notification_schedule_header
+                    slots = self._deps.schedule_service.get_available_time_slots(
+                        court_id=self._args.court_id,
+                        date=booking.start_time,
+                    )
+                    for slot in sorted(slots, key=lambda s: s.start_time):
+                        time_range = f'{slot.start_time.strftime("%H:%M")}-{slot.end_time.strftime("%H:%M")}'
+                        if slot.is_available:
+                            line = f'✅ {time_range}'
+                        else:
+                            slot_info = time_range
+                            if slot.booking_id:
+                                slot_booking = self._deps.booking_repo.get(slot.booking_id)
+                                if slot_booking:
+                                    if slot_booking.student and slot_booking.student.user:
+                                        slot_info += f' ({slot_booking.student.user.name})'
+                                    if slot_booking.trainer:
+                                        slot_info += f' 👨‍🏫 {slot_booking.trainer.user.name}'
+                            line = f'❌ {slot_info}'
+                        if slot.booking_id == booking.id:
+                            line = f'➡️ {line}'
+                        notify_text += f'{line}\n'
                     await self._context.bot.send_message(
                         chat_id=booked_trainer.user.telegram_user_id,
                         text=notify_text,

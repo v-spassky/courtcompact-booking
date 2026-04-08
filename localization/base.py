@@ -135,6 +135,10 @@ class Messages(ABC):
 
     @property
     @abstractmethod
+    def booking_new_notification_schedule_header(self) -> str: ...
+
+    @property
+    @abstractmethod
     def booking_failed(self) -> str: ...
 
     @property
