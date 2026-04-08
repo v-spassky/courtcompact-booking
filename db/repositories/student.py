@@ -45,14 +45,11 @@ class StudentRepository:
             ).scalar_one_or_none()
 
     def get_by_phone(self, phone: str) -> Student | None:
-        normalized = ''.join(c for c in phone if c.isdigit() or c == '+')
         with self._session() as session:
-            rows = session.execute(select(Student).options(selectinload(Student.user))).scalars().all()
-            for row in rows:
-                row_phone = ''.join(c for c in (row.phone or '') if c.isdigit() or c == '+')
-                if row_phone == normalized:
-                    return row
-        return None
+            result = session.execute(
+                select(Student).where(Student.phone == phone).options(selectinload(Student.user)),
+            )
+            return result.scalar_one_or_none()
 
     def get_all(self) -> list[Student]:
         with self._session() as session:

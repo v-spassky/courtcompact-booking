@@ -884,6 +884,10 @@ class Messages(ABC):
     @abstractmethod
     def admin_student_phone_required(self) -> str: ...
 
+    @property
+    @abstractmethod
+    def admin_student_phone_invalid(self) -> str: ...
+
     @abstractmethod
     def admin_student_phone_taken(self, name: str) -> str: ...
 

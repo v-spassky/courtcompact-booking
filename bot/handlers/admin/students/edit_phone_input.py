@@ -5,6 +5,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from bot.handlers.admin._utils import _clear_admin_state
 from bot.handlers.auth import _log_user_action
 from bot.handlers.base import TextInputHandler
+from phone import InvalidPhoneNumber, normalize_phone
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,19 @@ class AdminEditStudentPhoneInput(TextInputHandler):
                 ),
             )
             return
-        new_phone = self._text if self._text and self._text != '-' else student.phone
+        if self._text and self._text != '-':
+            try:
+                new_phone = normalize_phone(self._text)
+            except InvalidPhoneNumber:
+                await self._update.message.reply_text(
+                    self._messages.admin_student_phone_invalid,
+                    reply_markup=InlineKeyboardMarkup(
+                        [[InlineKeyboardButton(self._messages.btn_back_to_students, callback_data='admin_students')]],
+                    ),
+                )
+                return
+        else:
+            new_phone = student.phone
         if new_phone != student.phone:
             existing = self._deps.student_repo.get_by_phone(new_phone)
             if existing and existing.id != student.id:

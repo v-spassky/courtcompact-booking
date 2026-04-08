@@ -6,6 +6,7 @@ from bot.handlers.admin._utils import _clear_admin_state
 from bot.handlers.auth import _log_user_action
 from bot.handlers.base import TextInputHandler
 from db.models import Student
+from phone import InvalidPhoneNumber, normalize_phone
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,20 @@ class AdminStudentPhoneInput(TextInputHandler):
                 ),
             )
             return
-        existing = self._deps.student_repo.get_by_phone(self._text)
+        try:
+            phone = normalize_phone(self._text)
+        except InvalidPhoneNumber:
+            await self._update.message.reply_text(
+                self._messages.admin_student_phone_invalid,
+                reply_markup=InlineKeyboardMarkup(
+                    [
+                        [InlineKeyboardButton(self._messages.btn_retry, callback_data='admin_create_student')],
+                        [InlineKeyboardButton(self._messages.btn_cancel, callback_data='admin_students')],
+                    ],
+                ),
+            )
+            return
+        existing = self._deps.student_repo.get_by_phone(phone)
         if existing:
             _clear_admin_state(self._context)
             await self._update.message.reply_text(
@@ -47,12 +61,12 @@ class AdminStudentPhoneInput(TextInputHandler):
             )
             return
         _clear_admin_state(self._context)
-        student = Student(user_id=None, phone=self._text)
+        student = Student(user_id=None, phone=phone)
         self._deps.student_repo.save(student)
         if self._update.effective_user:
-            _log_user_action(self._update.effective_user, f'created student with phone: {self._text}')
+            _log_user_action(self._update.effective_user, f'created student with phone: {phone}')
         text = self._messages.admin_student_created(name=student_name)
-        text += self._messages.admin_student_phone_line(phone=self._text)
+        text += self._messages.admin_student_phone_line(phone=phone)
         await self._update.message.reply_text(
             text,
             reply_markup=InlineKeyboardMarkup(

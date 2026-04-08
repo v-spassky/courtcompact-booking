@@ -974,6 +974,10 @@ class RussianMessages(Messages):
     def admin_student_phone_required(self) -> str:
         return '❌ Номер телефона обязателен для ученика.'
 
+    @property
+    def admin_student_phone_invalid(self) -> str:
+        return '❌ Неверный формат номера телефона. Введите номер с кодом страны, например: +380961234567'
+
     def admin_student_phone_taken(self, name: str) -> str:
         return f'❌ Номер телефона уже используется учеником: {name}'
 
