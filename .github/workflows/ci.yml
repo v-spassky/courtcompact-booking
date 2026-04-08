@@ -37,9 +37,9 @@ jobs:
         run: |
           uv run isort bot/ config/ db/ localization/ services/ tests/ main.py --check
 
-      - name: Run mypy
+      - name: Run ty
         run: |
-          uv run mypy bot/ config/ db/ localization/ services/ tests/ main.py
+          uv run ty check bot/ config/ db/ localization/ services/ tests/ main.py
 
       - name: Run pytest
         run: |

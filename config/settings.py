@@ -42,7 +42,7 @@ class Settings(BaseSettings):
 if 'pytest' in sys.modules:
     settings = Settings(telegram_bot_token='test-token', db_url='sqlite:///:memory:', timezone=timezone.utc)
 else:
-    settings = Settings()  # type: ignore[call-arg]
+    settings = Settings()  # type: ignore
 
 
 def now_kiev() -> datetime:

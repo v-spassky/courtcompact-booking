@@ -71,7 +71,7 @@ def main() -> None:
 
     for trainer in (trainer_1, trainer_2, trainer_3):
         trainer_repo.save(trainer)
-        print(f'Created trainer: {user_repo.get(trainer.user_id).name} (id={trainer.id})')  # type: ignore[union-attr]
+        print(f'Created trainer: {user_repo.get(trainer.user_id).name} (id={trainer.id})')  # type: ignore
 
     # Students — two authorized (have Telegram accounts), two not yet authorized
 
